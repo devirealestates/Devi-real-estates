@@ -4,13 +4,13 @@ import { getAuth, connectAuthEmulator } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDo76dvf_6tPaBP-rqtN8sNKkWLFJhK6jE",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "real-estate-ee44e.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "real-estate-ee44e",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "real-estate-ee44e.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "940703523125",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:940703523125:web:99168cdcfeb73852edec7c",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-0WF56TMSXZ"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCeM9qLBU7BevplyqW9m6u9KJHKzfe4DNc",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "devirealestates-a550f.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "devirealestates-a550f",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "devirealestates-a550f.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "33925963339",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:33925963339:web:674ffbb087ccb83d4477ce",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-7Z40DM1T6Q"
 };
 
 // Initialize Firebase

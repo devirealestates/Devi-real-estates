@@ -6,10 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LocationProvider } from "@/contexts/LocationContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import LoadingScreen from "@/components/LoadingScreen";
 import BottomNavigation from "@/components/BottomNavigation";
 import NetworkStatus from "@/components/NetworkStatus";
-import { useState, useEffect } from "react";
 
 // Pages
 import Index from "./pages/Index";
@@ -34,50 +32,14 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const initializeApp = async () => {
-      // Wait for DOM to be ready
-      if (document.readyState === 'loading') {
-        await new Promise(resolve => {
-          document.addEventListener('DOMContentLoaded', resolve);
-        });
-      }
-
-      // Wait for all critical resources to load
-      await new Promise(resolve => {
-        if (document.readyState === 'complete') {
-          resolve(true);
-        } else {
-          window.addEventListener('load', resolve);
-        }
-      });
-
-      // Ensure minimum display time for smooth UX (1.2 seconds for cleaner experience)
-      await new Promise(resolve => setTimeout(resolve, 1200));
-
-      // Smooth fade out
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 50);
-    };
-
-    initializeApp();
-  }, []);
-
   return (
-    <>
-      <LoadingScreen isVisible={isLoading} />
-      
-      <div className={`loading-fade ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
-        <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <AuthProvider>
-              <LocationProvider>
-                <BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AuthProvider>
+          <LocationProvider>
+            <BrowserRouter>
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/buy" element={<Buy />} />
@@ -107,13 +69,11 @@ const App = () => {
                   </Routes>
                   <BottomNavigation />
                   <NetworkStatus />
-                </BrowserRouter>
-              </LocationProvider>
-            </AuthProvider>
-          </TooltipProvider>
-        </QueryClientProvider>
-      </div>
-    </>
+              </BrowserRouter>
+            </LocationProvider>
+          </AuthProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
   );
 };
 

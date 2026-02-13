@@ -128,7 +128,7 @@ export default {
 				'premium-gradient': 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%)'
 			},
 			fontFamily: {
-				'display': ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+				'display': ['DM Sans', 'Poppins', 'Inter', 'system-ui', 'sans-serif'],
 				'body': ['Inter', 'Poppins', 'system-ui', 'sans-serif'],
 				'premium': ['Poppins', 'Inter', 'system-ui', 'sans-serif']
 			},

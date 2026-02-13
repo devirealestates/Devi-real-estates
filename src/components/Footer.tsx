@@ -14,7 +14,7 @@ const Footer = () => {
                 <Home className="w-4 h-4 md:w-6 md:h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg md:text-xl font-bold">Mana Nivasam</h3>
+                <h3 className="text-lg md:text-xl font-bold">Devi Real Estates</h3>
                 <p className="text-xs md:text-sm text-gray-400">Premium Properties</p>
               </div>
             </div>
@@ -183,7 +183,7 @@ const Footer = () => {
                   <Mail className="w-3 h-3 md:w-4 md:h-4" />
                 </div>
                 <div>
-                  <p className="text-gray-300 text-sm md:text-base">mananivasam@gmail.com</p>
+                  <p className="text-gray-300 text-sm md:text-base">devirealestates@gmail.com</p>
                   <p className="text-gray-400 text-xs md:text-sm">24/7 Support</p>
                 </div>
               </div>
@@ -208,7 +208,7 @@ const Footer = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-20 md:py-6 md:pb-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-xs md:text-sm mb-3 md:mb-0">
-              © 2025 Mana Nivasam. All rights reserved.
+              © 2025 Devi Real Estates. All rights reserved.
             </p>
             <div className="flex space-x-4 md:space-x-6 text-xs md:text-sm">
               <a href="/privacy-policy" className="text-gray-400 hover:text-white transition-colors duration-300">

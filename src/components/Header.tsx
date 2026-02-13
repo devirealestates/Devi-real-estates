@@ -248,11 +248,11 @@ const Header = () => {
             >
               <img 
                 src="https://i.ibb.co/n8rMxsmw/IMG-20250707-184211.webp"
-                alt="Mana Nivasam Logo"
+                alt="Devi Real Estates Logo"
                 className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
               />
               <div className="flex flex-col justify-center items-start mt-1">
-                <h1 className={`text-sm sm:text-base ${logoTextClass} drop-shadow-lg leading-tight`}>Mana Nivasam</h1>
+                <h1 className={`text-sm sm:text-base ${logoTextClass} drop-shadow-lg leading-tight`}>Devi Real Estates</h1>
                 <p className={`text-xs ${subtitleTextClass} hidden sm:block drop-shadow-md`}></p>
               </div>
             </div>

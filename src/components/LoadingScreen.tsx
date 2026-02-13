@@ -25,7 +25,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({ isVisible }) => {
           <div className="flex items-center justify-center ml-4 relative">
             <img 
               src="https://i.ibb.co/39dX7HZC/Untitled-design-20250707-164414-0000.webp"
-              alt="Mana Nivasam Logo"
+              alt="Devi Real Estates Logo"
               className="w-[500px] h-[500px] sm:w-[550px] sm:h-[550px] lg:w-[600px] lg:h-[600px] object-contain relative z-10"
             />
           </div>

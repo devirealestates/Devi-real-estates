@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import StoryGallery from '@/components/StoryGallery';
-import { Button } from '@/components/ui/button';
-import { Award, Users, Building, Heart, MapPin, Phone, Mail, MessageCircle } from 'lucide-react';
+import HeaderRedesign from '@/components/HeaderRedesign';
+import FooterRedesign from '@/components/FooterRedesign';
+import { ArrowRight, DollarSign, Star, Users, Scale, Award, MessageSquare } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface TeamMember {
   id: string;
@@ -16,298 +15,447 @@ interface TeamMember {
 }
 
 const About = () => {
+  const navigate = useNavigate();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [visibleSections, setVisibleSections] = useState<boolean[]>([false, false, false, false, false, false, false]);
 
   useEffect(() => {
     fetchTeamMembers();
   }, []);
 
+  useEffect(() => {
+    const observers = sectionRefs.current.map((ref, index) => {
+      if (!ref) return null;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setVisibleSections(prev => {
+                const newArr = [...prev];
+                newArr[index] = true;
+                return newArr;
+              });
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      observer.observe(ref);
+      return observer;
+    });
+
+    return () => {
+      observers.forEach(observer => observer?.disconnect());
+    };
+  }, []);
+
   const fetchTeamMembers = async () => {
     try {
-      setError(null);
-      console.log('Fetching team members from Firestore...');
-      console.log('Database instance:', db);
-      console.log('Project ID:', db.app.options.projectId);
-      
       const collectionRef = collection(db, 'teamMembers');
-      console.log('Team members collection reference:', collectionRef);
-      
       const querySnapshot = await getDocs(collectionRef);
-      console.log('Team members query executed successfully. Number of documents:', querySnapshot.size);
-      console.log('Team member documents:', querySnapshot.docs.map(doc => ({ id: doc.id, data: doc.data() })));
-      
       const teamData = querySnapshot.docs.map(doc => {
         const data = doc.data();
-        console.log('Processing team member document:', { id: doc.id, data });
-        
         return {
           id: doc.id,
           name: data.name || 'Unknown',
           role: data.role || 'Team Member',
-          description: data.description || 'No description available',
+          description: data.description || '',
           image: data.image || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400'
         };
       }) as TeamMember[];
-      
-      console.log('Processed team members data:', teamData);
       setTeamMembers(teamData);
-      
-      if (teamData.length === 0) {
-        console.log('No team members found in the database');
-      }
-      
-    } catch (error: any) {
-      console.error('Detailed error fetching team members:', {
-        error,
-        code: error?.code,
-        message: error?.message,
-        stack: error?.stack
-      });
-      
-      let errorMessage = 'Unable to load team members. ';
-      
-      if (error?.code === 'permission-denied') {
-        errorMessage += 'Database access denied. Please check Firestore security rules.';
-        console.error('Permission denied - Firestore security rules may be blocking access to teamMembers collection');
-      } else if (error?.code === 'unauthenticated') {
-        errorMessage += 'Authentication required to view team members.';
-      } else if (error?.code === 'unavailable') {
-        errorMessage += 'Database temporarily unavailable. Please try again later.';
-      } else {
-        errorMessage += `Error: ${error?.message || 'Unknown error occurred'}`;
-      }
-      
-      setError(errorMessage);
+    } catch (error) {
+      console.error('Error fetching team members:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const stats = [
-    { icon: Building, value: '', label: 'Properties Listed' },
-    { icon: Users, value: '', label: 'Happy Clients' },
-    { icon: MapPin, value: '', label: 'Locations Covered' },
-    { icon: Award, value: '', label: 'Satisfaction Rate' },
+    { value: '48+', label: 'Our core team spread all over the world.' },
+    { value: '436+', label: 'Projects We Completed daily like to us.' },
+    { value: '12+', label: 'District/Cities represented in to sit agency.' },
   ];
 
-  const handlePhoneCall = () => {
-    window.location.href = 'tel:8985816481';
-  };
+  const values = [
+    {
+      icon: <DollarSign className="w-6 h-6" />,
+      title: 'Affordable Price',
+      description: 'Offering competitive rates that make quality accessible to all.',
+    },
+    {
+      icon: <Star className="w-6 h-6" />,
+      title: 'Innovative Excellence',
+      description: 'Inspiring change with creative solutions and a passion for excellence.',
+    },
+    {
+      icon: <Award className="w-6 h-6" />,
+      title: 'Quality Crafts',
+      description: 'Exceptional craftsmanship and attention to detail in every creation.',
+    },
+    {
+      icon: <Scale className="w-6 h-6" />,
+      title: 'Clear Legality',
+      description: 'Ensuring transparency and compliance in all legal matters.',
+    },
+    {
+      icon: <Users className="w-6 h-6" />,
+      title: 'Experienced Agents',
+      description: 'Skilled professionals delivering expert guidance and support.',
+    },
+    {
+      icon: <MessageSquare className="w-6 h-6" />,
+      title: 'Honest Opinion',
+      description: 'Transparent and sincere perspectives you can trust.',
+    },
+  ];
 
-  const handleWhatsAppContact = () => {
-    const message = encodeURIComponent("Hello, I'm interested in real estate services.");
-    const whatsappUrl = `https://wa.me/918985816481?text=${message}`;
-    window.open(whatsappUrl, '_blank');
-  };
+  const agents = teamMembers.length > 0 ? teamMembers.slice(0, 4) : [
+    { id: '1', name: 'Michael Rodriguez', role: 'Agent', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400' },
+    { id: '2', name: 'Andrew Johnson', role: 'Broker', image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400' },
+    { id: '3', name: 'Esther Howard', role: 'Broker', image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=400' },
+    { id: '4', name: 'Bessie Cooper', role: 'Marketing Expert', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400' },
+  ];
 
-  const handleEmailContact = () => {
-    const emailAddress = 'mananivasam@gmail.com';
-    const subject = encodeURIComponent('Inquiry about Real Estate Services');
-    const body = encodeURIComponent("Hello,\n\nI'm interested in learning more about your real estate services. Please contact me at your earliest convenience.\n\nThank you!");
-    const mailtoUrl = `mailto:${emailAddress}?subject=${subject}&body=${body}`;
-    window.location.href = mailtoUrl;
-  };
+  const jobs = [
+    { title: 'Real Estate Broker', type: 'Full Time', location: 'Remote', salary: '$200-40K' },
+    { title: 'Property Manager', type: 'Part Time', location: 'Remote', salary: '$20K-35K' },
+    { title: 'Realtor Agent', type: 'Part Time', location: 'Remote', salary: '$20K-40K' },
+    { title: 'Operations Manager', type: 'Full Time', location: 'In House', salary: '$20K-40K' },
+  ];
 
   return (
-    <div className="min-h-screen">
-      <Header />
+    <div className="min-h-screen bg-white">
+      <style>{`
+        @keyframes aboutReveal {
+          from { 
+            clip-path: inset(100% 0 0 0);
+            transform: translateY(30px);
+            opacity: 0;
+          }
+          to { 
+            clip-path: inset(0 0 0 0);
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+        .about-reveal {
+          opacity: 0;
+          clip-path: inset(100% 0 0 0);
+          transform: translateY(30px);
+        }
+        .about-reveal.visible {
+          animation: aboutReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
+      
+      <HeaderRedesign />
       
       {/* Hero Section */}
-      <section id="hero" className="relative pt-20 pb-16 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1497604401993-f2e922e5cb0a?q=80&w=2070')] bg-cover bg-center opacity-20"></div>
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-white">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
-              About
-              <span className="block bg-gradient-to-r from-yellow-400 to-pink-500 bg-clip-text text-transparent">
-                Mana Nivasam
-              </span>
-            </h1>
-            <p className="text-xl text-gray-200 max-w-3xl mx-auto leading-relaxed">
-              Your trusted partner in luxury real estate, connecting dreams with reality since 2025.
-            </p>
-          </div>
+      <section className="relative h-[50vh] min-h-[400px] flex items-center">
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2070" 
+            alt="About Us" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/50"></div>
+        </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <p className="text-gray-300 text-sm mb-4">Home / About</p>
+          <h1 
+            className="text-4xl sm:text-5xl lg:text-6xl font-medium text-white"
+            style={{ fontFamily: "'DM Sans', sans-serif" }}
+          >
+            About Us
+          </h1>
         </div>
       </section>
 
-      {/* Our Story with Admin-Managed Gallery */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-            <div className="fade-in-up">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 lg:mb-6">Our Story</h2>
-              <p className="text-sm sm:text-base lg:text-lg text-gray-600 mb-4 lg:mb-6 leading-relaxed">
-                Founded with a vision to revolutionize the real estate experience, Mana Nivasam has grown 
-                from a small startup to one of the most trusted names in premium property services.
-              </p>
-              <p className="text-sm sm:text-base lg:text-lg text-gray-600 mb-6 lg:mb-8 leading-relaxed">
-                We believe that finding the perfect property should be an exciting journey, not a stressful 
-                ordeal. Our team of experienced professionals works tirelessly to match our clients with 
-                properties that not only meet their needs but exceed their expectations.
-              </p>
-              <div className="flex items-center space-x-4">
-                <Heart className="w-6 h-6 lg:w-8 lg:h-8 text-red-500" />
-                <span className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900">
-                  Serving with passion and integrity
-                </span>
-              </div>
-            </div>
-            <div className="fade-in-up" style={{animationDelay: '0.2s'}}>
-              <StoryGallery />
-            </div>
-          </div>
+      {/* Welcome Section */}
+      <section 
+        ref={el => sectionRefs.current[0] = el}
+        className="py-16 sm:py-20 lg:py-24 bg-white"
+      >
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 
+            className={`text-3xl sm:text-4xl lg:text-5xl font-medium text-gray-900 mb-8 leading-tight about-reveal ${visibleSections[0] ? 'visible' : ''}`}
+            style={{ fontFamily: "'DM Sans', sans-serif" }}
+          >
+            Welcome to Devi Real Estates! As a design, build, and development firm, our goal is to shape communities that enrich, fortify the surrounding neighborhoods
+          </h2>
+          <button 
+            onClick={() => navigate('/buy')}
+            className={`inline-flex items-center gap-2 px-8 py-3 bg-orange-500 text-white rounded-full text-sm font-medium hover:bg-orange-600 transition-all duration-300 about-reveal ${visibleSections[0] ? 'visible' : ''}`}
+            style={{ animationDelay: '0.2s' }}
+          >
+            Explore All Properties <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">Our Achievements</h2>
-            <p className="text-sm sm:text-base lg:text-xl text-gray-600 max-w-3xl mx-auto">
-              Numbers that speak for our commitment to excellence
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-            {stats.map((stat, index) => (
-              <div 
-                key={index} 
-                className="text-center fade-in-up" 
-                style={{animationDelay: `${index * 0.1}s`}}
-              >
-                <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-premium-gradient rounded-2xl mx-auto mb-2 sm:mb-3 lg:mb-4 flex items-center justify-center">
-                  <stat.icon className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-white" />
+      {/* Stats Section */}
+      <section className="py-12 bg-white border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+            <p className="text-gray-500 text-sm font-medium">In Numbers</p>
+            <div className="flex flex-col sm:flex-row gap-8 lg:gap-16">
+              {stats.map((stat, index) => (
+                <div key={index} className="text-center sm:text-left">
+                  <p className="text-4xl sm:text-5xl font-light text-orange-500 mb-2">{stat.value}</p>
+                  <p className="text-gray-500 text-sm max-w-[200px]">{stat.label}</p>
                 </div>
-                <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">{stat.value}</div>
-                <div className="text-xs sm:text-sm lg:text-base text-gray-600 font-medium">{stat.label}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mission Section */}
+      <section 
+        ref={el => sectionRefs.current[1] = el}
+        className="relative py-20 lg:py-32 bg-gray-900 overflow-hidden"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div className={`about-reveal ${visibleSections[1] ? 'visible' : ''}`}>
+              <h2 
+                className="text-3xl sm:text-4xl lg:text-5xl font-medium text-white mb-6 leading-tight"
+                style={{ fontFamily: "'DM Sans', sans-serif" }}
+              >
+                Our Mission:<br />Building the Future
+              </h2>
+            </div>
+            <div 
+              className={`text-gray-400 text-sm leading-relaxed about-reveal ${visibleSections[1] ? 'visible' : ''}`}
+              style={{ animationDelay: '0.2s' }}
+            >
+              <p className="mb-4">
+                At Devi Real Estates, our mission is clear: to redefine the landscape of real estate by creating vibrant communities that inspire and endure. We're not just building structures; we're shaping the future with thoughtful designs that meet the needs of today while shaping the future of living.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div 
+          className={`absolute bottom-0 right-0 w-full lg:w-1/2 h-64 lg:h-full about-reveal ${visibleSections[1] ? 'visible' : ''}`}
+          style={{ animationDelay: '0.4s' }}
+        >
+          <img 
+            src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800" 
+            alt="Mission" 
+            className="w-full h-full object-cover object-center lg:object-right opacity-30 lg:opacity-100"
+          />
+        </div>
+      </section>
+
+      {/* Values Section */}
+      <section 
+        ref={el => sectionRefs.current[2] = el}
+        className="py-16 sm:py-20 lg:py-24 bg-white"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 
+            className={`text-3xl sm:text-4xl lg:text-5xl font-medium text-gray-900 text-center mb-16 about-reveal ${visibleSections[2] ? 'visible' : ''}`}
+            style={{ fontFamily: "'DM Sans', sans-serif" }}
+          >
+            The Values That Drive<br />Everything We Do
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
+            {values.map((value, index) => (
+              <div 
+                key={index}
+                className={`text-center about-reveal ${visibleSections[2] ? 'visible' : ''}`}
+                style={{ animationDelay: `${0.1 + index * 0.1}s` }}
+              >
+                <div className="w-14 h-14 bg-orange-500 rounded-xl flex items-center justify-center mx-auto mb-4 text-white">
+                  {value.icon}
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{value.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{value.description}</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-12">
+            <button 
+              onClick={() => navigate('/contact')}
+              className="inline-flex items-center gap-2 px-8 py-3 border-2 border-orange-500 text-orange-500 rounded-full text-sm font-medium hover:bg-orange-500 hover:text-white transition-all duration-300"
+            >
+              Get in Touch <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* CEO's Words Section */}
+      <section 
+        ref={el => sectionRefs.current[3] = el}
+        className="py-16 sm:py-20 lg:py-24 bg-gray-50"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div 
+              className={`about-reveal ${visibleSections[3] ? 'visible' : ''}`}
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600" 
+                alt="CEO" 
+                className="w-full max-w-md mx-auto lg:mx-0 rounded-2xl shadow-lg"
+              />
+            </div>
+            <div 
+              className={`about-reveal ${visibleSections[3] ? 'visible' : ''}`}
+              style={{ animationDelay: '0.2s' }}
+            >
+              <h2 
+                className="text-3xl sm:text-4xl font-medium text-gray-900 mb-6"
+                style={{ fontFamily: "'DM Sans', sans-serif" }}
+              >
+                CEO's Words
+              </h2>
+              <p className="text-gray-600 font-medium mb-4">Dear Devi Real Estates Community,</p>
+              <p className="text-gray-500 text-sm leading-relaxed mb-4">
+                It is with great pride and dedication that I lead our team at Devi Real Estates.
+              </p>
+              <p className="text-gray-500 text-sm leading-relaxed mb-4">
+                Every decision we make, every project we undertake, is guided by our commitment to excellence, innovation, and sustainability. We strive to create spaces that inspire, uplift, and stand the test of time.
+              </p>
+              <p className="text-gray-500 text-sm leading-relaxed">
+                Thank you for entrusting us with your dreams and aspirations.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Our Agents Section */}
+      <section 
+        ref={el => sectionRefs.current[4] = el}
+        className="py-16 sm:py-20 lg:py-24 bg-white"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-12">
+            <h2 
+              className={`text-3xl sm:text-4xl font-medium text-gray-900 about-reveal ${visibleSections[4] ? 'visible' : ''}`}
+              style={{ fontFamily: "'DM Sans', sans-serif" }}
+            >
+              Our Agents
+            </h2>
+            <button 
+              onClick={() => navigate('/contact')}
+              className={`inline-flex items-center gap-2 px-6 py-2 border border-gray-300 rounded-full text-sm text-gray-700 hover:border-orange-500 hover:text-orange-500 transition-colors about-reveal ${visibleSections[4] ? 'visible' : ''}`}
+              style={{ animationDelay: '0.1s' }}
+            >
+              View All Agents <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+            {(loading ? Array(4).fill(null) : agents).map((agent, index) => (
+              <div 
+                key={agent?.id || index}
+                className={`about-reveal ${visibleSections[4] ? 'visible' : ''}`}
+                style={{ animationDelay: `${0.2 + index * 0.1}s` }}
+              >
+                {loading ? (
+                  <div className="animate-pulse">
+                    <div className="aspect-[3/4] bg-gray-200 rounded-xl mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="aspect-[3/4] rounded-xl overflow-hidden mb-4">
+                      <img 
+                        src={agent.image} 
+                        alt={agent.name}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400';
+                        }}
+                      />
+                    </div>
+                    <h3 className="font-semibold text-gray-900 mb-1">{agent.name}</h3>
+                    <p className="text-gray-500 text-sm">{agent.role}</p>
+                  </>
+                )}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Dynamic Team Section */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-4">Meet Our Team</h2>
-            <p className="text-sm sm:text-base lg:text-xl text-gray-600 max-w-3xl mx-auto">
-              Dedicated professionals committed to your real estate success
-            </p>
-          </div>
-          
-          {/* Debug Information */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-8 text-center">
-              <p className="font-medium">Error loading team members:</p>
-              <p className="text-sm mt-1">{error}</p>
-              <Button
-                onClick={fetchTeamMembers}
-                className="mt-3 text-sm bg-red-600 hover:bg-red-700 text-white"
+      {/* Career Section */}
+      <section 
+        ref={el => sectionRefs.current[5] = el}
+        className="py-16 sm:py-20 lg:py-24 bg-gray-50"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+            <div>
+              <p className="text-orange-500 text-sm font-medium mb-4">Career</p>
+              <h2 
+                className={`text-3xl sm:text-4xl lg:text-5xl font-medium text-gray-900 leading-tight about-reveal ${visibleSections[5] ? 'visible' : ''}`}
+                style={{ fontFamily: "'DM Sans', sans-serif" }}
               >
-                Retry Loading Team Members
-              </Button>
+                Discover Your Career Path at Devi Real Estates
+              </h2>
             </div>
-          )}
-          
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-              {[...Array(3)].map((_, index) => (
-                <div key={index} className="text-center animate-pulse">
-                  <div className="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 bg-gray-200 rounded-full mx-auto mb-4 sm:mb-6"></div>
-                  <div className="h-4 sm:h-6 bg-gray-200 rounded mb-2 mx-auto w-24 sm:w-32"></div>
-                  <div className="h-3 sm:h-4 bg-gray-200 rounded mb-4 mx-auto w-16 sm:w-24"></div>
-                  <div className="h-3 sm:h-4 bg-gray-200 rounded mx-auto w-full"></div>
-                </div>
-              ))}
-            </div>
-          ) : teamMembers.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {teamMembers.map((member, index) => (
+            <div className="space-y-4">
+              {jobs.map((job, index) => (
                 <div 
-                  key={member.id} 
-                  className="text-center fade-in-up hover-lift" 
-                  style={{animationDelay: `${index * 0.2}s`}}
+                  key={index}
+                  className={`bg-white rounded-xl p-6 border border-gray-200 hover:border-orange-300 transition-colors about-reveal ${visibleSections[5] ? 'visible' : ''}`}
+                  style={{ animationDelay: `${0.1 + index * 0.1}s` }}
                 >
-                  <div className="relative mb-4 sm:mb-6">
-                    <img 
-                      src={member.image || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400'} 
-                      alt={member.name}
-                      className="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 object-cover rounded-full mx-auto shadow-xl transition-transform duration-300 hover:scale-105"
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400';
-                      }}
-                    />
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20"></div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 mb-2">{job.title}</h3>
+                      <p className="text-gray-500 text-sm">{job.type} • {job.location} • {job.salary}</p>
+                    </div>
+                    <button className="inline-flex items-center gap-1 text-orange-500 text-sm font-medium hover:text-orange-600 transition-colors">
+                      Apply Now <ArrowRight className="w-4 h-4" />
+                    </button>
                   </div>
-                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-1 sm:mb-2 transition-colors duration-300 hover:text-purple-600">{member.name}</h3>
-                  <p className="text-sm sm:text-base text-purple-600 font-semibold mb-2 sm:mb-4 transition-colors duration-300 hover:text-purple-800">{member.role}</p>
-                  <p className="text-xs sm:text-sm lg:text-base text-gray-600 leading-relaxed transition-colors duration-300 hover:text-gray-800">{member.description}</p>
                 </div>
               ))}
-            </div>
-          ) : (
-            <div className="text-center py-16">
-              <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-2xl font-semibold text-gray-900 mb-4">No Team Members Found</h3>
-              <p className="text-gray-600 mb-4">
-                {error ? 'There was an error loading team members.' : 'No team members have been added yet.'}
-              </p>
-              <Button
-                onClick={fetchTeamMembers}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-              >
-                Refresh Team Members
-              </Button>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* CTA with Fixed Contact Actions */}
-      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-purple-900 to-pink-900">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="max-w-4xl mx-auto text-white">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold mb-4 sm:mb-6">
-              Ready to Find Your Dream Property?
-            </h2>
-            <p className="text-sm sm:text-base lg:text-xl text-gray-200 mb-8 sm:mb-12 leading-relaxed">
-              Let our expert team guide you through your real estate journey. 
-              Contact us today for a personalized consultation.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center">
-              <Button 
-                onClick={handlePhoneCall}
-                className="btn-luxury text-white px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-lg font-semibold rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
-              >
-                <Phone className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                Call Us Now
-              </Button>
-              <Button 
-                onClick={handleWhatsAppContact}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-lg font-semibold rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
-              >
-                <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                WhatsApp
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleEmailContact}
-                className="border-2 border-white bg-transparent text-white hover:bg-white hover:text-purple-900 px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-lg font-semibold rounded-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
-              >
-                <Mail className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                Email Us
-              </Button>
             </div>
           </div>
         </div>
       </section>
 
-      <Footer />
+      {/* CTA Section */}
+      <section 
+        ref={el => sectionRefs.current[6] = el}
+        className="relative py-20 lg:py-32 overflow-hidden"
+      >
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070" 
+            alt="Property" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/60"></div>
+        </div>
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 
+            className={`text-3xl sm:text-4xl lg:text-5xl font-medium text-white mb-6 leading-tight about-reveal ${visibleSections[6] ? 'visible' : ''}`}
+            style={{ fontFamily: "'DM Sans', sans-serif" }}
+          >
+            Are you looking to buy<br />or rent a property?
+          </h2>
+          <button 
+            onClick={() => navigate('/contact')}
+            className={`inline-flex items-center gap-2 px-8 py-3 border-2 border-white text-white rounded-full text-sm font-medium hover:bg-white hover:text-gray-900 transition-all duration-300 about-reveal ${visibleSections[6] ? 'visible' : ''}`}
+            style={{ animationDelay: '0.2s' }}
+          >
+            Get in Touch <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </section>
+
+      <FooterRedesign />
     </div>
   );
 };

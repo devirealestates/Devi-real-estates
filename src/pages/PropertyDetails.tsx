@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import HeaderRedesign from '@/components/HeaderRedesign';
+import FooterRedesign from '@/components/FooterRedesign';
 import PropertyImageGallery from '@/components/PropertyImageGallery';
 import PropertyOverview from '@/components/PropertyOverview';
 import PropertyAmenities from '@/components/PropertyAmenities';
@@ -12,7 +12,6 @@ import PropertyContact from '@/components/PropertyContact';
 import SuggestedProperties from '@/components/SuggestedProperties';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, MapPin, Calendar, Home, ImageIcon, MapIcon, Phone, CheckCircle } from 'lucide-react';
 
 interface Property {
@@ -89,218 +88,234 @@ const PropertyDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <Header />
-        <div className="container mx-auto px-4 py-20">
+      <div className="min-h-screen bg-white">
+        <HeaderRedesign />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20">
           <div className="animate-pulse">
-            <div className="h-6 bg-gray-200 rounded-xl mb-4 w-full sm:w-1/4"></div>
-            <div className="h-48 sm:h-64 bg-gray-200 rounded-2xl mb-6"></div>
-            <div className="h-4 bg-gray-200 rounded-xl mb-2"></div>
-            <div className="h-4 bg-gray-200 rounded-xl w-full sm:w-2/3"></div>
+            <div className="h-6 bg-gray-200 rounded mb-4 w-1/4"></div>
+            <div className="h-[60vh] bg-gray-200 rounded-2xl mb-8"></div>
+            <div className="h-4 bg-gray-200 rounded mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
           </div>
         </div>
-        <Footer />
+        <FooterRedesign />
       </div>
     );
   }
 
   if (error || !property) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-        <Header />
-        <div className="container mx-auto px-4 py-20 text-center">
-          <Card className="max-w-md mx-auto shadow-soft">
-            <CardContent className="p-6 sm:p-8">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 font-premium">Property Not Found</h1>
-              <p className="text-sm sm:text-base text-gray-600 mb-6 font-body">{error || 'The property you are looking for does not exist.'}</p>
-              <Button onClick={handleBackClick} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 rounded-xl">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Go Back
-              </Button>
-            </CardContent>
-          </Card>
+      <div className="min-h-screen bg-white">
+        <HeaderRedesign />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20 text-center">
+          <div className="max-w-md mx-auto">
+            <h1 className="text-3xl font-semibold text-gray-900 mb-4" style={{ fontFamily: "'DM Sans', sans-serif" }}>Property Not Found</h1>
+            <p className="text-gray-600 mb-8">{error || 'The property you are looking for does not exist.'}</p>
+            <Button 
+              onClick={handleBackClick} 
+              className="bg-transparent hover:bg-gray-900 text-gray-900 hover:text-white border-2 border-gray-900 rounded-full px-8 py-6 transition-all duration-300"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Go Back
+            </Button>
+          </div>
         </div>
-        <Footer />
+        <FooterRedesign />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 font-body">
-      <Header />
+    <div className="min-h-screen bg-white">
+      <HeaderRedesign />
       
-      {/* Navigation - Back button with icon for mobile */}
-      <section className="pt-16 sm:pt-20 pb-1 sm:pb-4 bg-white/80 backdrop-blur-sm border-b border-gray-200/50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <Button 
-            variant="outline" 
+      {/* Navigation - Back button */}
+      <section className="pt-24 sm:pt-28 pb-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <button 
             onClick={handleBackClick}
-            className="mb-1 sm:mb-4 flex items-center gap-2 hover:bg-gray-100 rounded-xl border-gray-200 transition-all duration-200 text-sm sm:text-base font-semibold"
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Back to Properties</span>
-          </Button>
+            <span>Back to Properties</span>
+          </button>
         </div>
       </section>
 
       {/* Main Content Layout */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-1 sm:py-8">
-        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-3 sm:gap-8">
-          {/* Main Content Area - Mobile First Order */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-24">
+        <div className="flex flex-col lg:grid lg:grid-cols-5 gap-8 lg:gap-12">
+          {/* Main Content Area - Image Gallery */}
+          <div className="lg:col-span-3 space-y-8">
             
-            {/* 1. Image Gallery - First on Mobile */}
-            <Card className="overflow-hidden shadow-soft-lg rounded-2xl">
-              <CardContent className="p-1 sm:p-6">
-                <PropertyImageGallery 
-                  images={property.images} 
-                  videos={property.videos} 
-                  title={property.title} 
-                />
-              </CardContent>
-            </Card>
+            {/* Image Gallery */}
+            <div className="rounded-2xl overflow-hidden">
+              <PropertyImageGallery 
+                images={property.images} 
+                videos={property.videos} 
+                title={property.title} 
+              />
+            </div>
 
-            {/* 2. Compact Property Info Card - Second on Mobile */}
-            <Card className="shadow-soft-lg rounded-2xl lg:hidden">
-              <CardContent className="p-4 sm:p-5">
-                <div className="space-y-2 sm:space-y-2">
-                  <h1 className="text-lg sm:text-xl font-bold text-gray-900 leading-tight font-premium line-clamp-2">
-                    {property.title}
-                  </h1>
-                  <div className="flex items-start gap-1 text-gray-600">
-                    <MapPin className="w-3 h-3 mr-0.5 mt-0.5 flex-shrink-0 text-blue-600" />
-                    <span className="text-sm sm:text-sm font-medium">{property.location}</span>
-                  </div>
-                  <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-premium">
-                    {property.price}
-                  </div>
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 sm:px-2 sm:py-1 rounded-lg text-xs font-semibold shadow-elegant">
-                      {property.type}
-                    </span>
-                    <span className="bg-green-100 text-green-800 px-2 py-1 sm:px-2 sm:py-1 rounded-lg text-xs font-semibold shadow-elegant">
-                      {property.category}
-                    </span>
-                  </div>
-                  {property.createdAt && (
-                    <div className="flex items-center text-xs text-gray-500 bg-gray-50 px-2 py-1 sm:px-2 sm:py-1 rounded-lg mt-2">
-                      <Calendar className="w-3 h-3 mr-1" />
-                      Listed on {new Date(property.createdAt.toDate()).toLocaleDateString()}
+            {/* Mobile Property Info */}
+            <div className="lg:hidden space-y-4">
+              <h1 
+                className="text-2xl sm:text-3xl font-semibold text-gray-900"
+                style={{ fontFamily: "'DM Sans', sans-serif" }}
+              >
+                {property.title}
+              </h1>
+              <div className="flex items-center gap-2 text-gray-500">
+                <MapPin className="w-4 h-4" />
+                <span className="text-sm">{property.location}</span>
+              </div>
+              <p 
+                className="text-3xl font-semibold text-emerald-600"
+                style={{ fontFamily: "'DM Sans', sans-serif" }}
+              >
+                {property.price}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <span className="px-4 py-1.5 rounded-full text-sm font-medium border border-gray-200 text-gray-700">
+                  {property.type}
+                </span>
+                <span className="px-4 py-1.5 rounded-full text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
+                  {property.category}
+                </span>
+              </div>
+              {property.propertyAge !== undefined && property.propertyAge !== null && (
+                <div className="flex items-center text-sm text-gray-600">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Property Age: {property.propertyAge === 0 ? 'New Construction' : `${property.propertyAge} ${property.propertyAge === 1 ? 'Year' : 'Years'} Old`}
+                </div>
+              )}
+              {property.status && property.category !== 'Land' && (
+                <div className="flex items-center text-sm text-gray-600">
+                  <CheckCircle className="w-4 h-4 mr-2 text-emerald-600" />
+                  Status: {property.status}
+                </div>
+              )}
+              {property.createdAt && (
+                <div className="flex items-center text-sm text-gray-500">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Listed on {new Date(property.createdAt.toDate()).toLocaleDateString()}
+                </div>
+              )}
+            </div>
+
+            {/* Tabbed Content Sections */}
+            <div className="border border-gray-100 rounded-2xl overflow-hidden">
+              <Tabs defaultValue="overview" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 bg-gray-50 p-1 m-4 mb-0 rounded-xl w-[calc(100%-2rem)]">
+                  <TabsTrigger value="overview" className="flex items-center gap-2 rounded-lg font-medium text-sm">
+                    <Home className="w-4 h-4" />
+                    <span className="hidden sm:inline">Overview</span>
+                    <span className="sm:hidden">Info</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="amenities" className="flex items-center gap-2 rounded-lg font-medium text-sm">
+                    <ImageIcon className="w-4 h-4" />
+                    <span className="hidden sm:inline">Amenities</span>
+                    <span className="sm:hidden">Features</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="map" className="flex items-center gap-2 rounded-lg font-medium text-sm">
+                    <MapIcon className="w-4 h-4" />
+                    <span className="hidden sm:inline">Location</span>
+                    <span className="sm:hidden">Map</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="contact" className="flex items-center gap-2 rounded-lg font-medium text-sm">
+                    <Phone className="w-4 h-4" />
+                    Contact
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="overview" className="p-4 sm:p-6 mt-2">
+                  <PropertyOverview property={property} />
+                </TabsContent>
+                
+                <TabsContent value="amenities" className="p-4 sm:p-6 mt-2">
+                  {property.amenities && property.amenities.length > 0 ? (
+                    <PropertyAmenities amenities={property.amenities} />
+                  ) : (
+                    <div className="text-center py-12">
+                      <ImageIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500 font-medium">No amenities listed for this property.</p>
                     </div>
                   )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 3. Tabbed Content Sections with improved mobile spacing */}
-            <Card className="shadow-soft-lg rounded-2xl overflow-hidden">
-              <CardContent className="p-0">
-                <Tabs defaultValue="overview" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 bg-gray-50/50 p-1 m-3 sm:m-6 mb-0 rounded-xl">
-                    <TabsTrigger value="overview" className="flex items-center gap-1 sm:gap-2 rounded-lg font-medium text-xs sm:text-sm">
-                      <Home className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span className="hidden sm:inline">Overview</span>
-                      <span className="sm:hidden">Info</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="amenities" className="flex items-center gap-1 sm:gap-2 rounded-lg font-medium text-xs sm:text-sm">
-                      <ImageIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span className="hidden sm:inline">Amenities</span>
-                      <span className="sm:hidden">Features</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="map" className="flex items-center gap-1 sm:gap-2 rounded-lg font-medium text-xs sm:text-sm">
-                      <MapIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span className="hidden sm:inline">Location</span>
-                      <span className="sm:hidden">Map</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="contact" className="flex items-center gap-1 sm:gap-2 rounded-lg font-medium text-xs sm:text-sm">
-                      <Phone className="w-3 h-3 sm:w-4 sm:h-4" />
-                      Contact
-                    </TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="overview" className="p-4 sm:p-6 pt-3 sm:pt-4 mt-3 sm:mt-2">
-                    <PropertyOverview property={property} />
-                  </TabsContent>
-                  
-                  <TabsContent value="amenities" className="p-4 sm:p-6 pt-3 sm:pt-4 mt-3 sm:mt-2">
-                    {property.amenities && property.amenities.length > 0 ? (
-                      <PropertyAmenities amenities={property.amenities} />
-                    ) : (
-                      <div className="text-center py-8 sm:py-12">
-                        <ImageIcon className="w-8 h-8 sm:w-12 sm:h-12 text-gray-300 mx-auto mb-3 sm:mb-4" />
-                        <p className="text-sm sm:text-base text-gray-500 font-medium">No amenities listed for this property.</p>
-                      </div>
-                    )}
-                  </TabsContent>
-                  
-                  <TabsContent value="map" className="p-0 mt-3 sm:mt-2">
-                    <div className="min-h-[300px] sm:h-80 lg:h-96">
-                      <PropertyMap 
-                        location={property.location} 
-                        title={property.title} 
-                        fullAddress={property.fullAddress}
-                      />
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="contact" className="p-4 sm:p-6 pt-3 sm:pt-4 mt-3 sm:mt-2">
-                    <PropertyContact 
-                      contactName={property.contactName}
-                      contactPhone={property.contactPhone}
-                      contactEmail={property.contactEmail}
-                      propertyTitle={property.title}
-                      propertyLocation={property.location}
-                      propertyFullAddress={property.fullAddress}
+                </TabsContent>
+                
+                <TabsContent value="map" className="p-0 mt-2">
+                  <div className="h-80 lg:h-96">
+                    <PropertyMap 
+                      location={property.location} 
+                      title={property.title} 
+                      fullAddress={property.fullAddress}
                     />
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="contact" className="p-4 sm:p-6 mt-2">
+                  <PropertyContact 
+                    contactName={property.contactName}
+                    contactPhone={property.contactPhone}
+                    contactEmail={property.contactEmail}
+                    propertyTitle={property.title}
+                    propertyLocation={property.location}
+                    propertyFullAddress={property.fullAddress}
+                  />
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
 
-          {/* Desktop Sidebar - Hidden on mobile and simplified */}
-          <div className="hidden lg:block lg:col-span-1 space-y-6">
-            {/* Key Information Card - Desktop Only */}
-            <Card className="shadow-soft-lg rounded-2xl sticky top-24">
-              <CardContent className="p-6">
-                <div className="mb-6">
-                  <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-3 leading-tight font-premium">{property.title}</h1>
-                  <div className="flex items-center text-gray-600 mb-4">
-                    <MapPin className="w-5 h-5 mr-2 flex-shrink-0 text-blue-600" />
-                    <span className="text-sm font-medium">{property.location}</span>
+          {/* Desktop Sidebar */}
+          <div className="hidden lg:block lg:col-span-2 space-y-6">
+            <div className="sticky top-28 border border-gray-100 rounded-2xl p-6">
+              <h1 
+                className="text-2xl font-semibold text-gray-900 mb-3"
+                style={{ fontFamily: "'DM Sans', sans-serif" }}
+              >
+                {property.title}
+              </h1>
+              <div className="flex items-center text-gray-500 mb-4">
+                <MapPin className="w-4 h-4 mr-2" />
+                <span className="text-sm">{property.location}</span>
+              </div>
+              <p 
+                className="text-3xl font-semibold text-emerald-600 mb-6"
+                style={{ fontFamily: "'DM Sans', sans-serif" }}
+              >
+                {property.price}
+              </p>
+              <div className="flex flex-wrap gap-2 mb-6">
+                <span className="px-4 py-1.5 rounded-full text-sm font-medium border border-gray-200 text-gray-700">
+                  {property.type}
+                </span>
+                <span className="px-4 py-1.5 rounded-full text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
+                  {property.category}
+                </span>
+              </div>
+              
+              <div className="space-y-3 border-t border-gray-100 pt-6">
+                {property.propertyAge !== undefined && property.propertyAge !== null && (
+                  <div className="flex items-center text-sm text-gray-600">
+                    <Calendar className="w-4 h-4 mr-3" />
+                    Property Age: {property.propertyAge === 0 ? 'New Construction' : `${property.propertyAge} ${property.propertyAge === 1 ? 'Year' : 'Years'} Old`}
                   </div>
-                  <div className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4 font-premium">
-                    {property.price}
+                )}
+                {property.status && property.category !== 'Land' && (
+                  <div className="flex items-center text-sm text-gray-600">
+                    <CheckCircle className="w-4 h-4 mr-3 text-emerald-600" />
+                    Status: {property.status}
                   </div>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="bg-blue-100 text-blue-800 px-3 py-2 rounded-xl text-sm font-semibold shadow-elegant">
-                      {property.type}
-                    </span>
-                    <span className="bg-green-100 text-green-800 px-3 py-2 rounded-xl text-sm font-semibold shadow-elegant">
-                      {property.category}
-                    </span>
+                )}
+                {property.createdAt && (
+                  <div className="flex items-center text-sm text-gray-500">
+                    <Calendar className="w-4 h-4 mr-3" />
+                    Listed on {new Date(property.createdAt.toDate()).toLocaleDateString()}
                   </div>
-                  {property.propertyAge !== undefined && property.propertyAge !== null && (
-                    <div className="flex items-center text-sm text-gray-600 bg-indigo-50 px-3 py-2 rounded-xl mb-2">
-                      <Calendar className="w-4 h-4 mr-2 text-indigo-600" />
-                      Property Age: {property.propertyAge === 0 ? 'New Construction' : `${property.propertyAge} ${property.propertyAge === 1 ? 'Year' : 'Years'} Old`}
-                    </div>
-                  )}
-                  {property.status && property.category !== 'Land' && (
-                    <div className="flex items-center text-sm text-gray-600 bg-emerald-50 px-3 py-2 rounded-xl mb-2">
-                      <CheckCircle className="w-4 h-4 mr-2 text-emerald-600" />
-                      Status: {property.status}
-                    </div>
-                  )}
-                  {property.createdAt && (
-                    <div className="flex items-center text-sm text-gray-500 bg-gray-50 px-3 py-2 rounded-xl">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      Listed on {new Date(property.createdAt.toDate()).toLocaleDateString()}
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -312,7 +327,7 @@ const PropertyDetails = () => {
         location={property.location}
       />
 
-      <Footer />
+      <FooterRedesign />
     </div>
   );
 };

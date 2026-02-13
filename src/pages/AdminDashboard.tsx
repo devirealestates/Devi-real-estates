@@ -504,7 +504,7 @@ const AdminDashboard = () => {
               </div>
               <div>
                 <h1 className="text-sm font-bold text-white drop-shadow-lg">
-                  Mana Nivasam
+                  Devi Real Estates
                 </h1>
                 <p className="text-xs text-white/90 drop-shadow">
                   Welcome back, {currentUser?.email?.split('@')[0]} ({userRole === 'admin' ? 'Admin' : 'User'})
@@ -714,7 +714,7 @@ const AdminDashboard = () => {
                   </div>
                   <div>
                     <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                       Mana Nivasam Dashboard
+                       Devi Real Estates Dashboard
                     </h1>
                     <p className="text-sm sm:text-base text-gray-600 flex items-center gap-2">
                       <Calendar className="w-4 h-4" />

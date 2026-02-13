@@ -28,17 +28,17 @@ const PrivacyPolicy = () => {
     }, 50);
 
     // Set page title for SEO
-    document.title = 'Privacy Policy | Mana Nivasam - Real Estate Services';
+    document.title = 'Privacy Policy | Devi Real Estates - Real Estate Services';
     
     // Add meta description
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute('content', 'Privacy Policy for Mana Nivasam Real Estate Services. Learn how we protect and handle your personal information.');
+      metaDescription.setAttribute('content', 'Privacy Policy for Devi Real Estates Real Estate Services. Learn how we protect and handle your personal information.');
     }
 
     return () => {
       document.body.style.transition = '';
-      document.title = 'Mana Nivasam - Premium Real Estate Services';
+      document.title = 'Devi Real Estates - Premium Real Estate Services';
     };
   }, []);
 
@@ -51,7 +51,7 @@ const PrivacyPolicy = () => {
       id: 'introduction',
       title: 'Introduction',
       icon: Shield,
-      content: `Welcome to Mana Nivasam. We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our real estate services. By accessing or using our services, you consent to the practices described in this policy.`
+      content: `Welcome to Devi Real Estates. We are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our real estate services. By accessing or using our services, you consent to the practices described in this policy.`
     },
     {
       id: 'data-collection',
@@ -183,16 +183,16 @@ We regularly review and securely delete data that is no longer needed.`,
       icon: Phone,
       content: `If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:
       
-• Email: privacy@mananivasam.com
+• Email: privacy@devirealestates.com
 • Phone: +91 91210 55512
-• Address: Mana Nivasam Real Estate Services
+• Address: Devi Real Estates Real Estate Services
 • Business Hours: Monday to Saturday, 9:00 AM to 7:00 PM IST
       
 We will respond to your inquiry within 30 days and work to resolve any privacy concerns promptly.`,
       subsections: [
         {
           title: 'Data Protection Officer',
-          content: 'For specific data protection inquiries, you may contact our Data Protection Officer at dpo@mananivasam.com.'
+          content: 'For specific data protection inquiries, you may contact our Data Protection Officer at dpo@devirealestates.com.'
         }
       ]
     }
@@ -403,12 +403,12 @@ We will respond to your inquiry within 30 days and work to resolve any privacy c
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 max-w-2xl mx-auto">
               <a
-                href="mailto:privacy@mananivasam.com"
+                href="mailto:privacy@devirealestates.com"
                 className="group p-4 md:p-6 bg-white/10 backdrop-blur-sm rounded-lg md:rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300"
               >
                 <Mail className="w-6 h-6 md:w-8 md:h-8 text-white mb-2 md:mb-3 mx-auto group-hover:scale-110 transition-transform" />
                 <div className="text-base md:text-lg font-semibold mb-1 md:mb-2">Email Us</div>
-                <div className="text-sm md:text-base text-blue-100 break-all">privacy@mananivasam.com</div>
+                <div className="text-sm md:text-base text-blue-100 break-all">privacy@devirealestates.com</div>
               </a>
               
               <a

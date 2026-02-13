@@ -1,4 +1,4 @@
-# Mana Nivasam - Prime Vista Homes
+# Devi Real Estates - Prime Vista Homes
 
 ## Project info
 

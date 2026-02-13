@@ -1,18 +1,14 @@
-
-import React, { useState } from 'react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Phone, Mail, MapPin, MessageCircle } from 'lucide-react';
+﻿import React, { useState } from 'react';
+import HeaderRedesign from '@/components/HeaderRedesign';
+import FooterRedesign from '@/components/FooterRedesign';
+import { ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Contact = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    phone: '',
     message: ''
   });
 
@@ -24,7 +20,6 @@ const Contact = () => {
     
 Name: ${formData.name}
 Email: ${formData.email}
-Phone: ${formData.phone}
 Message: ${formData.message}`;
     
     const encodedMessage = encodeURIComponent(whatsappMessage);
@@ -42,190 +37,137 @@ Message: ${formData.message}`;
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <div className="min-h-screen bg-white">
+      <HeaderRedesign />
       
-      {/* Hero Section */}
-      <section className="relative pt-20 pb-16 bg-gradient-to-br from-teal-900 via-blue-900 to-purple-900">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1721322800607-8c38375eef04?q=80&w=2070')] bg-cover bg-center opacity-20"></div>
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-white mb-12">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
+      {/* Hero Section - 80% viewport height */}
+      <section className="relative h-[80vh] min-h-[500px] flex items-end pb-16">
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2075" 
+            alt="Luxury Modern Home" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/40"></div>
+        </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <h1 
+            className="text-6xl sm:text-7xl lg:text-8xl font-medium text-white"
+            style={{ fontFamily: "'DM Sans', sans-serif" }}
+          >
+            Contact Us
+          </h1>
+        </div>
+      </section>
+
+      {/* Contact Form Section */}
+      <section className="py-16 sm:py-20 lg:py-24 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Left Side Label */}
+          <div className="mb-12">
+            <h3 
+              className="text-xl font-medium text-gray-600"
+              style={{ fontFamily: "'DM Sans', sans-serif" }}
+            >
               Contact
-              <span className="block bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
-                Us
-              </span>
-            </h1>
-            <p className="text-xl text-gray-200 max-w-3xl mx-auto">
-              Get in touch with our expert team for all your real estate needs
-            </p>
+            </h3>
+          </div>
+
+          {/* Form Section */}
+          <div>
+            <h2 
+              className="text-3xl sm:text-4xl lg:text-5xl font-medium text-gray-900 mb-12 text-center"
+              style={{ fontFamily: "'DM Sans', sans-serif" }}
+            >
+              Question not answered yet?<br />We are here to help!
+            </h2>
+
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-3">
+                  Full Name
+                </label>
+                <input
+                  name="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full border-0 border-b border-gray-300 focus:border-gray-900 focus:ring-0 px-0 py-3 text-gray-900 placeholder-gray-400 transition-colors"
+                  style={{ outline: 'none' }}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-3">
+                  Email
+                </label>
+                <input
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full border-0 border-b border-gray-300 focus:border-gray-900 focus:ring-0 px-0 py-3 text-gray-900 placeholder-gray-400 transition-colors"
+                  style={{ outline: 'none' }}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-3">
+                  Message
+                </label>
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  required
+                  rows={6}
+                  className="w-full border-0 border-b border-gray-300 focus:border-gray-900 focus:ring-0 px-0 py-3 text-gray-900 placeholder-gray-400 resize-none transition-colors"
+                  style={{ outline: 'none' }}
+                />
+              </div>
+              
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  className="px-8 py-3 bg-orange-500 text-white rounded-full font-medium hover:bg-orange-600 transition-colors"
+                >
+                  Send Message
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Contact Form */}
-            <Card className="hover-lift">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  <MessageCircle className="w-6 h-6 text-purple-600" />
-                  Send us a Message
-                </CardTitle>
-                <p className="text-gray-600">Fill out the form and we'll connect you via WhatsApp</p>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name *
-                    </label>
-                    <Input
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      placeholder="Enter your full name"
-                      required
-                      className="h-12"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email Address *
-                    </label>
-                    <Input
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="Enter your email"
-                      required
-                      className="h-12"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Phone Number
-                    </label>
-                    <Input
-                      name="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      placeholder="Enter your phone number"
-                      className="h-12"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Message *
-                    </label>
-                    <Textarea
-                      name="message"
-                      value={formData.message}
-                      onChange={handleInputChange}
-                      placeholder="Tell us about your property requirements..."
-                      required
-                      rows={4}
-                      className="resize-none"
-                    />
-                  </div>
-                  
-                  <Button
-                    type="submit"
-                    className="w-full h-12 btn-luxury text-white font-semibold flex items-center justify-center gap-2"
-                  >
-                    <MessageCircle className="w-5 h-5" />
-                    Send message
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-
-            {/* Contact Information */}
-            <div className="space-y-8">
-              <Card className="hover-lift">
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Get in Touch</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <Phone className="w-5 h-5 text-purple-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">Phone</p>
-                        <p className="text-gray-600">+91 8985816481</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <Mail className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">Email</p>
-                        <p className="text-gray-600">mananivasam@gmail.com</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                        <MapPin className="w-5 h-5 text-green-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">Office</p>
-                        <p className="text-gray-600">Kakinada, Andhra Pradesh, India</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="hover-lift">
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Business Hours</h3>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Monday - Friday</span>
-                      <span className="font-medium">9:00 AM - 6:00 PM</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Saturday</span>
-                      <span className="font-medium">10:00 AM - 4:00 PM</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Sunday</span>
-                      <span className="font-medium">Closed</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Direct WhatsApp Button */}
-              <Card className="hover-lift bg-green-50 border-green-200">
-                <CardContent className="p-6 text-center">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">Quick WhatsApp Chat</h3>
-                  <p className="text-gray-600 mb-4">Need immediate assistance? Chat with us directly on WhatsApp</p>
-                  <Button
-                    onClick={() => window.open('https://wa.me/918985816481?text=Hi%20I%20would%20like%20to%20inquire%20about%20a%20property%20on%20your%20website.', '_blank')}
-                    className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg flex items-center gap-2 mx-auto"
-                  >
-                    <MessageCircle className="w-5 h-5" />
-                    Chat on WhatsApp
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+      {/* CTA Section */}
+      <section className="relative py-20 lg:py-32 overflow-hidden">
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070" 
+            alt="Property" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/60"></div>
+        </div>
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 
+            className="text-3xl sm:text-4xl lg:text-5xl font-medium text-white mb-6 leading-tight"
+            style={{ fontFamily: "'DM Sans', sans-serif" }}
+          >
+            Are you looking to buy<br />or rent a property?
+          </h2>
+          <button 
+            onClick={() => navigate('/contact')}
+            className="inline-flex items-center gap-2 px-6 py-3 border-2 border-white text-white rounded-full text-sm font-medium hover:bg-white hover:text-gray-900 transition-all duration-300"
+          >
+            Get in Touch <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
       </section>
 
-      <Footer />
+      <FooterRedesign />
     </div>
   );
 };

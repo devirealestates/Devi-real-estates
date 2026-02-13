@@ -25,8 +25,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [activeTab, setActiveTab] = useState('upload');
 
   // Updated Cloudinary configuration with new credentials
-  const CLOUDINARY_CLOUD_NAME = 'doxwyrp8n';
-  const CLOUDINARY_UPLOAD_PRESET = 'kkdrealestate';
+  const CLOUDINARY_CLOUD_NAME = 'drr2mblir';
+  const CLOUDINARY_UPLOAD_PRESET = 'devirealestates';
 
   const uploadToCloudinary = async (file: File): Promise<string> => {
     const formData = new FormData();

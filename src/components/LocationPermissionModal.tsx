@@ -84,7 +84,7 @@ const LocationPermissionModal: React.FC<LocationPermissionModalProps> = ({
 
       // Enhanced logo detection with multiple strategies
       const detectLogoLoad = () => {
-        const logoImage = document.querySelector('img[alt="Mana Nivasam Logo"]') as HTMLImageElement;
+        const logoImage = document.querySelector('img[alt="Devi Real Estates Logo"]') as HTMLImageElement;
         
         if (logoImage) {
           console.log('Logo found, checking if loaded:', {
@@ -189,14 +189,14 @@ const LocationPermissionModal: React.FC<LocationPermissionModalProps> = ({
                 if (node.nodeType === Node.ELEMENT_NODE) {
                   const element = node as Element;
                   // Check if the added node is the logo or contains the logo
-                  if (element.tagName === 'IMG' && element.getAttribute('alt') === 'Mana Nivasam Logo') {
+                  if (element.tagName === 'IMG' && element.getAttribute('alt') === 'Devi Real Estates Logo') {
                     console.log('Logo detected via MutationObserver');
                     if (detectLogoLoad()) {
                       observer.disconnect();
                     }
                   } else {
                     // Check if logo is within the added node
-                    const logo = element.querySelector('img[alt="Mana Nivasam Logo"]');
+                    const logo = element.querySelector('img[alt="Devi Real Estates Logo"]');
                     if (logo) {
                       console.log('Logo found in added subtree');
                       if (detectLogoLoad()) {

@@ -24,8 +24,8 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
   const [activeTab, setActiveTab] = useState('upload');
 
   // Cloudinary configuration for video uploads
-  const CLOUDINARY_CLOUD_NAME = 'doxwyrp8n';
-  const CLOUDINARY_UPLOAD_PRESET = 'kkdrealestate';
+  const CLOUDINARY_CLOUD_NAME = 'drr2mblir';
+  const CLOUDINARY_UPLOAD_PRESET = 'devirealestates';
 
   // Initialize videos from props - improved to handle updates properly
   React.useEffect(() => {

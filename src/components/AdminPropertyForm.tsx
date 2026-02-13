@@ -27,6 +27,7 @@ const AdminPropertyForm: React.FC<AdminPropertyFormProps> = ({
     price: '',
     location: '',
     fullAddress: '',
+    mapEmbedLink: '',
     type: '',
     category: '',
     subCategory: '',
@@ -116,6 +117,7 @@ const AdminPropertyForm: React.FC<AdminPropertyFormProps> = ({
         price: property.price || '',
         location: property.location || '',
         fullAddress: property.fullAddress || '',
+        mapEmbedLink: property.mapEmbedLink || '',
         type: property.type || '',
         category: property.category || '',
         subCategory: property.subCategory || '',
@@ -437,6 +439,21 @@ const AdminPropertyForm: React.FC<AdminPropertyFormProps> = ({
                   placeholder="Enter complete address with landmarks"
                   className="transition-all duration-300 ease-in-out focus:scale-105 focus:shadow-md"
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="mapEmbedLink">Google Maps Embed Link (Optional)</Label>
+                <Input
+                  id="mapEmbedLink"
+                  name="mapEmbedLink"
+                  value={formData.mapEmbedLink}
+                  onChange={handleInputChange}
+                  placeholder="Paste Google Maps embed link for exact location"
+                  className="transition-all duration-300 ease-in-out focus:scale-105 focus:shadow-md"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Tip: Share location from Google Maps → Copy embed code or link
+                </p>
               </div>
 
               <div>

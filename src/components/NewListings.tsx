@@ -29,12 +29,75 @@ const newListings = [
   },
 ];
 
+// Individual card component with its own intersection observer
+const ListingCard: React.FC<{
+  listing: typeof newListings[0];
+  onClick: () => void;
+}> = ({ listing, onClick }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      {
+        threshold: 0.5,
+        rootMargin: '-20% 0px -20% 0px'
+      }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={cardRef}
+      className={`group cursor-pointer transition-all duration-700 ease-out ${
+        isVisible 
+          ? 'opacity-100 translate-y-0' 
+          : 'opacity-0 translate-y-8'
+      }`}
+      onClick={onClick}
+    >
+      {/* Image */}
+      <div className="relative overflow-hidden rounded-2xl mb-4 aspect-[4/3]">
+        <img
+          src={listing.image}
+          alt={listing.name}
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+        />
+      </div>
+      {/* Info */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">{listing.name}</h3>
+          <p className="text-gray-500 text-sm flex items-center gap-1 mt-1">
+            <MapPin className="w-3.5 h-3.5" />
+            {listing.location}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-lg font-semibold text-gray-900">{listing.price}</p>
+          <p className="text-gray-500 text-sm mt-1">{listing.area}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const NewListings: React.FC = () => {
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
-  const cardsRef = useRef<HTMLDivElement>(null);
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
-  const [isCardsVisible, setIsCardsVisible] = useState(false);
 
   useEffect(() => {
     const headerObserver = new IntersectionObserver(([entry]) => {
@@ -44,23 +107,12 @@ const NewListings: React.FC = () => {
       }
     }, { threshold: 0.1 });
 
-    const cardsObserver = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setIsCardsVisible(true);
-        cardsObserver.disconnect();
-      }
-    }, { threshold: 0.05 });
-
     if (sectionRef.current) {
       headerObserver.observe(sectionRef.current);
-    }
-    if (cardsRef.current) {
-      cardsObserver.observe(cardsRef.current);
     }
 
     return () => {
       headerObserver.disconnect();
-      cardsObserver.disconnect();
     };
   }, []);
 
@@ -98,13 +150,6 @@ const NewListings: React.FC = () => {
             transform: translateY(0);
           }
         }
-        .card-reveal {
-          clip-path: inset(100% 0 0 0);
-          transform: translateY(30px);
-        }
-        .card-reveal.animate {
-          animation: revealUp 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-        }
         .text-reveal {
           clip-path: inset(100% 0 0 0);
           transform: translateY(20px);
@@ -140,39 +185,13 @@ const NewListings: React.FC = () => {
         </div>
 
         {/* Cards Section */}
-        <div ref={cardsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {newListings.map((listing, index) => (
-            <div
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          {newListings.map((listing) => (
+            <ListingCard
               key={listing.id}
-              className={`group cursor-pointer card-reveal ${isCardsVisible ? 'animate' : ''}`}
+              listing={listing}
               onClick={() => navigate('/buy')}
-              style={{
-                animationDelay: `${index * 0.2}s`,
-              }}
-            >
-              {/* Image */}
-              <div className="relative overflow-hidden rounded-2xl mb-4 aspect-[4/3]">
-                <img
-                  src={listing.image}
-                  alt={listing.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-              </div>
-              {/* Info */}
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{listing.name}</h3>
-                  <p className="text-gray-500 text-sm flex items-center gap-1 mt-1">
-                    <MapPin className="w-3.5 h-3.5" />
-                    {listing.location}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-semibold text-gray-900">{listing.price}</p>
-                  <p className="text-gray-500 text-sm mt-1">{listing.area}</p>
-                </div>
-              </div>
-            </div>
+            />
           ))}
         </div>
       </div>

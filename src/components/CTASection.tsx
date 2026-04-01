@@ -1,9 +1,13 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 const CTASection: React.FC = () => {
-  const navigate = useNavigate();
+  const handleGetInTouch = () => {
+    const phoneNumber = '919912991671'; // Without + and spaces
+    const message = encodeURIComponent('Hi, I am interested in buying/renting a property. Can you help me?');
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+    window.open(whatsappUrl, '_blank');
+  };
 
   return (
     <section className="relative overflow-hidden">
@@ -22,7 +26,7 @@ const CTASection: React.FC = () => {
               or rent a property?
             </h2>
             <button
-              onClick={() => navigate('/contact')}
+              onClick={handleGetInTouch}
               className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-full text-sm font-medium hover:bg-gray-800 transition-all duration-300"
             >
               Get In Touch <ArrowRight className="w-4 h-4" />

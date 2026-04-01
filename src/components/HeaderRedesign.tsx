@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, ShoppingCart, ChevronDown, User } from 'lucide-react';
+import { Menu, X, ShoppingCart, ChevronDown, User, Home, Info, Building2, Calculator, Heart, Phone, ArrowRight } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import ShortlistSidebar from './ShortlistSidebar';
@@ -34,6 +34,37 @@ const HeaderRedesign: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+    } else {
+      const scrollY = document.body.style.top;
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      setShowPagesDropdown(false);
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+    };
+  }, [isMobileMenuOpen]);
+
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'About', path: '/about' },
@@ -47,6 +78,18 @@ const HeaderRedesign: React.FC = () => {
     { name: 'PG/Hostels', path: '/pg-hostels' },
     { name: 'Land', path: '/land' },
     { name: 'EMI Calculator', path: '/emi-calculator' },
+  ];
+
+  const mobileMenuLinks = [
+    { name: 'Home', path: '/', icon: Home },
+    { name: 'About Us', path: '/about', icon: Info },
+    { name: 'Buy Property', path: '/buy', icon: Building2 },
+    { name: 'Rent Property', path: '/rent', icon: Building2 },
+    { name: 'Commercial', path: '/commercial', icon: Building2 },
+    { name: 'PG/Hostels', path: '/pg-hostels', icon: Building2 },
+    { name: 'Land', path: '/land', icon: Building2 },
+    { name: 'EMI Calculator', path: '/emi-calculator', icon: Calculator },
+    { name: 'Shortlist', path: '/shortlist', icon: Heart },
   ];
 
   const headerBg = isHomePage && !isScrolled
@@ -149,7 +192,7 @@ const HeaderRedesign: React.FC = () => {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? (
-              <X className={`w-6 h-6 ${textColor}`} />
+              <X className={`w-6 h-6 ${isMobileMenuOpen ? 'text-gray-900' : textColor}`} />
             ) : (
               <Menu className={`w-6 h-6 ${textColor}`} />
             )}
@@ -157,68 +200,192 @@ const HeaderRedesign: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden bg-white border-t border-gray-100 shadow-lg">
-          <div className="px-4 py-4 space-y-1">
-            {navLinks.map((link) => (
+      {/* Fullscreen Mobile Menu */}
+      <div 
+        className={`lg:hidden fixed inset-0 bg-white z-40 transition-all duration-300 ease-out ${
+          isMobileMenuOpen 
+            ? 'opacity-100 translate-x-0' 
+            : 'opacity-0 translate-x-full pointer-events-none'
+        }`}
+      >
+        {/* Mobile Menu Header */}
+        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-100">
+          <div
+            className="flex items-center cursor-pointer"
+            onClick={() => {
+              navigate('/');
+              setIsMobileMenuOpen(false);
+            }}
+          >
+            <img 
+              src="/dre-logo.png" 
+              alt="DRE Logo" 
+              className="h-10 w-auto object-contain"
+            />
+          </div>
+          <button
+            className="w-10 h-10 flex items-center justify-center"
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            <X className="w-7 h-7 text-gray-900" />
+          </button>
+        </div>
+
+        {/* Menu Content - Scrollable */}
+        <div className="h-[calc(100vh-64px)] overflow-y-auto overscroll-contain">
+          <div className="px-6 pt-8 pb-20">
+            <nav>
+              {/* Home */}
               <a
-                key={link.name}
                 onClick={(e) => {
                   e.preventDefault();
-                  navigate(link.path);
+                  navigate('/');
                   setIsMobileMenuOpen(false);
                 }}
-                href={link.path}
-                className={`block py-3 px-3 text-sm font-medium rounded-lg transition-colors ${
-                  location.pathname === link.path
-                    ? 'text-orange-500 bg-orange-50'
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
+                href="/"
+                className="block py-4 text-2xl text-gray-900 hover:text-orange-500 transition-colors border-b border-gray-100"
+                style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}
               >
-                {link.name}
+                Home
               </a>
-            ))}
-            <div className="border-t border-gray-100 pt-2 mt-2">
-              <p className="px-3 py-2 text-xs text-gray-400 uppercase tracking-wider">More Pages</p>
-              {pagesLinks.map((link) => (
-                <a
-                  key={link.name}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate(link.path);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  href={link.path}
-                  className="block py-3 px-3 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+
+              {/* About */}
+              <a
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/about');
+                  setIsMobileMenuOpen(false);
+                }}
+                href="/about"
+                className="block py-4 text-2xl text-gray-900 hover:text-orange-500 transition-colors border-b border-gray-100"
+                style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}
+              >
+                About
+              </a>
+
+              {/* Properties Dropdown */}
+              <div className="border-b border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setShowPagesDropdown(!showPagesDropdown)}
+                  className="flex items-center justify-between w-full py-4 text-2xl text-left text-gray-900 hover:text-orange-500 transition-colors"
+                  style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}
                 >
-                  {link.name}
-                </a>
-              ))}
-            </div>
-            <div className="border-t border-gray-100 pt-3 mt-2 flex gap-3">
-              <button
-                onClick={() => {
+                  Properties
+                  <ChevronDown className={`w-6 h-6 transition-transform duration-200 ${showPagesDropdown ? 'rotate-180' : ''}`} />
+                </button>
+                
+                <div className={`overflow-hidden transition-all duration-300 ${showPagesDropdown ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+                  <div className="pb-3 space-y-0">
+                    <a
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate('/buy');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      href="/buy"
+                      className="block py-3 pl-4 text-xl text-gray-600 hover:text-orange-500 transition-colors border-b border-gray-50"
+                      style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400 }}
+                    >
+                      Buy
+                    </a>
+                    <a
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate('/rent');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      href="/rent"
+                      className="block py-3 pl-4 text-xl text-gray-600 hover:text-orange-500 transition-colors border-b border-gray-50"
+                      style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400 }}
+                    >
+                      Rent
+                    </a>
+                    <a
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate('/commercial');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      href="/commercial"
+                      className="block py-3 pl-4 text-xl text-gray-600 hover:text-orange-500 transition-colors border-b border-gray-50"
+                      style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400 }}
+                    >
+                      Commercial
+                    </a>
+                    <a
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate('/pg-hostels');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      href="/pg-hostels"
+                      className="block py-3 pl-4 text-xl text-gray-600 hover:text-orange-500 transition-colors border-b border-gray-50"
+                      style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400 }}
+                    >
+                      PG/Hostels
+                    </a>
+                    <a
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate('/land');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      href="/land"
+                      className="block py-3 pl-4 text-xl text-gray-600 hover:text-orange-500 transition-colors"
+                      style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400 }}
+                    >
+                      Land
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* EMI Calculator */}
+              <a
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/emi-calculator');
+                  setIsMobileMenuOpen(false);
+                }}
+                href="/emi-calculator"
+                className="block py-4 text-2xl text-gray-900 hover:text-orange-500 transition-colors border-b border-gray-100"
+                style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}
+              >
+                EMI Calculator
+              </a>
+
+              {/* Shortlist */}
+              <a
+                onClick={(e) => {
+                  e.preventDefault();
                   setIsShortlistOpen(true);
                   setIsMobileMenuOpen(false);
                 }}
-                className="flex-1 py-3 border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+                href="/shortlist"
+                className="block py-4 text-2xl text-gray-900 hover:text-orange-500 transition-colors border-b border-gray-100"
+                style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}
               >
                 Shortlist
-              </button>
-              <button
-                onClick={() => {
-                  navigate(currentUser ? '/profile' : '/contact');
+              </a>
+
+              {/* Contact */}
+              <a
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/contact');
                   setIsMobileMenuOpen(false);
                 }}
-                className="flex-1 py-3 bg-gray-900 text-white rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
+                href="/contact"
+                className="block py-4 text-2xl text-gray-900 hover:text-orange-500 transition-colors border-b border-gray-100"
+                style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}
               >
-                {currentUser ? 'Profile' : 'Contact Us'}
-              </button>
-            </div>
+                Contact
+              </a>
+            </nav>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Shortlist Sidebar */}
       <ShortlistSidebar isOpen={isShortlistOpen} onClose={() => setIsShortlistOpen(false)} />

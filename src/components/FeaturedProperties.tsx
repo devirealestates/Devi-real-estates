@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { collection, getDocs, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import PropertyCard from '@/components/PropertyCard';
@@ -7,6 +7,58 @@ import { Button } from '@/components/ui/button';
 import { Heart, Send } from 'lucide-react';
 import { useShortlist } from '@/hooks/useShortlist';
 import { useNavigate } from 'react-router-dom';
+
+// Custom hook for scroll-triggered animations
+const useScrollAnimation = () => {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      {
+        threshold: 0.3,
+        rootMargin: '-10% 0px -10% 0px'
+      }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, []);
+
+  return { ref, isVisible };
+};
+
+// Animated card wrapper component
+const AnimatedCard: React.FC<{ children: React.ReactNode; delay?: number }> = ({ children, delay = 0 }) => {
+  const { ref, isVisible } = useScrollAnimation();
+
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ease-out ${
+        isVisible 
+          ? 'opacity-100 translate-y-0' 
+          : 'opacity-0 translate-y-8'
+      }`}
+      style={{ transitionDelay: isVisible ? `${delay}ms` : '0ms' }}
+    >
+      {children}
+    </div>
+  );
+};
 
 interface Property {
   id: string;
@@ -294,11 +346,7 @@ const FeaturedProperties = () => {
             {/* Mobile: 2-Column Grid */}
             <div className="grid grid-cols-2 gap-3 sm:gap-4 md:hidden">
               {filteredProperties.map((property, index) => (
-                <div 
-                  key={property.id} 
-                  className="fade-in-up" 
-                  style={{animationDelay: `${index * 0.1}s`}}
-                >
+                <AnimatedCard key={property.id} delay={index * 100}>
                   <div 
                     className="property-card bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg border border-gray-100 transition-all duration-300 transform hover:scale-105 cursor-pointer"
                     onClick={(e) => handleViewDetails(e, property.id)}
@@ -371,20 +419,16 @@ const FeaturedProperties = () => {
                       </Button>
                     </div>
                   </div>
-                </div>
+                </AnimatedCard>
               ))}
             </div>
             
             {/* Desktop: Wider 2-Column Grid for larger cards, 3-Column on XL screens */}
             <div className="hidden md:grid md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
               {filteredProperties.map((property, index) => (
-                <div 
-                  key={property.id} 
-                  className="fade-in-up" 
-                  style={{animationDelay: `${index * 0.1}s`}}
-                >
+                <AnimatedCard key={property.id} delay={index * 100}>
                   <PropertyCard property={property} />
-                </div>
+                </AnimatedCard>
               ))}
             </div>
           </div>

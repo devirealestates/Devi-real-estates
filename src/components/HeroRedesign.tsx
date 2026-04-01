@@ -40,13 +40,13 @@ const HeroRedesign: React.FC = () => {
       </div>
 
       {/* Search Form - Top Right */}
-      <div className="absolute top-24 right-4 sm:right-6 lg:right-8 z-20 w-full max-w-md px-4 sm:px-0">
-        <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-6 lg:right-8 z-20 w-full max-w-[340px] sm:max-w-md px-3 sm:px-0">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl p-5 sm:p-8">
           {/* Buy / Rent Tabs */}
-          <div className="flex gap-6 mb-6 border-b border-gray-200 pb-3">
+          <div className="flex gap-4 sm:gap-6 mb-4 sm:mb-6 border-b border-gray-200 pb-2 sm:pb-3">
             <button
               onClick={() => setActiveTab('buy')}
-              className={`text-base font-medium pb-1 transition-all ${
+              className={`text-sm sm:text-base font-medium pb-1 transition-all ${
                 activeTab === 'buy'
                   ? 'text-gray-900 border-b-2 border-orange-500'
                   : 'text-gray-400 hover:text-gray-600'
@@ -56,7 +56,7 @@ const HeroRedesign: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('rent')}
-              className={`text-base font-medium pb-1 transition-all ${
+              className={`text-sm sm:text-base font-medium pb-1 transition-all ${
                 activeTab === 'rent'
                   ? 'text-gray-900 border-b-2 border-orange-500'
                   : 'text-gray-400 hover:text-gray-600'
@@ -67,21 +67,21 @@ const HeroRedesign: React.FC = () => {
           </div>
 
           {/* Property Type Dropdown */}
-          <div className="relative mb-4">
-            <p className="text-xs text-gray-400 mb-1">I'm looking to {activeTab}</p>
+          <div className="relative mb-3 sm:mb-4">
+            <p className="text-[10px] sm:text-xs text-gray-400 mb-0.5 sm:mb-1">I'm looking to {activeTab}</p>
             <div
-              className="flex items-center gap-3 cursor-pointer border-b border-gray-200 pb-3"
+              className="flex items-center gap-2 sm:gap-3 cursor-pointer border-b border-gray-200 pb-2 sm:pb-3"
               onClick={() => {
                 setShowPropertyDropdown(!showPropertyDropdown);
                 setShowLocationDropdown(false);
                 setShowPriceDropdown(false);
               }}
             >
-              <Building2 className="w-5 h-5 text-gray-400" />
-              <span className={`flex-1 text-base ${propertyType ? 'text-gray-900' : 'text-gray-400'}`}>
+              <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+              <span className={`flex-1 text-sm sm:text-base ${propertyType ? 'text-gray-900' : 'text-gray-400'}`}>
                 {propertyType || 'Apartments'}
               </span>
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
             </div>
             {showPropertyDropdown && (
               <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-20 mt-1 max-h-48 overflow-auto">
@@ -102,21 +102,21 @@ const HeroRedesign: React.FC = () => {
           </div>
 
           {/* Location Dropdown */}
-          <div className="relative mb-4">
-            <p className="text-xs text-gray-400 mb-1">In the city of</p>
+          <div className="relative mb-3 sm:mb-4">
+            <p className="text-[10px] sm:text-xs text-gray-400 mb-0.5 sm:mb-1">In the city of</p>
             <div
-              className="flex items-center gap-3 cursor-pointer border-b border-gray-200 pb-3"
+              className="flex items-center gap-2 sm:gap-3 cursor-pointer border-b border-gray-200 pb-2 sm:pb-3"
               onClick={() => {
                 setShowLocationDropdown(!showLocationDropdown);
                 setShowPropertyDropdown(false);
                 setShowPriceDropdown(false);
               }}
             >
-              <MapPin className="w-5 h-5 text-gray-400" />
-              <span className={`flex-1 text-base ${location ? 'text-gray-900' : 'text-gray-400'}`}>
+              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+              <span className={`flex-1 text-sm sm:text-base ${location ? 'text-gray-900' : 'text-gray-400'}`}>
                 {location || 'Location'}
               </span>
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
             </div>
             {showLocationDropdown && (
               <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-20 mt-1 max-h-48 overflow-auto">
@@ -137,21 +137,21 @@ const HeroRedesign: React.FC = () => {
           </div>
 
           {/* Price Range Dropdown */}
-          <div className="relative mb-6">
-            <p className="text-xs text-gray-400 mb-1">In price range of</p>
+          <div className="relative mb-4 sm:mb-6">
+            <p className="text-[10px] sm:text-xs text-gray-400 mb-0.5 sm:mb-1">In price range of</p>
             <div
-              className="flex items-center gap-3 cursor-pointer border-b border-gray-200 pb-3"
+              className="flex items-center gap-2 sm:gap-3 cursor-pointer border-b border-gray-200 pb-2 sm:pb-3"
               onClick={() => {
                 setShowPriceDropdown(!showPriceDropdown);
                 setShowPropertyDropdown(false);
                 setShowLocationDropdown(false);
               }}
             >
-              <DollarSign className="w-5 h-5 text-gray-400" />
-              <span className={`flex-1 text-base ${priceRange ? 'text-gray-900' : 'text-gray-400'}`}>
+              <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+              <span className={`flex-1 text-sm sm:text-base ${priceRange ? 'text-gray-900' : 'text-gray-400'}`}>
                 {priceRange || '₹50,000 - ₹1,25,000'}
               </span>
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
             </div>
             {showPriceDropdown && (
               <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-20 mt-1 max-h-48 overflow-auto">
@@ -174,7 +174,7 @@ const HeroRedesign: React.FC = () => {
           {/* Search Button */}
           <button
             onClick={handleSearch}
-            className="w-full py-3.5 bg-white border-2 border-orange-500 text-orange-500 rounded-xl font-semibold text-base hover:bg-orange-500 hover:text-white transition-all duration-300"
+            className="w-full py-2.5 sm:py-3.5 bg-white border-2 border-orange-500 text-orange-500 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base hover:bg-orange-500 hover:text-white transition-all duration-300"
           >
             Search
           </button>

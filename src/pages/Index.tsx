@@ -7,7 +7,6 @@ import FeaturedListings from '@/components/FeaturedListings';
 import PopularCities from '@/components/PopularCities';
 import OurAgents from '@/components/OurAgents';
 import Testimonials from '@/components/Testimonials';
-import OurBlogs from '@/components/OurBlogs';
 import CTASection from '@/components/CTASection';
 import FooterRedesign from '@/components/FooterRedesign';
 
@@ -22,7 +21,6 @@ const Index = () => {
       <PopularCities />
       <OurAgents />
       <Testimonials />
-      <OurBlogs />
       <CTASection />
       <FooterRedesign />
     </div>

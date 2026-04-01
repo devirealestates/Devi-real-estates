@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const cities = [
@@ -33,6 +33,57 @@ const cities = [
     image: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
   },
 ];
+
+// Individual city card with scroll animation
+const CityCard: React.FC<{
+  city: typeof cities[0];
+  index: number;
+}> = ({ city, index }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      {
+        threshold: 0.1
+      }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div 
+      ref={cardRef}
+      className={`flex flex-col items-center text-center group cursor-pointer transition-all duration-700 ease-out ${
+        isVisible 
+          ? 'opacity-100 translate-y-0 scale-100' 
+          : 'opacity-0 translate-y-8 scale-95'
+      }`}
+      style={{ transitionDelay: `${index * 100}ms` }}
+    >
+      <div className="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 rounded-full overflow-hidden mb-4 ring-4 ring-transparent group-hover:ring-orange-500 transition-all duration-300">
+        <img
+          src={city.image}
+          alt={city.name}
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+        />
+      </div>
+      <h3 className="text-base sm:text-lg font-semibold mb-1">{city.name}</h3>
+      <p className="text-gray-400 text-sm">{city.listings}</p>
+    </div>
+  );
+};
 
 const PopularCities: React.FC = () => {
   const [startIndex, setStartIndex] = useState(0);
@@ -78,17 +129,11 @@ const PopularCities: React.FC = () => {
         {/* Cities Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 lg:gap-8">
           {visibleCities.map((city, index) => (
-            <div key={`${city.name}-${index}`} className="flex flex-col items-center text-center group cursor-pointer">
-              <div className="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 rounded-full overflow-hidden mb-4 ring-4 ring-transparent group-hover:ring-orange-500 transition-all duration-300">
-                <img
-                  src={city.image}
-                  alt={city.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-              </div>
-              <h3 className="text-base sm:text-lg font-semibold mb-1">{city.name}</h3>
-              <p className="text-gray-400 text-sm">{city.listings}</p>
-            </div>
+            <CityCard 
+              key={`${city.name}-${startIndex}-${index}`} 
+              city={city} 
+              index={index} 
+            />
           ))}
         </div>
       </div>

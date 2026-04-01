@@ -11,8 +11,8 @@ const BottomNavigation = () => {
   const { currentUser } = useAuth();
   const isMobile = useIsMobile();
 
-  // Only show on mobile
-  if (!isMobile) return null;
+  // Hide on mobile screens
+  if (isMobile) return null;
 
   const handleHomeClick = () => {
     if (location.pathname === '/') {
@@ -153,7 +153,7 @@ const BottomNavigation = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40 md:hidden">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40 hidden md:flex">
       <div className="flex items-center justify-around py-2 px-2">
         <button
           onClick={handleHomeClick}

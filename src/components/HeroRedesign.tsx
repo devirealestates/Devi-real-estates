@@ -182,7 +182,7 @@ const HeroRedesign: React.FC = () => {
       </div>
 
       {/* Heading - Bottom Left */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 sm:pb-16 lg:pb-20">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 sm:pb-16 lg:pb-20">
         <style>{`
           @keyframes heroSlideUp {
             0% {

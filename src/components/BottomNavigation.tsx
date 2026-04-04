@@ -6,13 +6,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const BottomNavigation = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { currentUser } = useAuth();
-  const isMobile = useIsMobile();
-
-  // Hide on mobile screens
-  if (isMobile) return null;
+  // Hide on all screen sizes
+  return null;
 
   const handleHomeClick = () => {
     if (location.pathname === '/') {

@@ -1,5 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+﻿import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { db } from '@/lib/firebase';
 import HeaderRedesign from '@/components/HeaderRedesign';
 import FooterRedesign from '@/components/FooterRedesign';
@@ -7,6 +6,7 @@ import { Search, MapPin, Home, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePropertyLocations } from '@/hooks/usePropertyLocations';
+import { useRealtimeProperties } from '@/hooks/useRealtimeProperties';
 
 interface Property {
   id: string;
@@ -25,9 +25,12 @@ interface Property {
 }
 
 const Rent = () => {
-  const [properties, setProperties] = useState<Property[]>([]);
+  // Debug: Log when component renders
+  console.log('[Rent] Component rendering');
+  
+  // Use real-time properties hook
+  const { properties: allProperties, loading } = useRealtimeProperties();
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('all');
   const [priceRange, setPriceRange] = useState('all');
@@ -36,12 +39,23 @@ const Rent = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
+  // Debug: Log mount/unmount
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    console.log('[Rent] Component MOUNTED');
+    return () => {
+      console.log('[Rent] Component UNMOUNTED');
+    };
   }, []);
 
+  // Filter for "For Rent" properties only - memoized to prevent infinite loop
+  const properties = useMemo(() => {
+    return allProperties.filter(property => 
+      ['For Rent', 'Flat for Rent', 'House for Rent', 'PG/Hostel'].includes(property.category)
+    );
+  }, [allProperties]);
+
   useEffect(() => {
-    fetchProperties();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   useEffect(() => {
@@ -67,25 +81,6 @@ const Rent = () => {
 
     return () => observer.disconnect();
   }, []);
-
-  const fetchProperties = async () => {
-    try {
-      const q = query(
-        collection(db, 'properties'),
-        where('category', 'in', ['For Rent', 'Flat for Rent', 'House for Rent', 'PG/Hostel'])
-      );
-      const querySnapshot = await getDocs(q);
-      const propertiesData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Property[];
-      setProperties(propertiesData);
-    } catch (error) {
-      console.error('Error fetching properties:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const filterProperties = () => {
     let filtered = properties;

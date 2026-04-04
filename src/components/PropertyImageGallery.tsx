@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, X, Maximize2, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Maximize2, Play, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { combineMediaItems, MediaItem, getEmbedUrl } from '@/lib/mediaUtils';
 
@@ -8,9 +8,21 @@ interface PropertyImageGalleryProps {
   images: string[];
   videos?: string[];
   title: string;
+  propertyId?: string;
+  isShortlisted?: boolean;
+  onToggleShortlist?: (e: React.MouseEvent) => void;
+  shortlistLoading?: boolean;
 }
 
-const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({ images, videos = [], title }) => {
+const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({ 
+  images, 
+  videos = [], 
+  title,
+  propertyId,
+  isShortlisted = false,
+  onToggleShortlist,
+  shortlistLoading = false
+}) => {
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
@@ -129,6 +141,26 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({ images, vid
         <div className="absolute top-2 right-2 bg-black/50 backdrop-blur-sm text-white px-2 py-1 rounded-md text-xs">
           {selectedMediaIndex + 1} / {mediaItems.length}
         </div>
+
+        {/* Wishlist Heart Icon */}
+        {onToggleShortlist && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleShortlist(e);
+            }}
+            disabled={shortlistLoading}
+            className="absolute top-2 left-2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white hover:scale-110 shadow-lg"
+          >
+            <Heart 
+              className={`w-5 h-5 transition-all duration-300 ${
+                isShortlisted 
+                  ? 'fill-red-500 text-red-500' 
+                  : 'text-gray-700'
+              }`} 
+            />
+          </button>
+        )}
       </div>
 
       {/* Compact Thumbnail Strip */}

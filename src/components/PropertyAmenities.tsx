@@ -40,39 +40,24 @@ const PropertyAmenities: React.FC<PropertyAmenitiesProps> = ({ amenities }) => {
     return CheckCircle;
   };
 
-  const getAmenityColor = (index: number) => {
-    const colors = [
-      'from-blue-500 to-cyan-500',
-      'from-purple-500 to-pink-500',
-      'from-green-500 to-emerald-500',
-      'from-orange-500 to-red-500',
-      'from-indigo-500 to-purple-500',
-      'from-teal-500 to-blue-500'
-    ];
-    return colors[index % colors.length];
-  };
-
   if (!amenities || amenities.length === 0) {
     return null;
   }
 
   return (
     <div className="font-body">
-      <h2 className="text-sm sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-8 font-premium mt-2 sm:mt-0">Amenities & Features</h2>
+      <h2 className="text-base sm:text-lg font-semibold text-slate-900 mb-4 sm:mb-5 font-premium">Amenities & Features</h2>
       
-      <div className="grid grid-cols-2 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
         {amenities.map((amenity, index) => {
           const IconComponent = getAmenityIcon(amenity);
-          const colorClass = getAmenityColor(index);
           
           return (
-            <div key={index} className="group cursor-pointer">
-              <div className="flex items-center gap-2 sm:gap-4 p-2 sm:p-5 bg-white rounded-lg sm:rounded-2xl shadow-elegant hover:shadow-soft transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
-                <div className={`flex-shrink-0 w-6 h-6 sm:w-12 sm:h-12 bg-gradient-to-br ${colorClass} rounded-lg sm:rounded-xl flex items-center justify-center shadow-soft`}>
-                  <IconComponent className="w-3 h-3 sm:w-6 sm:h-6 text-white" />
-                </div>
-                <span className="text-xs sm:text-base text-gray-900 font-medium group-hover:text-gray-700 transition-colors">{amenity}</span>
+            <div key={index} className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+              <div className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
+                <IconComponent className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
               </div>
+              <span className="text-xs sm:text-sm text-slate-900 font-medium">{amenity}</span>
             </div>
           );
         })}

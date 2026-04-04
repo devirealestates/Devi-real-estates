@@ -5,10 +5,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Edit, Trash2, Building, Home, Users, MapPin, Image as ImageIcon, Mail, BarChart3, Calendar, Settings, Menu, ChevronDown, Eye, Database } from 'lucide-react';
+import { LogOut, Plus, Edit, Trash2, Building, Home, Users, MapPin, Image as ImageIcon, Mail, BarChart3, Calendar, Settings, Menu, ChevronDown, Eye, Database, MessageSquare } from 'lucide-react';
 import AdminPropertyForm from '@/components/AdminPropertyForm';
 import TeamMemberForm from '@/components/TeamMemberForm';
 import StoryImageForm from '@/components/StoryImageForm';
+import CEOMessageForm from '@/components/CEOMessageForm';
+import CityManagementForm from '@/components/CityManagementForm';
 import AdminSidebar from '@/components/AdminSidebar';
 import AdminPropertyFilters from '@/components/AdminPropertyFilters';
 import { format, isValid, parseISO, startOfDay, endOfDay } from 'date-fns';
@@ -68,10 +70,18 @@ interface StoryImage {
   description?: string;
 }
 
+interface City {
+  id: string;
+  name: string;
+  image: string;
+  order?: number;
+}
+
 const AdminDashboard = () => {
   const [properties, setProperties] = useState<AdminProperty[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [storyImages, setStoryImages] = useState<StoryImage[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   
@@ -82,9 +92,12 @@ const AdminDashboard = () => {
   const [showPropertyForm, setShowPropertyForm] = useState(false);
   const [showTeamForm, setShowTeamForm] = useState(false);
   const [showStoryImageForm, setShowStoryImageForm] = useState(false);
+  const [showCEOMessageForm, setShowCEOMessageForm] = useState(false);
+  const [showCityForm, setShowCityForm] = useState(false);
   const [editingProperty, setEditingProperty] = useState<AdminProperty | null>(null);
   const [editingTeamMember, setEditingTeamMember] = useState<TeamMember | null>(null);
   const [editingStoryImage, setEditingStoryImage] = useState<StoryImage | null>(null);
+  const [editingCity, setEditingCity] = useState<City | null>(null);
   const [activeTab, setActiveTab] = useState('properties');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -98,7 +111,7 @@ const AdminDashboard = () => {
     fetchProperties();
     fetchTeamMembers();
     fetchStoryImages();
-
+    fetchCities();
   }, []);
 
   const fetchProperties = async () => {
@@ -172,6 +185,27 @@ const AdminDashboard = () => {
       toast({
         title: "Error",
         description: "Failed to fetch story images",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchCities = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'cities'));
+      const citiesData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as City[];
+      
+      // Sort by order field
+      citiesData.sort((a, b) => (a.order || 0) - (b.order || 0));
+      setCities(citiesData);
+    } catch (error) {
+      console.error('Error fetching cities:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch cities",
         variant: "destructive",
       });
     }
@@ -267,6 +301,25 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteCity = async (cityId: string) => {
+    if (window.confirm('Are you sure you want to delete this city?')) {
+      try {
+        await deleteDoc(doc(db, 'cities', cityId));
+        setCities(cities.filter(c => c.id !== cityId));
+        toast({
+          title: "Success",
+          description: "City deleted successfully",
+        });
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: "Failed to delete city",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   const handleEditProperty = (property: AdminProperty) => {
     setEditingProperty(property);
     setShowPropertyForm(true);
@@ -280,6 +333,11 @@ const AdminDashboard = () => {
   const handleEditStoryImage = (image: StoryImage) => {
     setEditingStoryImage(image);
     setShowStoryImageForm(true);
+  };
+
+  const handleEditCity = (city: City) => {
+    setEditingCity(city);
+    setShowCityForm(true);
   };
 
   const handleClosePropertyForm = () => {
@@ -297,6 +355,11 @@ const AdminDashboard = () => {
     setEditingStoryImage(null);
   };
 
+  const handleCloseCityForm = () => {
+    setShowCityForm(false);
+    setEditingCity(null);
+  };
+
   const handlePropertyFormSuccess = () => {
     fetchProperties();
     handleClosePropertyForm();
@@ -310,6 +373,11 @@ const AdminDashboard = () => {
   const handleStoryImageFormSuccess = () => {
     fetchStoryImages();
     handleCloseStoryImageForm();
+  };
+
+  const handleCityFormSuccess = () => {
+    fetchCities();
+    handleCloseCityForm();
   };
 
   const handleEmailContact = () => {
@@ -597,6 +665,15 @@ const AdminDashboard = () => {
                 >
                   <ImageIcon className="w-4 h-4 mr-3" />
                   Story Images
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  onClick={() => handleMobileNavClick('cities')}
+                  className={`w-full justify-start hover:bg-blue-50 ${activeTab === 'cities' ? 'bg-blue-50 text-blue-600 font-medium' : ''}`}
+                >
+                  <MapPin className="w-4 h-4 mr-3" />
+                  Popular Cities
                 </Button>
 
                 <Button
@@ -934,7 +1011,28 @@ const AdminDashboard = () => {
             )}
 
             {activeTab === 'team' && (
-              <Card className="bg-white/60 backdrop-blur-lg border border-white/30 shadow-xl w-full">
+              <>
+                <Card className="bg-white/60 backdrop-blur-lg border border-white/30 shadow-xl w-full mb-6">
+                  <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                    <CardTitle className="text-lg md:text-2xl bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                      CEO's Message
+                    </CardTitle>
+                    <Button 
+                      onClick={() => setShowCEOMessageForm(true)}
+                      className="bg-gradient-to-r from-orange-600 to-purple-600 hover:from-orange-700 hover:to-purple-700 text-white transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl text-sm rounded-xl"
+                    >
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Edit CEO Message
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 text-sm">
+                      Click "Edit CEO Message" to update the CEO's message, photo, and content displayed on the About page.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/60 backdrop-blur-lg border border-white/30 shadow-xl w-full">
                 <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
                   <CardTitle className="text-lg md:text-2xl bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                     Team Members ({teamMembers.length})
@@ -1005,6 +1103,7 @@ const AdminDashboard = () => {
                   )}
                 </CardContent>
               </Card>
+              </>
             )}
 
             {activeTab === 'story' && (
@@ -1080,6 +1179,84 @@ const AdminDashboard = () => {
                       >
                         <Plus className="w-4 h-4 mr-2" />
                         Add Story Image
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {activeTab === 'cities' && (
+              <Card className="bg-white/60 backdrop-blur-lg border border-white/30 shadow-xl w-full">
+                <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                  <CardTitle className="text-lg md:text-2xl bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                    Popular Cities ({cities.length})
+                  </CardTitle>
+                  <Button 
+                    onClick={() => setShowCityForm(true)}
+                    className="bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-700 hover:to-pink-700 text-white transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl text-sm rounded-xl"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add City
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {cities.length > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 w-full">
+                      {cities.map((city, index) => (
+                        <div 
+                          key={city.id} 
+                          className="bg-white/70 backdrop-blur-sm border border-white/30 rounded-xl md:rounded-2xl p-4 md:p-6 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 animate-in fade-in-up w-full"
+                          style={{animationDelay: `${index * 100}ms`}}
+                        >
+                          <div className="text-center">
+                            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden mx-auto mb-3 md:mb-4 ring-4 ring-white/50 shadow-xl">
+                              <img 
+                                src={city.image}
+                                alt={city.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=400';
+                                }}
+                              />
+                            </div>
+                            <h3 className="font-bold text-gray-900 text-sm md:text-base mb-1 md:mb-2">{city.name}</h3>
+                            <p className="text-gray-400 text-xs mb-3 md:mb-4">Order: {city.order || 0}</p>
+                            <div className="flex justify-center space-x-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleEditCity(city)}
+                                className="p-1 h-7 w-7 md:h-auto md:w-auto transition-all duration-300 hover:scale-110 rounded-lg md:rounded-xl bg-white/60 backdrop-blur-sm"
+                              >
+                                <Edit className="w-3 h-3" />
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleDeleteCity(city.id)}
+                                className="p-1 h-7 w-7 md:h-auto md:w-auto text-red-600 hover:text-red-700 transition-all duration-300 hover:scale-110 rounded-lg md:rounded-xl bg-white/60 backdrop-blur-sm"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full mx-auto mb-6 flex items-center justify-center">
+                        <MapPin className="w-8 h-8 md:w-10 md:h-10 text-gray-500" />
+                      </div>
+                      <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-3">No Cities Added</h3>
+                      <p className="text-gray-600 mb-6 text-sm md:text-base">Start by adding your first popular city to showcase on the homepage.</p>
+                      <Button 
+                        className="bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-700 hover:to-pink-700 text-white transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl rounded-xl"
+                        onClick={() => setShowCityForm(true)}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add City
                       </Button>
                     </div>
                   )}
@@ -1280,6 +1457,27 @@ const AdminDashboard = () => {
           onClose={handleCloseStoryImageForm}
           onSuccess={handleStoryImageFormSuccess}
           image={editingStoryImage}
+        />
+      )}
+
+      {showCEOMessageForm && (
+        <CEOMessageForm
+          onClose={() => setShowCEOMessageForm(false)}
+          onSuccess={() => {
+            setShowCEOMessageForm(false);
+            toast({
+              title: "Success",
+              description: "CEO message has been updated",
+            });
+          }}
+        />
+      )}
+
+      {showCityForm && (
+        <CityManagementForm
+          onClose={handleCloseCityForm}
+          onSuccess={handleCityFormSuccess}
+          editingCity={editingCity}
         />
       )}
     </div>

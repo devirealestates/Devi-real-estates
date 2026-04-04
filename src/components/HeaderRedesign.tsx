@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Menu, X, ShoppingCart, ChevronDown, User, Home, Info, Building2, Calculator, Heart, Phone, ArrowRight } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import ShortlistSidebar from './ShortlistSidebar';
 
@@ -13,6 +13,11 @@ const HeaderRedesign: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Debug log for location changes
+  useEffect(() => {
+    console.log('[HeaderRedesign] Current pathname:', location.pathname);
+  }, [location.pathname]);
 
   const isHomePage = location.pathname === '/';
 
@@ -34,36 +39,33 @@ const HeaderRedesign: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Prevent body scroll when mobile menu is open
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setShowPagesDropdown(false);
+  }, [location.pathname]);
+
+  // Prevent body scroll when mobile menu is open - simplified approach
   useEffect(() => {
     if (isMobileMenuOpen) {
-      const scrollY = window.scrollY;
       document.body.style.overflow = 'hidden';
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.left = '0';
-      document.body.style.right = '0';
     } else {
-      const scrollY = document.body.style.top;
       document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      window.scrollTo(0, parseInt(scrollY || '0') * -1);
-      setShowPagesDropdown(false);
     }
     return () => {
       document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
     };
   }, [isMobileMenuOpen]);
+
+  // Helper function for mobile navigation
+  const handleMobileNavigation = (path: string) => {
+    // Reset body styles immediately
+    document.body.style.overflow = '';
+    setIsMobileMenuOpen(false);
+    setShowPagesDropdown(false);
+    // Navigate after state is reset
+    navigate(path);
+  };
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -118,19 +120,15 @@ const HeaderRedesign: React.FC = () => {
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.name}
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate(link.path);
-                }}
-                href={link.path}
+                to={link.path}
                 className={`text-lg font-light font-display ${textColor} ${hoverColor} transition-colors cursor-pointer ${
                   location.pathname === link.path ? 'text-orange-500' : ''
                 }`}
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
 
             {/* Pages Dropdown */}
@@ -144,18 +142,14 @@ const HeaderRedesign: React.FC = () => {
               {showPagesDropdown && (
                 <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
                   {pagesLinks.map((link) => (
-                    <a
+                    <Link
                       key={link.name}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigate(link.path);
-                        setShowPagesDropdown(false);
-                      }}
-                      href={link.path}
+                      to={link.path}
+                      onClick={() => setShowPagesDropdown(false)}
                       className="block px-4 py-2.5 text-sm text-gray-600 hover:bg-orange-50 hover:text-orange-500 transition-colors"
                     >
                       {link.name}
-                    </a>
+                    </Link>
                   ))}
                 </div>
               )}
@@ -212,10 +206,7 @@ const HeaderRedesign: React.FC = () => {
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-100">
           <div
             className="flex items-center cursor-pointer"
-            onClick={() => {
-              navigate('/');
-              setIsMobileMenuOpen(false);
-            }}
+            onClick={() => handleMobileNavigation('/')}
           >
             <img 
               src="/dre-logo.png" 
@@ -225,7 +216,10 @@ const HeaderRedesign: React.FC = () => {
           </div>
           <button
             className="w-10 h-10 flex items-center justify-center"
-            onClick={() => setIsMobileMenuOpen(false)}
+            onClick={() => {
+              document.body.style.overflow = '';
+              setIsMobileMenuOpen(false);
+            }}
           >
             <X className="w-7 h-7 text-gray-900" />
           </button>
@@ -236,32 +230,22 @@ const HeaderRedesign: React.FC = () => {
           <div className="px-6 pt-8 pb-20">
             <nav>
               {/* Home */}
-              <a
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate('/');
-                  setIsMobileMenuOpen(false);
-                }}
-                href="/"
-                className="block py-4 text-2xl text-gray-900 hover:text-orange-500 transition-colors border-b border-gray-100"
+              <button
+                onClick={() => handleMobileNavigation('/')}
+                className="block w-full text-left py-4 text-2xl text-gray-900 hover:text-orange-500 transition-colors border-b border-gray-100"
                 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}
               >
                 Home
-              </a>
+              </button>
 
               {/* About */}
-              <a
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate('/about');
-                  setIsMobileMenuOpen(false);
-                }}
-                href="/about"
-                className="block py-4 text-2xl text-gray-900 hover:text-orange-500 transition-colors border-b border-gray-100"
+              <button
+                onClick={() => handleMobileNavigation('/about')}
+                className="block w-full text-left py-4 text-2xl text-gray-900 hover:text-orange-500 transition-colors border-b border-gray-100"
                 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}
               >
                 About
-              </a>
+              </button>
 
               {/* Properties Dropdown */}
               <div className="border-b border-gray-100">
@@ -277,111 +261,75 @@ const HeaderRedesign: React.FC = () => {
                 
                 <div className={`overflow-hidden transition-all duration-300 ${showPagesDropdown ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
                   <div className="pb-3 space-y-0">
-                    <a
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigate('/buy');
-                        setIsMobileMenuOpen(false);
-                      }}
-                      href="/buy"
-                      className="block py-3 pl-4 text-xl text-gray-600 hover:text-orange-500 transition-colors border-b border-gray-50"
+                    <button
+                      onClick={() => handleMobileNavigation('/buy')}
+                      className="block w-full text-left py-3 pl-4 text-xl text-gray-600 hover:text-orange-500 transition-colors border-b border-gray-50"
                       style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400 }}
                     >
                       Buy
-                    </a>
-                    <a
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigate('/rent');
-                        setIsMobileMenuOpen(false);
-                      }}
-                      href="/rent"
-                      className="block py-3 pl-4 text-xl text-gray-600 hover:text-orange-500 transition-colors border-b border-gray-50"
+                    </button>
+                    <button
+                      onClick={() => handleMobileNavigation('/rent')}
+                      className="block w-full text-left py-3 pl-4 text-xl text-gray-600 hover:text-orange-500 transition-colors border-b border-gray-50"
                       style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400 }}
                     >
                       Rent
-                    </a>
-                    <a
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigate('/commercial');
-                        setIsMobileMenuOpen(false);
-                      }}
-                      href="/commercial"
-                      className="block py-3 pl-4 text-xl text-gray-600 hover:text-orange-500 transition-colors border-b border-gray-50"
+                    </button>
+                    <button
+                      onClick={() => handleMobileNavigation('/commercial')}
+                      className="block w-full text-left py-3 pl-4 text-xl text-gray-600 hover:text-orange-500 transition-colors border-b border-gray-50"
                       style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400 }}
                     >
                       Commercial
-                    </a>
-                    <a
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigate('/pg-hostels');
-                        setIsMobileMenuOpen(false);
-                      }}
-                      href="/pg-hostels"
-                      className="block py-3 pl-4 text-xl text-gray-600 hover:text-orange-500 transition-colors border-b border-gray-50"
+                    </button>
+                    <button
+                      onClick={() => handleMobileNavigation('/pg-hostels')}
+                      className="block w-full text-left py-3 pl-4 text-xl text-gray-600 hover:text-orange-500 transition-colors border-b border-gray-50"
                       style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400 }}
                     >
                       PG/Hostels
-                    </a>
-                    <a
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigate('/land');
-                        setIsMobileMenuOpen(false);
-                      }}
-                      href="/land"
-                      className="block py-3 pl-4 text-xl text-gray-600 hover:text-orange-500 transition-colors"
+                    </button>
+                    <button
+                      onClick={() => handleMobileNavigation('/land')}
+                      className="block w-full text-left py-3 pl-4 text-xl text-gray-600 hover:text-orange-500 transition-colors"
                       style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 400 }}
                     >
                       Land
-                    </a>
+                    </button>
                   </div>
                 </div>
               </div>
 
               {/* EMI Calculator */}
-              <a
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate('/emi-calculator');
-                  setIsMobileMenuOpen(false);
-                }}
-                href="/emi-calculator"
-                className="block py-4 text-2xl text-gray-900 hover:text-orange-500 transition-colors border-b border-gray-100"
+              <button
+                onClick={() => handleMobileNavigation('/emi-calculator')}
+                className="block w-full text-left py-4 text-2xl text-gray-900 hover:text-orange-500 transition-colors border-b border-gray-100"
                 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}
               >
                 EMI Calculator
-              </a>
+              </button>
 
               {/* Shortlist */}
-              <a
-                onClick={(e) => {
-                  e.preventDefault();
-                  setIsShortlistOpen(true);
+              <button
+                onClick={() => {
+                  document.body.style.overflow = '';
                   setIsMobileMenuOpen(false);
+                  setIsShortlistOpen(true);
                 }}
-                href="/shortlist"
-                className="block py-4 text-2xl text-gray-900 hover:text-orange-500 transition-colors border-b border-gray-100"
+                className="block w-full text-left py-4 text-2xl text-gray-900 hover:text-orange-500 transition-colors border-b border-gray-100"
                 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}
               >
                 Shortlist
-              </a>
+              </button>
 
               {/* Contact */}
-              <a
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate('/contact');
-                  setIsMobileMenuOpen(false);
-                }}
-                href="/contact"
-                className="block py-4 text-2xl text-gray-900 hover:text-orange-500 transition-colors border-b border-gray-100"
+              <button
+                onClick={() => handleMobileNavigation('/contact')}
+                className="block w-full text-left py-4 text-2xl text-gray-900 hover:text-orange-500 transition-colors border-b border-gray-100"
                 style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}
               >
                 Contact
-              </a>
+              </button>
             </nav>
           </div>
         </div>

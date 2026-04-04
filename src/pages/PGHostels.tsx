@@ -1,5 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
-import { collection, onSnapshot } from 'firebase/firestore';
+﻿import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { db } from '@/lib/firebase';
 import HeaderRedesign from '@/components/HeaderRedesign';
 import FooterRedesign from '@/components/FooterRedesign';
@@ -7,6 +6,7 @@ import { Search, MapPin, Users, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePropertyLocations } from '@/hooks/usePropertyLocations';
+import { useRealtimeProperties } from '@/hooks/useRealtimeProperties';
 
 interface Property {
   id: string;
@@ -26,9 +26,9 @@ interface Property {
 }
 
 const PGHostels = () => {
-  const [properties, setProperties] = useState<Property[]>([]);
+  // Use real-time properties hook
+  const { properties: allProperties, loading } = useRealtimeProperties();
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('all');
   const [priceRange, setPriceRange] = useState('all');
@@ -37,17 +37,18 @@ const PGHostels = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+  // Filter for PG/Hostels properties only - memoized to prevent infinite loop
+  const properties = useMemo(() => {
+    return allProperties.filter(property => 
+      property.category === 'PG/Hostels' ||
+      property.type?.toLowerCase().includes('pg') ||
+      property.type?.toLowerCase().includes('hostel') ||
+      property.type?.toLowerCase().includes('accommodation')
+    );
+  }, [allProperties]);
 
   useEffect(() => {
-    const unsubscribe = setupRealtimeListener();
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   useEffect(() => {
@@ -73,57 +74,6 @@ const PGHostels = () => {
 
     return () => observer.disconnect();
   }, []);
-
-  const setupRealtimeListener = () => {
-    try {
-      setLoading(true);
-      const propertiesCollection = collection(db, 'properties');
-      
-      const unsubscribe = onSnapshot(
-        propertiesCollection,
-        { includeMetadataChanges: true },
-        (querySnapshot) => {
-          const propertiesData = querySnapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-              id: doc.id,
-              title: data.title || '',
-              price: data.price || '',
-              location: data.location || '',
-              type: data.type || '',
-              category: data.category || '',
-              subCategory: data.subCategory || '',
-              images: Array.isArray(data.images) ? data.images.filter((img: string) => 
-                img && typeof img === 'string' && !img.startsWith('blob:')
-              ) : [],
-              bedrooms: data.bedrooms,
-              bathrooms: data.bathrooms,
-              area: data.area || 'N/A',
-              description: data.description || '',
-              featured: data.featured || false
-            };
-          }).filter(property => {
-            return property.category === 'PG/Hostels' ||
-                   property.type?.toLowerCase().includes('pg') ||
-                   property.type?.toLowerCase().includes('hostel') ||
-                   property.type?.toLowerCase().includes('accommodation');
-          }) as Property[];
-          
-          setProperties(propertiesData);
-          setLoading(false);
-        },
-        (error: any) => {
-          console.error('Error in PG properties real-time listener:', error);
-          setLoading(false);
-        }
-      );
-      
-      return unsubscribe;
-    } catch (error: any) {
-      console.error('Error setting up PG properties real-time listener:', error);
-      setLoading(false);
-    }
-  };
 
   const filterProperties = () => {
     let filtered = properties;

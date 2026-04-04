@@ -8,6 +8,7 @@ import { LocationProvider } from "@/contexts/LocationContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import BottomNavigation from "@/components/BottomNavigation";
 import NetworkStatus from "@/components/NetworkStatus";
+import ScrollToTop from "@/components/ScrollToTop";
 
 // Pages
 import Index from "./pages/Index";
@@ -40,40 +41,41 @@ const App = () => {
         <AuthProvider>
           <LocationProvider>
             <BrowserRouter>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/buy" element={<Buy />} />
-                    <Route path="/rent" element={<Rent />} />
-                    <Route path="/land" element={<Land />} />
-                    <Route path="/commercial" element={<Commercial />} />
-                    <Route path="/pg-hostels" element={<PGHostels />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/shortlist" element={<Shortlist />} />
-                    <Route path="/emi-calculator" element={<EMICalculator />} />
-                    <Route path="/privacypolicy" element={<PrivacyPolicy />} />
-                    <Route path="/property/:id" element={<PropertyDetails />} />
-                    <Route path="/admin/login" element={<AdminLogin />} />
-                    <Route 
-                      path="/admin/dashboard" 
-                      element={
-                        <ProtectedRoute>
-                          <AdminDashboard />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                  <BottomNavigation />
-                  <NetworkStatus />
-              </BrowserRouter>
-            </LocationProvider>
-          </AuthProvider>
-        </TooltipProvider>
-      </QueryClientProvider>
+              <ScrollToTop />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/buy" element={<Buy />} />
+                <Route path="/rent" element={<Rent />} />
+                <Route path="/land" element={<Land />} />
+                <Route path="/commercial" element={<Commercial />} />
+                <Route path="/pg-hostels" element={<PGHostels />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/shortlist" element={<Shortlist />} />
+                <Route path="/emi-calculator" element={<EMICalculator />} />
+                <Route path="/privacypolicy" element={<PrivacyPolicy />} />
+                <Route path="/property/:id" element={<PropertyDetails />} />
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route 
+                  path="/admin/dashboard" 
+                  element={
+                    <ProtectedRoute>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <BottomNavigation />
+              <NetworkStatus />
+            </BrowserRouter>
+          </LocationProvider>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 };
 

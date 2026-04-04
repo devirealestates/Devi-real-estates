@@ -36,18 +36,22 @@ const PropertyContact: React.FC<PropertyContactProps> = ({
   };
 
   const handleWhatsAppContact = () => {
-    // Use the specified phone number: 8985816481
-    const phoneNumber = '8985816481';
-    const message = encodeURIComponent('Hello, I\'m interested in your property listed on the site.');
-    const whatsappUrl = `https://wa.me/91${phoneNumber}?text=${message}`;
+    // Use the specified phone number: 9912991671
+    const phoneNumber = '919912991671';
+    const message = encodeURIComponent(
+      `Hi, I'm interested in "${propertyTitle}" in ${locationForMessage}. Please share more details.`
+    );
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
     window.open(whatsappUrl, '_blank');
   };
 
   const handleEmailContact = () => {
-    // Use the specified email: snsnarayanac@gmail.com
-    const emailAddress = 'snsnarayanac@gmail.com';
-    const subject = encodeURIComponent('Property Inquiry – Sent via Website');
-    const body = encodeURIComponent('Property Inquiry – Sent via Website');
+    // Use the specified email: info.devirealestates@gmail.com
+    const emailAddress = 'info.devirealestates@gmail.com';
+    const subject = encodeURIComponent(`Property Inquiry - ${propertyTitle}`);
+    const body = encodeURIComponent(
+      `Hi,\n\nI'm interested in the property "${propertyTitle}" located in ${locationForMessage}.\n\nPlease share more details.\n\nThank you.`
+    );
     const emailUrl = `mailto:${emailAddress}?subject=${subject}&body=${body}`;
     window.location.href = emailUrl;
   };
@@ -58,8 +62,27 @@ const PropertyContact: React.FC<PropertyContactProps> = ({
       toast.error('Please fill in required fields');
       return;
     }
-    toast.success('Thank you! We will contact you soon.');
-    setFormData({ name: '', phone: '', email: '', message: formData.message });
+    
+    // Send to WhatsApp with inquiry details
+    const phoneNumber = '919912991671';
+    const message = encodeURIComponent(
+      `*Property Inquiry*\n\n` +
+      `Name: ${formData.name}\n` +
+      `Phone: ${formData.phone}\n` +
+      `Email: ${formData.email || 'Not provided'}\n\n` +
+      `Message: ${formData.message}`
+    );
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+    window.open(whatsappUrl, '_blank');
+    
+    toast.success('Opening WhatsApp...');
+    // Reset form
+    setFormData({ 
+      name: '', 
+      phone: '', 
+      email: '', 
+      message: `Hi, I'm interested in "${propertyTitle}" in ${locationForMessage}. Please share more details.`
+    });
   };
 
   return (
@@ -97,19 +120,18 @@ const PropertyContact: React.FC<PropertyContactProps> = ({
         </div>
       )}
 
-      {/* Quick Contact Buttons - Styled smaller with padding and pulled down */}
+      {/* Quick Contact Buttons - Pill Shaped with Borders */}
       <div className="grid grid-cols-2 gap-3 mt-6">
         <Button
           onClick={handleWhatsAppContact}
-          className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-xl py-2 px-3 text-sm shadow-soft transition-all duration-200 transform hover:scale-105"
+          className="bg-transparent hover:bg-green-50 text-green-600 border-2 border-green-600 rounded-full py-3 text-sm font-semibold transition-all duration-200"
         >
           <MessageCircle className="w-4 h-4 mr-2" />
           WhatsApp
         </Button>
         <Button
           onClick={handleEmailContact}
-          variant="outline"
-          className="rounded-xl py-2 px-3 text-sm border-gray-200 hover:bg-gray-50 shadow-elegant transition-all duration-200 transform hover:scale-105"
+          className="bg-transparent hover:bg-blue-50 text-blue-600 border-2 border-blue-600 rounded-full py-3 text-sm font-semibold transition-all duration-200"
         >
           <Mail className="w-4 h-4 mr-2" />
           Email
@@ -154,7 +176,7 @@ const PropertyContact: React.FC<PropertyContactProps> = ({
           />
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl py-3 shadow-soft transition-all duration-200 transform hover:scale-105"
+            className="w-full bg-transparent hover:bg-emerald-50 text-emerald-600 border-2 border-emerald-600 rounded-full py-3 transition-all duration-200 font-semibold"
           >
             <Send className="w-4 h-4 mr-2" />
             Send Inquiry

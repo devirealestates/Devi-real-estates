@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import HeaderRedesign from '@/components/HeaderRedesign';
 import FooterRedesign from '@/components/FooterRedesign';
@@ -14,20 +14,79 @@ interface TeamMember {
   image: string;
 }
 
+interface CEOMessage {
+  title: string;
+  greeting: string;
+  paragraph1: string;
+  paragraph2: string;
+  paragraph3: string;
+  image: string;
+}
+
 const About = () => {
   const navigate = useNavigate();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [ceoMessage, setCEOMessage] = useState<CEOMessage | null>(null);
   const [loading, setLoading] = useState(true);
-  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const sectionRefs = useRef<(HTMLElement | null)[]>([]);
   const [visibleSections, setVisibleSections] = useState<boolean[]>([false, false, false, false, false, false, false]);
 
   useEffect(() => {
-    fetchTeamMembers();
+    // Subscribe to real-time updates from the teamMembers collection
+    console.log('About page: Setting up team members listener...');
+    const q = query(collection(db, 'teamMembers'), orderBy('createdAt', 'asc'));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      console.log('About page: Received team members update, count:', snapshot.docs.length);
+      const teamData = snapshot.docs.map(doc => {
+        const data = doc.data();
+        console.log('Team member data:', { id: doc.id, name: data.name, role: data.role });
+        return {
+          id: doc.id,
+          name: data.name || 'Unknown',
+          role: data.role || 'Team Member',
+          description: data.description || '',
+          image: data.image || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400'
+        };
+      }) as TeamMember[];
+      
+      console.log('About page: Setting team members state, count:', teamData.length);
+      setTeamMembers(teamData);
+      setLoading(false);
+    }, (error) => {
+      console.error('Error fetching team members:', error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    const observers = sectionRefs.current.map((ref, index) => {
-      if (!ref) return null;
+    // Fetch CEO message
+    const fetchCEOMessage = async () => {
+      try {
+        const docRef = doc(db, 'siteContent', 'ceoMessage');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setCEOMessage(docSnap.data() as CEOMessage);
+        }
+      } catch (error) {
+        console.error('Error fetching CEO message:', error);
+      }
+    };
+
+    fetchCEOMessage();
+  }, []);
+
+  useEffect(() => {
+    const observers: (IntersectionObserver | null)[] = [];
+    
+    sectionRefs.current.forEach((ref, index) => {
+      if (!ref) {
+        observers.push(null);
+        return;
+      }
+      
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
@@ -43,41 +102,21 @@ const About = () => {
         },
         { threshold: 0.2 }
       );
+      
       observer.observe(ref);
-      return observer;
+      observers.push(observer);
     });
 
     return () => {
       observers.forEach(observer => observer?.disconnect());
     };
-  }, []);
-
-  const fetchTeamMembers = async () => {
-    try {
-      const collectionRef = collection(db, 'teamMembers');
-      const querySnapshot = await getDocs(collectionRef);
-      const teamData = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          name: data.name || 'Unknown',
-          role: data.role || 'Team Member',
-          description: data.description || '',
-          image: data.image || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400'
-        };
-      }) as TeamMember[];
-      setTeamMembers(teamData);
-    } catch (error) {
-      console.error('Error fetching team members:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [teamMembers, ceoMessage]);
 
   const stats = [
-    { value: '48+', label: 'Our core team spread all over the world.' },
-    { value: '436+', label: 'Projects We Completed daily like to us.' },
-    { value: '12+', label: 'District/Cities represented in to sit agency.' },
+    { value: '10+', label: 'Properties Listed' },
+    { value: '20+', label: 'Happy Clients' },
+    { value: '12+', label: 'Areas Covered' },
+    { value: '100%', label: 'Genuine & Trusted Properties' },
   ];
 
   const values = [
@@ -113,12 +152,8 @@ const About = () => {
     },
   ];
 
-  const agents = teamMembers.length > 0 ? teamMembers.slice(0, 4) : [
-    { id: '1', name: 'Michael Rodriguez', role: 'Agent', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400' },
-    { id: '2', name: 'Andrew Johnson', role: 'Broker', image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400' },
-    { id: '3', name: 'Esther Howard', role: 'Broker', image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=400' },
-    { id: '4', name: 'Bessie Cooper', role: 'Marketing Expert', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400' },
-  ];
+  const agents = teamMembers.slice(0, 4);
+  console.log('About page: agents array length:', agents.length, 'teamMembers length:', teamMembers.length, 'loading:', loading);
 
   const jobs = [
     { title: 'Real Estate Broker', type: 'Full Time', location: 'Remote', salary: '$200-40K' },
@@ -200,16 +235,13 @@ const About = () => {
       {/* Stats Section */}
       <section className="py-12 bg-white border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-            <p className="text-gray-500 text-sm font-medium">In Numbers</p>
-            <div className="flex flex-col sm:flex-row gap-8 lg:gap-16">
-              {stats.map((stat, index) => (
-                <div key={index} className="text-center sm:text-left">
-                  <p className="text-4xl sm:text-5xl font-light text-orange-500 mb-2">{stat.value}</p>
-                  <p className="text-gray-500 text-sm max-w-[200px]">{stat.label}</p>
-                </div>
-              ))}
-            </div>
+          <div className="flex flex-col sm:flex-row sm:justify-between gap-8">
+            {stats.map((stat, index) => (
+              <div key={index} className="text-center sm:text-left">
+                <p className="text-4xl sm:text-5xl font-light text-orange-500 mb-2">{stat.value}</p>
+                <p className="text-gray-500 text-sm max-w-[200px]">{stat.label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -300,9 +332,12 @@ const About = () => {
               className={`about-reveal ${visibleSections[3] ? 'visible' : ''}`}
             >
               <img 
-                src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600" 
+                src={ceoMessage?.image || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600'} 
                 alt="CEO" 
                 className="w-full max-w-md mx-auto lg:mx-0 rounded-2xl shadow-lg"
+                onError={(e) => {
+                  e.currentTarget.src = 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600';
+                }}
               />
             </div>
             <div 
@@ -313,18 +348,24 @@ const About = () => {
                 className="text-3xl sm:text-4xl font-medium text-gray-900 mb-6"
                 style={{ fontFamily: "'DM Sans', sans-serif" }}
               >
-                CEO's Words
+                {ceoMessage?.title || "CEO's Words"}
               </h2>
-              <p className="text-gray-600 font-medium mb-4">Dear Devi Real Estates Community,</p>
-              <p className="text-gray-500 text-sm leading-relaxed mb-4">
-                It is with great pride and dedication that I lead our team at Devi Real Estates.
-              </p>
-              <p className="text-gray-500 text-sm leading-relaxed mb-4">
-                Every decision we make, every project we undertake, is guided by our commitment to excellence, innovation, and sustainability. We strive to create spaces that inspire, uplift, and stand the test of time.
-              </p>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                Thank you for entrusting us with your dreams and aspirations.
-              </p>
+              <p className="text-gray-600 font-medium mb-4">{ceoMessage?.greeting || 'Dear Devi Real Estates Community,'}</p>
+              {ceoMessage?.paragraph1 && (
+                <p className="text-gray-500 text-sm leading-relaxed mb-4">
+                  {ceoMessage.paragraph1}
+                </p>
+              )}
+              {ceoMessage?.paragraph2 && (
+                <p className="text-gray-500 text-sm leading-relaxed mb-4">
+                  {ceoMessage.paragraph2}
+                </p>
+              )}
+              {ceoMessage?.paragraph3 && (
+                <p className="text-gray-500 text-sm leading-relaxed">
+                  {ceoMessage.paragraph3}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -351,38 +392,45 @@ const About = () => {
               View All Agents <ArrowRight className="w-4 h-4" />
             </button>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {(loading ? Array(4).fill(null) : agents).map((agent, index) => (
-              <div 
-                key={agent?.id || index}
-                className={`about-reveal ${visibleSections[4] ? 'visible' : ''}`}
-                style={{ animationDelay: `${0.2 + index * 0.1}s` }}
-              >
-                {loading ? (
-                  <div className="animate-pulse">
-                    <div className="aspect-[3/4] bg-gray-200 rounded-xl mb-4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+          
+          {loading ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="aspect-[3/4] bg-gray-200 rounded-xl mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              ))}
+            </div>
+          ) : agents.length > 0 ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+              {agents.map((agent, index) => (
+                <div 
+                  key={agent.id}
+                  className={`about-reveal ${visibleSections[4] ? 'visible' : ''}`}
+                  style={{ animationDelay: `${0.2 + index * 0.1}s` }}
+                >
+                  <div className="aspect-[3/4] rounded-xl overflow-hidden mb-4">
+                    <img 
+                      src={agent.image} 
+                      alt={agent.name}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400';
+                      }}
+                    />
                   </div>
-                ) : (
-                  <>
-                    <div className="aspect-[3/4] rounded-xl overflow-hidden mb-4">
-                      <img 
-                        src={agent.image} 
-                        alt={agent.name}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                        onError={(e) => {
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400';
-                        }}
-                      />
-                    </div>
-                    <h3 className="font-semibold text-gray-900 mb-1">{agent.name}</h3>
-                    <p className="text-gray-500 text-sm">{agent.role}</p>
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
+                  <h3 className="font-semibold text-gray-900 mb-1">{agent.name}</h3>
+                  <p className="text-gray-500 text-sm">{agent.role}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No agents available at the moment. Add agents from the admin panel.</p>
+            </div>
+          )}
         </div>
       </section>
 

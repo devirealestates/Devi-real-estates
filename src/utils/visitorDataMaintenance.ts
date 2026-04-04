@@ -18,7 +18,7 @@ export class VisitorDataMaintenanceService {
   private cleanupInterval: NodeJS.Timeout | null = null;
   private readonly CLEANUP_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
   private readonly SESSION_RETENTION_DAYS = 30; // Keep visitor sessions for 30 days
-  private readonly MAX_SESSIONS = 10000; // Maximum number of visitor sessions to keep
+  private readonly MAX_SESSIONS = 9500; // Maximum number of visitor sessions to keep (Firestore limit is 10000)
 
   static getInstance(): VisitorDataMaintenanceService {
     if (!VisitorDataMaintenanceService.instance) {

@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { db } from '@/lib/firebase';
 import HeaderRedesign from '@/components/HeaderRedesign';
 import FooterRedesign from '@/components/FooterRedesign';
 import { Button } from '@/components/ui/button';
 import { Search, MapPin, Home, ChevronDown, ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePropertyLocations } from '@/hooks/usePropertyLocations';
+import { useRealtimeProperties } from '@/hooks/useRealtimeProperties';
 
 interface Property {
   id: string;
@@ -26,23 +26,38 @@ interface Property {
 }
 
 const Buy = () => {
-  const [properties, setProperties] = useState<Property[]>([]);
+  // Debug: Log when component renders
+  console.log('[Buy] Component rendering');
+  
+  // Use real-time properties hook
+  const { properties: allProperties, loading } = useRealtimeProperties();
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('all');
   const [priceRange, setPriceRange] = useState('all');
   const navigate = useNavigate();
+  const location = useLocation();
   const { locationData } = usePropertyLocations();
   const sectionRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
+  // Debug log for mount/unmount and location
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    console.log('[Buy] Component MOUNTED at path:', location.pathname);
+    return () => {
+      console.log('[Buy] Component UNMOUNTED');
+    };
   }, []);
 
+  // Filter for "For Sale" properties only - memoized to prevent infinite loop
+  const properties = useMemo(() => {
+    return allProperties.filter(property => 
+      ['For Sale', 'Land for Sale', 'Flat for Sale', 'House for Sale'].includes(property.category)
+    );
+  }, [allProperties]);
+
   useEffect(() => {
-    fetchProperties();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   useEffect(() => {
@@ -68,25 +83,6 @@ const Buy = () => {
 
     return () => observer.disconnect();
   }, []);
-
-  const fetchProperties = async () => {
-    try {
-      const q = query(
-        collection(db, 'properties'),
-        where('category', 'in', ['For Sale', 'Land for Sale', 'Flat for Sale', 'House for Sale'])
-      );
-      const querySnapshot = await getDocs(q);
-      const propertiesData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Property[];
-      setProperties(propertiesData);
-    } catch (error) {
-      console.error('Error fetching properties:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const filterProperties = () => {
     let filtered = properties;

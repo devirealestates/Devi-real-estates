@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { X, Upload, User } from 'lucide-react';
-import ImageUploader from './ImageUploader';
+import CircularImageCropper from './CircularImageCropper';
 
 interface TeamMember {
   id: string;
@@ -30,6 +30,8 @@ const TeamMemberForm: React.FC<TeamMemberFormProps> = ({ onClose, onSuccess, mem
     image: member?.image || ''
   });
   const [uploading, setUploading] = useState(false);
+  const [showCropper, setShowCropper] = useState(false);
+  const [tempImage, setTempImage] = useState<string>('');
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -40,40 +42,43 @@ const TeamMemberForm: React.FC<TeamMemberFormProps> = ({ onClose, onSuccess, mem
     }));
   };
 
-  const handleImageUpload = (imageUrls: string[]) => {
-    console.log('Image upload received:', imageUrls);
-    if (imageUrls.length > 0) {
-      const imageUrl = imageUrls[0];
-      
-      // Validate that we have a proper URL, not base64 data
-      if (imageUrl.startsWith('data:')) {
-        console.error('Received base64 data instead of URL');
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
         toast({
           title: "Error",
-          description: "Image upload failed. Please try again.",
+          description: "Please select an image file",
           variant: "destructive",
         });
         return;
       }
-      
-      // Ensure URL is reasonable length (under 500 characters)
-      if (imageUrl.length > 500) {
-        console.error('Image URL too long:', imageUrl.length, 'characters');
-        toast({
-          title: "Error", 
-          description: "Image URL is too long. Please use a different image.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      setFormData(prev => ({
-        ...prev,
-        image: imageUrl
-      }));
-      
-      console.log('Valid image URL set:', imageUrl);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setTempImage(reader.result as string);
+        setShowCropper(true);
+      };
+      reader.readAsDataURL(file);
     }
+  };
+
+  const handleCropComplete = (croppedImageUrl: string) => {
+    setFormData(prev => ({
+      ...prev,
+      image: croppedImageUrl
+    }));
+    setShowCropper(false);
+    setTempImage('');
+    toast({
+      title: "Success",
+      description: "Image cropped and uploaded successfully",
+    });
+  };
+
+  const handleCropCancel = () => {
+    setShowCropper(false);
+    setTempImage('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -205,12 +210,12 @@ const TeamMemberForm: React.FC<TeamMemberFormProps> = ({ onClose, onSuccess, mem
                 Profile Image
               </label>
               <div className="mb-4">
-                {formData.image && !formData.image.startsWith('data:') ? (
+                {formData.image ? (
                   <div className="flex flex-col items-center space-y-2">
                     <img 
                       src={formData.image} 
                       alt="Preview" 
-                      className="w-24 h-24 object-cover rounded-full"
+                      className="w-24 h-24 object-cover rounded-full ring-4 ring-gray-200"
                     />
                     <Button 
                       type="button"
@@ -229,11 +234,22 @@ const TeamMemberForm: React.FC<TeamMemberFormProps> = ({ onClose, onSuccess, mem
                   </div>
                 )}
               </div>
-              <ImageUploader
-                onImagesUpload={handleImageUpload}
-                maxImages={1}
-                initialImages={formData.image && !formData.image.startsWith('data:') ? [formData.image] : []}
-              />
+              
+              {/* Upload Button */}
+              <div className="flex justify-center">
+                <label className="cursor-pointer">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg transition-all duration-300 hover:scale-105">
+                    <Upload className="w-4 h-4" />
+                    <span>{formData.image ? 'Change Image' : 'Upload Image'}</span>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    className="hidden"
+                  />
+                </label>
+              </div>
             </div>
 
             <div>
@@ -295,7 +311,7 @@ const TeamMemberForm: React.FC<TeamMemberFormProps> = ({ onClose, onSuccess, mem
               </Button>
               <Button
                 type="submit"
-                disabled={uploading || (formData.image && formData.image.startsWith('data:'))}
+                disabled={uploading}
                 className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
                 {uploading ? 'Saving...' : member ? 'Update' : 'Add'} Team Member
@@ -304,6 +320,15 @@ const TeamMemberForm: React.FC<TeamMemberFormProps> = ({ onClose, onSuccess, mem
           </form>
         </CardContent>
       </Card>
+
+      {/* Circular Image Cropper */}
+      {showCropper && (
+        <CircularImageCropper
+          image={tempImage}
+          onCropComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+        />
+      )}
     </div>
   );
 };

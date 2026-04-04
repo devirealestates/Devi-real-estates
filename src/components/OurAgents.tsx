@@ -1,32 +1,19 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
-const agents = [
-  {
-    name: 'Michael Rodriguez',
-    role: 'Agent',
-    image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    name: 'Andrew Johnson',
-    role: 'Retailer',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    name: 'Esther Howard',
-    role: 'Retailer',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-  },
-  {
-    name: 'Bessie Cooper',
-    role: 'Marketing Expert',
-    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
-  },
-];
+interface Agent {
+  id: string;
+  name: string;
+  role: string;
+  image: string;
+  description?: string;
+}
 
 // Individual agent card with flip animation
 const AgentCard: React.FC<{
-  agent: typeof agents[0];
+  agent: Agent;
   index: number;
 }> = ({ agent, index }) => {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -78,6 +65,56 @@ const AgentCard: React.FC<{
 };
 
 const OurAgents: React.FC = () => {
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Subscribe to real-time updates from the teamMembers collection
+    const q = query(collection(db, 'teamMembers'), orderBy('createdAt', 'asc'));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const agentsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Agent[];
+      
+      setAgents(agentsData);
+      setLoading(false);
+    }, (error) => {
+      console.error('Error fetching agents:', error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-16 sm:py-20 lg:py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-gray-500">Loading agents...</div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (agents.length === 0) {
+    return (
+      <section className="py-16 sm:py-20 lg:py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 font-display mb-12">
+            Our Agents
+          </h2>
+          <div className="flex items-center justify-center py-12">
+            <div className="text-gray-500">No agents available at the moment.</div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-16 sm:py-20 lg:py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -94,7 +131,7 @@ const OurAgents: React.FC = () => {
         {/* Agents Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 lg:gap-8">
           {agents.map((agent, index) => (
-            <AgentCard key={index} agent={agent} index={index} />
+            <AgentCard key={agent.id} agent={agent} index={index} />
           ))}
         </div>
       </div>

@@ -40,7 +40,7 @@ const HeroRedesign: React.FC = () => {
       </div>
 
       {/* Search Form - Top Right */}
-      <div className="absolute top-20 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-6 lg:right-8 z-20 w-full max-w-[340px] sm:max-w-md px-3 sm:px-0">
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:top-32 sm:right-6 lg:right-8 z-20 w-full max-w-[340px] sm:max-w-md px-3 sm:px-0">
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl p-5 sm:p-8">
           {/* Buy / Rent Tabs */}
           <div className="flex gap-4 sm:gap-6 mb-4 sm:mb-6 border-b border-gray-200 pb-2 sm:pb-3">
@@ -182,7 +182,7 @@ const HeroRedesign: React.FC = () => {
       </div>
 
       {/* Heading - Bottom Left */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 sm:pb-16 lg:pb-20">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 sm:pb-16 lg:pb-20">
         <style>{`
           @keyframes heroSlideUp {
             0% {

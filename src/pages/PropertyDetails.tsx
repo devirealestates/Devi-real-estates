@@ -12,7 +12,8 @@ import PropertyContact from '@/components/PropertyContact';
 import SuggestedProperties from '@/components/SuggestedProperties';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, MapPin, Calendar, Home, ImageIcon, MapIcon, Phone, CheckCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Home, ImageIcon, MapIcon, Phone, CheckCircle, Heart, CalendarDays } from 'lucide-react';
+import { useShortlist } from '@/hooks/useShortlist';
 
 interface Property {
   id: string;
@@ -46,6 +47,7 @@ const PropertyDetails = () => {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { isShortlisted, toggleShortlist, isLoading: shortlistLoading } = useShortlist();
 
   useEffect(() => {
     if (id) {
@@ -84,6 +86,30 @@ const PropertyDetails = () => {
 
   const handleBackClick = () => {
     navigate(-1);
+  };
+
+  const handleContactOwner = () => {
+    // Direct phone call to the number
+    const phoneNumber = '919912991671';
+    window.location.href = `tel:+${phoneNumber}`;
+  };
+
+  const handleScheduleVisit = () => {
+    if (property) {
+      const phoneNumber = '919912991671';
+      const message = encodeURIComponent(
+        `Hi, I would like to schedule a visit for "${property.title}" in ${property.fullAddress || property.location}.`
+      );
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+      window.open(whatsappUrl, '_blank');
+    }
+  };
+
+  const handleToggleShortlist = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (property) {
+      toggleShortlist(property.id);
+    }
   };
 
   if (loading) {
@@ -126,7 +152,7 @@ const PropertyDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white pb-20">
       <HeaderRedesign />
       
       {/* Navigation - Back button */}
@@ -153,7 +179,11 @@ const PropertyDetails = () => {
               <PropertyImageGallery 
                 images={property.images} 
                 videos={property.videos} 
-                title={property.title} 
+                title={property.title}
+                propertyId={property.id}
+                isShortlisted={isShortlisted(property.id)}
+                onToggleShortlist={handleToggleShortlist}
+                shortlistLoading={shortlistLoading}
               />
             </div>
 
@@ -203,30 +233,41 @@ const PropertyDetails = () => {
               )}
             </div>
 
-            {/* Tabbed Content Sections */}
-            <div className="border border-gray-100 rounded-2xl overflow-hidden">
+            {/* Tabbed Content Sections - Pill Design */}
+            <div className="bg-white rounded-2xl overflow-hidden">
               <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 bg-gray-50 p-1 m-4 mb-0 rounded-xl w-[calc(100%-2rem)]">
-                  <TabsTrigger value="overview" className="flex items-center gap-2 rounded-lg font-medium text-sm">
-                    <Home className="w-4 h-4" />
-                    <span className="hidden sm:inline">Overview</span>
-                    <span className="sm:hidden">Info</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="amenities" className="flex items-center gap-2 rounded-lg font-medium text-sm">
-                    <ImageIcon className="w-4 h-4" />
-                    <span className="hidden sm:inline">Amenities</span>
-                    <span className="sm:hidden">Features</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="map" className="flex items-center gap-2 rounded-lg font-medium text-sm">
-                    <MapIcon className="w-4 h-4" />
-                    <span className="hidden sm:inline">Location</span>
-                    <span className="sm:hidden">Map</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="contact" className="flex items-center gap-2 rounded-lg font-medium text-sm">
-                    <Phone className="w-4 h-4" />
-                    Contact
-                  </TabsTrigger>
-                </TabsList>
+                <div className="bg-gray-50 px-3 py-3 sm:px-4 sm:py-4">
+                  <TabsList className="inline-flex gap-2 sm:gap-3 bg-transparent p-0 h-auto w-full justify-start overflow-x-auto">
+                    <TabsTrigger 
+                      value="overview" 
+                      className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2"
+                    >
+                      <Home className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      Info
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="amenities" 
+                      className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2"
+                    >
+                      <ImageIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      Features
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="map" 
+                      className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2"
+                    >
+                      <MapIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      Map
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="contact" 
+                      className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2"
+                    >
+                      <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      Contact
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
                 
                 <TabsContent value="overview" className="p-4 sm:p-6 mt-2">
                   <PropertyOverview property={property} />
@@ -244,13 +285,11 @@ const PropertyDetails = () => {
                 </TabsContent>
                 
                 <TabsContent value="map" className="p-0 mt-2">
-                  <div className="h-80 lg:h-96">
-                    <PropertyMap 
-                      location={property.location} 
-                      title={property.title} 
-                      fullAddress={property.fullAddress}
-                    />
-                  </div>
+                  <PropertyMap 
+                    location={property.location} 
+                    title={property.title} 
+                    fullAddress={property.fullAddress}
+                  />
                 </TabsContent>
                 
                 <TabsContent value="contact" className="p-4 sm:p-6 mt-2">
@@ -328,6 +367,44 @@ const PropertyDetails = () => {
       />
 
       <FooterRedesign />
+
+      {/* Fixed Bottom Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 pb-safe">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-2 sm:gap-3">
+          {/* Contact Owner Button */}
+          <Button
+            onClick={handleContactOwner}
+            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full py-3 font-semibold transition-all duration-200 flex items-center justify-center gap-2"
+          >
+            <Phone className="w-4 h-4" />
+            <span className="hidden sm:inline">Contact Owner</span>
+            <span className="sm:hidden">Contact</span>
+          </Button>
+
+          {/* Schedule Visit Button */}
+          <Button
+            onClick={handleScheduleVisit}
+            className="flex-1 bg-transparent hover:bg-slate-50 text-slate-900 border-2 border-slate-900 rounded-full py-3 font-semibold transition-all duration-200 flex items-center justify-center gap-2"
+          >
+            <CalendarDays className="w-4 h-4" />
+            <span className="hidden sm:inline">Schedule Visit</span>
+            <span className="sm:hidden">Visit</span>
+          </Button>
+
+          {/* Favorite Button */}
+          <Button
+            onClick={() => property && toggleShortlist(property.id)}
+            disabled={shortlistLoading}
+            className={`w-12 h-12 rounded-full transition-all duration-200 flex items-center justify-center ${
+              property && isShortlisted(property.id) 
+                ? 'bg-red-50 text-red-600 border-2 border-red-600' 
+                : 'bg-transparent text-slate-400 border-2 border-slate-300 hover:text-red-600 hover:border-red-600'
+            }`}
+          >
+            <Heart className={`w-5 h-5 ${property && isShortlisted(property.id) ? 'fill-current' : ''}`} />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

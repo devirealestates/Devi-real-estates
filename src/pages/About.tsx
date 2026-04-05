@@ -12,6 +12,7 @@ interface TeamMember {
   role: string;
   description: string;
   image: string;
+  order?: number;
 }
 
 interface CEOMessage {
@@ -34,7 +35,7 @@ const About = () => {
   useEffect(() => {
     // Subscribe to real-time updates from the teamMembers collection
     console.log('About page: Setting up team members listener...');
-    const q = query(collection(db, 'teamMembers'), orderBy('createdAt', 'asc'));
+    const q = query(collection(db, 'teamMembers'));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
       console.log('About page: Received team members update, count:', snapshot.docs.length);
@@ -46,12 +47,20 @@ const About = () => {
           name: data.name || 'Unknown',
           role: data.role || 'Team Member',
           description: data.description || '',
-          image: data.image || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400'
+          image: data.image || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400',
+          order: data.order ?? 999999
         };
       }) as TeamMember[];
       
-      console.log('About page: Setting team members state, count:', teamData.length);
-      setTeamMembers(teamData);
+      // Sort by order field (lower numbers first)
+      const sortedTeamData = teamData.sort((a, b) => {
+        const orderA = a.order ?? 999999;
+        const orderB = b.order ?? 999999;
+        return orderA - orderB;
+      });
+      
+      console.log('About page: Setting team members state, count:', sortedTeamData.length);
+      setTeamMembers(sortedTeamData);
       setLoading(false);
     }, (error) => {
       console.error('Error fetching team members:', error);

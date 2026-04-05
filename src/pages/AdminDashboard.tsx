@@ -13,6 +13,7 @@ import CEOMessageForm from '@/components/CEOMessageForm';
 import CityManagementForm from '@/components/CityManagementForm';
 import AdminSidebar from '@/components/AdminSidebar';
 import AdminPropertyFilters from '@/components/AdminPropertyFilters';
+import VisitBookingsPanel from '@/components/VisitBookingsPanel';
 import { format, isValid, parseISO, startOfDay, endOfDay } from 'date-fns';
 import { VisitorStatsCard } from '@/components/VisitorStatsCard';
 import { VisitorDataMigrationPanel } from '@/components/VisitorDataMigrationPanel';
@@ -60,6 +61,7 @@ interface TeamMember {
   role: string;
   description: string;
   image: string;
+  order?: number;
   createdAt?: any;
 }
 
@@ -160,7 +162,14 @@ const AdminDashboard = () => {
         ...doc.data()
       })) as TeamMember[];
       
-      setTeamMembers(teamData);
+      // Sort by order field (lower numbers first), then by createdAt
+      const sortedTeamData = teamData.sort((a, b) => {
+        const orderA = a.order ?? 999999;
+        const orderB = b.order ?? 999999;
+        return orderA - orderB;
+      });
+      
+      setTeamMembers(sortedTeamData);
     } catch (error) {
       console.error('Error fetching team members:', error);
       toast({
@@ -1291,6 +1300,22 @@ const AdminDashboard = () => {
                     <VisitorDataMigrationPanel />
                   </CardContent>
                 </Card>
+              </div>
+            )}
+
+            {/* Visit Bookings Tab */}
+            {activeTab === 'visit-bookings' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent">
+                    Visit Bookings
+                  </h2>
+                  <div className="px-3 py-1 bg-gradient-to-r from-emerald-100 to-blue-100 rounded-full">
+                    <span className="text-sm font-medium text-emerald-800">Property Visits</span>
+                  </div>
+                </div>
+                
+                <VisitBookingsPanel />
               </div>
             )}
 

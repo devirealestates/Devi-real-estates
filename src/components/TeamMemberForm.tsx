@@ -13,6 +13,7 @@ interface TeamMember {
   role: string;
   description: string;
   image: string;
+  order?: number;
   createdAt?: any;
 }
 
@@ -27,7 +28,8 @@ const TeamMemberForm: React.FC<TeamMemberFormProps> = ({ onClose, onSuccess, mem
     name: member?.name || '',
     role: member?.role || '',
     description: member?.description || '',
-    image: member?.image || ''
+    image: member?.image || '',
+    order: member?.order?.toString() || ''
   });
   const [uploading, setUploading] = useState(false);
   const [showCropper, setShowCropper] = useState(false);
@@ -113,6 +115,7 @@ const TeamMemberForm: React.FC<TeamMemberFormProps> = ({ onClose, onSuccess, mem
       role: formData.role.trim(),
       description: formData.description.trim(),
       image: formData.image || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400&auto=format&fit=crop',
+      order: formData.order ? parseInt(formData.order) : 0,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -297,6 +300,24 @@ const TeamMemberForm: React.FC<TeamMemberFormProps> = ({ onClose, onSuccess, mem
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 resize-none"
                 placeholder="Brief description about the team member"
               />
+            </div>
+
+            <div>
+              <label htmlFor="order" className="block text-sm font-medium text-gray-700 mb-1">
+                Display Order
+              </label>
+              <input
+                type="text"
+                id="order"
+                name="order"
+                value={formData.order}
+                onChange={handleInputChange}
+                pattern="[0-9]*"
+                inputMode="numeric"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                placeholder="e.g., 1, 2, 3..."
+              />
+              <p className="text-xs text-gray-500 mt-1">Lower numbers appear first</p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-4">

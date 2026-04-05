@@ -9,6 +9,7 @@ interface Agent {
   role: string;
   image: string;
   description?: string;
+  order?: number;
 }
 
 // Individual agent card with flip animation
@@ -70,7 +71,7 @@ const OurAgents: React.FC = () => {
 
   useEffect(() => {
     // Subscribe to real-time updates from the teamMembers collection
-    const q = query(collection(db, 'teamMembers'), orderBy('createdAt', 'asc'));
+    const q = query(collection(db, 'teamMembers'));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const agentsData = snapshot.docs.map(doc => ({
@@ -78,7 +79,14 @@ const OurAgents: React.FC = () => {
         ...doc.data()
       })) as Agent[];
       
-      setAgents(agentsData);
+      // Sort by order field (lower numbers first)
+      const sortedAgentsData = agentsData.sort((a, b) => {
+        const orderA = a.order ?? 999999;
+        const orderB = b.order ?? 999999;
+        return orderA - orderB;
+      });
+      
+      setAgents(sortedAgentsData);
       setLoading(false);
     }, (error) => {
       console.error('Error fetching agents:', error);

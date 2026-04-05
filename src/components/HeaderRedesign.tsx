@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, ShoppingCart, ChevronDown, User, Home, Info, Building2, Calculator, Heart, Phone, ArrowRight } from 'lucide-react';
+import { Menu, X, ShoppingCart, ChevronDown, User, Home, Info, Building2, Calculator, Heart, Phone, ArrowRight, LogOut } from 'lucide-react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import ShortlistSidebar from './ShortlistSidebar';
@@ -9,7 +9,7 @@ const HeaderRedesign: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showPagesDropdown, setShowPagesDropdown] = useState(false);
   const [isShortlistOpen, setIsShortlistOpen] = useState(false);
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -65,6 +65,18 @@ const HeaderRedesign: React.FC = () => {
     setShowPagesDropdown(false);
     // Navigate after state is reset
     navigate(path);
+  };
+
+  // Logout handler
+  const handleLogout = async () => {
+    try {
+      await logout();
+      document.body.style.overflow = '';
+      setIsMobileMenuOpen(false);
+      navigate('/');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   };
 
   const navLinks = [
@@ -168,16 +180,42 @@ const HeaderRedesign: React.FC = () => {
               </span>
             </button>
 
+            {/* Contact Us button - Always visible */}
             <button
-              onClick={() => navigate(currentUser ? '/profile' : '/contact')}
+              onClick={() => navigate('/contact')}
               className={`px-6 py-2.5 rounded-full text-base font-light font-display transition-all duration-300 border ${
                 isHomePage && !isScrolled
                   ? 'border-white/60 text-white hover:bg-white/10'
                   : 'border-gray-300 text-gray-700 hover:bg-gray-100'
               }`}
             >
-              {currentUser ? 'Profile' : 'Contact Us'}
+              Contact Us
             </button>
+
+            {/* Show Sign In button if user is not logged in */}
+            {!currentUser && (
+              <button
+                onClick={() => navigate('/login')}
+                className={`px-6 py-2.5 rounded-full text-base font-light font-display transition-all duration-300 border ${
+                  isHomePage && !isScrolled
+                    ? 'border-white/60 text-white hover:bg-white/10'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                Sign In
+              </button>
+            )}
+
+            {/* Logout Button - Desktop */}
+            {currentUser && (
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-6 py-2.5 rounded-full text-base font-light font-display transition-all duration-300 border border-red-500 text-red-600 hover:bg-red-50"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+            )}
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -322,6 +360,15 @@ const HeaderRedesign: React.FC = () => {
                 Shortlist
               </button>
 
+              {/* My Bookings */}
+              <button
+                onClick={() => handleMobileNavigation('/my-bookings')}
+                className="block w-full text-left py-4 text-2xl text-gray-900 hover:text-orange-500 transition-colors border-b border-gray-100"
+                style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}
+              >
+                My Bookings
+              </button>
+
               {/* Contact */}
               <button
                 onClick={() => handleMobileNavigation('/contact')}
@@ -330,6 +377,30 @@ const HeaderRedesign: React.FC = () => {
               >
                 Contact
               </button>
+
+              {/* Sign In Button - Only show if user is NOT logged in */}
+              {!currentUser && (
+                <button
+                  onClick={() => handleMobileNavigation('/login')}
+                  className="flex items-center gap-3 w-full text-left py-4 text-2xl text-blue-600 hover:text-blue-700 transition-colors border-b border-gray-100"
+                  style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}
+                >
+                  <User className="w-6 h-6" />
+                  Sign In
+                </button>
+              )}
+
+              {/* Logout Button - Only show if user is logged in */}
+              {currentUser && (
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 w-full text-left py-4 text-2xl text-red-600 hover:text-red-700 transition-colors border-b border-gray-100"
+                  style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}
+                >
+                  <LogOut className="w-6 h-6" />
+                  Logout
+                </button>
+              )}
             </nav>
           </div>
         </div>

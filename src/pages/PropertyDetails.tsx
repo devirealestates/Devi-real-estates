@@ -10,6 +10,7 @@ import PropertyAmenities from '@/components/PropertyAmenities';
 import PropertyMap from '@/components/PropertyMap';
 import PropertyContact from '@/components/PropertyContact';
 import SuggestedProperties from '@/components/SuggestedProperties';
+import ScheduleVisitModal from '@/components/ScheduleVisitModal';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, MapPin, Calendar, Home, ImageIcon, MapIcon, Phone, CheckCircle, Heart, CalendarDays } from 'lucide-react';
@@ -47,6 +48,7 @@ const PropertyDetails = () => {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
   const { isShortlisted, toggleShortlist, isLoading: shortlistLoading } = useShortlist();
 
   useEffect(() => {
@@ -95,14 +97,7 @@ const PropertyDetails = () => {
   };
 
   const handleScheduleVisit = () => {
-    if (property) {
-      const phoneNumber = '919912991671';
-      const message = encodeURIComponent(
-        `Hi, I would like to schedule a visit for "${property.title}" in ${property.fullAddress || property.location}.`
-      );
-      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
-      window.open(whatsappUrl, '_blank');
-    }
+    setShowScheduleModal(true);
   };
 
   const handleToggleShortlist = (e: React.MouseEvent) => {
@@ -374,7 +369,7 @@ const PropertyDetails = () => {
           {/* Contact Owner Button */}
           <Button
             onClick={handleContactOwner}
-            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full py-3 font-semibold transition-all duration-200 flex items-center justify-center gap-2"
+            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full py-3 font-normal transition-all duration-200 flex items-center justify-center gap-2"
           >
             <Phone className="w-4 h-4" />
             <span className="hidden sm:inline">Contact Owner</span>
@@ -384,27 +379,23 @@ const PropertyDetails = () => {
           {/* Schedule Visit Button */}
           <Button
             onClick={handleScheduleVisit}
-            className="flex-1 bg-transparent hover:bg-slate-50 text-slate-900 border-2 border-slate-900 rounded-full py-3 font-semibold transition-all duration-200 flex items-center justify-center gap-2"
+            className="flex-1 bg-transparent hover:bg-slate-50 text-slate-900 border-2 border-slate-900 rounded-full py-3 font-normal transition-all duration-200 flex items-center justify-center gap-2"
           >
             <CalendarDays className="w-4 h-4" />
-            <span className="hidden sm:inline">Schedule Visit</span>
-            <span className="sm:hidden">Visit</span>
-          </Button>
-
-          {/* Favorite Button */}
-          <Button
-            onClick={() => property && toggleShortlist(property.id)}
-            disabled={shortlistLoading}
-            className={`w-12 h-12 rounded-full transition-all duration-200 flex items-center justify-center ${
-              property && isShortlisted(property.id) 
-                ? 'bg-red-50 text-red-600 border-2 border-red-600' 
-                : 'bg-transparent text-slate-400 border-2 border-slate-300 hover:text-red-600 hover:border-red-600'
-            }`}
-          >
-            <Heart className={`w-5 h-5 ${property && isShortlisted(property.id) ? 'fill-current' : ''}`} />
+            <span>Schedule visit</span>
           </Button>
         </div>
       </div>
+
+      {/* Schedule Visit Modal */}
+      {property && (
+        <ScheduleVisitModal
+          isOpen={showScheduleModal}
+          onClose={() => setShowScheduleModal(false)}
+          propertyId={property.id}
+          propertyTitle={property.title}
+        />
+      )}
     </div>
   );
 };

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -89,11 +88,11 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4" style={{ fontFamily: 'Poppins, sans-serif' }}>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       {/* Back Button */}
       <button
         onClick={() => navigate('/')}
-        className="fixed top-4 left-4 p-2 hover:bg-gray-100 rounded-full transition-colors z-50"
+        className="fixed top-4 left-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
       >
         <ArrowLeft className="w-5 h-5 text-gray-600" />
       </button>
@@ -104,65 +103,63 @@ const Login = () => {
           <img 
             src="/dre-logo.png" 
             alt="DRE Logo" 
-            className="h-8 w-auto mx-auto mb-4"
+            className="h-16 w-auto mx-auto mb-4"
           />
         </div>
 
         {/* Login Card */}
         <div className="bg-white rounded-3xl shadow-sm p-8">
           {/* Header */}
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-1" style={{ fontFamily: 'Poppins, sans-serif' }}>Welcome Back</h1>
-            <p className="text-sm text-gray-500" style={{ fontFamily: 'Poppins, sans-serif' }}>Please login to your account</p>
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+            <p className="text-gray-500">Please login to your account</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email Field */}
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Email address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
                   required
-                  className="w-full pl-10 pr-4 py-3 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all bg-gray-50"
-                  style={{ fontFamily: 'Poppins, sans-serif' }}
+                  className="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
                 />
               </div>
             </div>
 
             {/* Password Field */}
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-medium text-gray-700" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
                   Password
                 </label>
-                <Link to="/forgot-password" className="text-xs text-emerald-600 hover:underline" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
                   Forgot password?
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className="w-full pl-10 pr-10 py-3 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all bg-gray-50"
-                  style={{ fontFamily: 'Poppins, sans-serif' }}
+                  className="w-full pl-12 pr-12 py-3.5 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
@@ -171,17 +168,16 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 text-sm rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-200"
-              style={{ fontFamily: 'Poppins, sans-serif' }}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-200"
             >
               {loading ? 'Logging in...' : 'Login'}
             </button>
           </form>
 
           {/* Divider */}
-          <div className="flex items-center my-5">
+          <div className="flex items-center my-6">
             <div className="flex-1 border-t border-gray-200"></div>
-            <span className="px-3 text-xs text-gray-500" style={{ fontFamily: 'Poppins, sans-serif' }}>Or Login with</span>
+            <span className="px-4 text-sm text-gray-500">Or Login with</span>
             <div className="flex-1 border-t border-gray-200"></div>
           </div>
 
@@ -189,10 +185,9 @@ const Login = () => {
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-3 text-sm border border-gray-200 rounded-full hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ fontFamily: 'Poppins, sans-serif' }}
+            className="w-full flex items-center justify-center gap-3 py-3.5 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -202,10 +197,10 @@ const Login = () => {
           </button>
 
           {/* Sign Up Link */}
-          <div className="text-center mt-5">
-            <p className="text-sm text-gray-600" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          <div className="text-center mt-6">
+            <p className="text-gray-600">
               Don't have an account?{' '}
-              <Link to="/signup" className="text-emerald-600 font-medium hover:underline" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              <Link to="/signup" className="text-blue-600 font-medium hover:underline">
                 Sign up
               </Link>
             </p>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
@@ -67,15 +66,6 @@ const Signup = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!username || !email || !password || !confirmPassword) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
-      return;
-    }
 
     if (password !== confirmPassword) {
       toast({
@@ -97,59 +87,37 @@ const Signup = () => {
 
     setLoading(true);
     try {
-      // Create user with Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Update user profile with username
       await updateProfile(user, {
         displayName: username
       });
 
-      // Get user's device and location information for analytics
       const deviceInfo = {
         userAgent: navigator.userAgent,
         platform: navigator.platform,
         language: navigator.language,
         screenResolution: `${screen.width}x${screen.height}`,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        cookieEnabled: navigator.cookieEnabled,
-        onlineStatus: navigator.onLine
       };
 
-      // Store user data in Firestore with enhanced analytics data
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         username: username,
         email: email,
-        role: 'user', // Default role for new users
-        status: 'active', // Default status
+        role: 'user',
         createdAt: serverTimestamp(),
-        lastLogin: serverTimestamp(),
-        deviceInfo: JSON.stringify(deviceInfo),
-        signupSource: 'website',
-        signupPage: window.location.pathname,
-        referrer: document.referrer || 'direct'
+        deviceInfo,
+        signInMethod: 'email',
       });
 
       toast({
-        title: "Account created successfully!",
-        description: "Welcome to Devi Real Estates",
+        title: "Success",
+        description: "Account created successfully!",
       });
       
-      // Check if there's a redirect location from contact owner attempt
-      const from = location.state?.from || location.state?.returnTo || '/';
-      const redirectData = location.state;
-      
-      // If user was trying to contact owner, show success message and redirect
-      if (redirectData?.action === 'contact') {
-        toast({
-          title: "Account created! You can now contact the property owner",
-          description: "Welcome to Devi Real Estates",
-        });
-      }
-      
-      navigate(from, { replace: true });
+      navigate('/');
     } catch (error: any) {
       let errorMessage = "Failed to create account";
       
@@ -162,7 +130,7 @@ const Signup = () => {
       }
 
       toast({
-        title: "Signup Failed",
+        title: "Error",
         description: errorMessage,
         variant: "destructive",
       });
@@ -172,7 +140,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4" style={{ fontFamily: 'Poppins, sans-serif' }}>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       {/* Back Button */}
       <button
         onClick={() => navigate('/')}
@@ -187,105 +155,101 @@ const Signup = () => {
           <img 
             src="/dre-logo.png" 
             alt="DRE Logo" 
-            className="h-8 w-auto mx-auto mb-4"
+            className="h-16 w-auto mx-auto mb-4"
           />
         </div>
 
         {/* Signup Card */}
         <div className="bg-white rounded-3xl shadow-sm p-8">
           {/* Header */}
-          <div className="text-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-1" style={{ fontFamily: 'Poppins, sans-serif' }}>Create Account</h1>
-            <p className="text-sm text-gray-500" style={{ fontFamily: 'Poppins, sans-serif' }}>Join us to find your dream property</p>
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
+            <p className="text-gray-500">Join us to find your dream property</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-3.5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Username Field */}
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Username
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Enter your username"
                   required
-                  className="w-full pl-10 pr-4 py-3 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all bg-gray-50"
-                  style={{ fontFamily: 'Poppins, sans-serif' }}
+                  className="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
                 />
               </div>
             </div>
 
             {/* Email Field */}
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Email address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
                   required
-                  className="w-full pl-10 pr-4 py-3 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all bg-gray-50"
-                  style={{ fontFamily: 'Poppins, sans-serif' }}
+                  className="w-full pl-12 pr-4 py-3.5 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
                 />
               </div>
             </div>
 
             {/* Password Field */}
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Create a password"
                   required
-                  className="w-full pl-10 pr-10 py-3 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all bg-gray-50"
-                  style={{ fontFamily: 'Poppins, sans-serif' }}
+                  className="w-full pl-12 pr-12 py-3.5 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
 
             {/* Confirm Password Field */}
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1.5" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Confirm Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Confirm your password"
                   required
-                  className="w-full pl-10 pr-10 py-3 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all bg-gray-50"
-                  style={{ fontFamily: 'Poppins, sans-serif' }}
+                  className="w-full pl-12 pr-12 py-3.5 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-gray-50"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
@@ -294,17 +258,16 @@ const Signup = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 text-sm rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-200 mt-2"
-              style={{ fontFamily: 'Poppins, sans-serif' }}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-4 rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-200 mt-2"
             >
               {loading ? 'Creating account...' : 'Sign up'}
             </button>
           </form>
 
           {/* Divider */}
-          <div className="flex items-center my-5">
+          <div className="flex items-center my-6">
             <div className="flex-1 border-t border-gray-200"></div>
-            <span className="px-3 text-xs text-gray-500" style={{ fontFamily: 'Poppins, sans-serif' }}>Or Sign up with</span>
+            <span className="px-4 text-sm text-gray-500">Or Sign up with</span>
             <div className="flex-1 border-t border-gray-200"></div>
           </div>
 
@@ -312,10 +275,9 @@ const Signup = () => {
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-3 text-sm border border-gray-200 rounded-full hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ fontFamily: 'Poppins, sans-serif' }}
+            className="w-full flex items-center justify-center gap-3 py-3.5 border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <svg className="w-4 h-4" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -325,10 +287,10 @@ const Signup = () => {
           </button>
 
           {/* Login Link */}
-          <div className="text-center mt-5">
-            <p className="text-sm text-gray-600" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          <div className="text-center mt-6">
+            <p className="text-gray-600">
               Already have an account?{' '}
-              <Link to="/login" className="text-emerald-600 font-medium hover:underline" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              <Link to="/login" className="text-blue-600 font-medium hover:underline">
                 Sign in
               </Link>
             </p>

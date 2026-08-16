@@ -24,7 +24,7 @@ const Footer = () => {
             </p>
             <div className="flex space-x-4">
               <a 
-                href="https://www.facebook.com/share/16ovnVhmA8/" 
+                href="https://www.facebook.com/profile.php?id=61573333850657" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="w-12 h-12 md:w-10 md:h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-blue-600/20 transition-colors duration-300 touch-target"
@@ -33,22 +33,13 @@ const Footer = () => {
                 <Facebook className="w-5 h-5" />
               </a>
               <a 
-                href="https://www.instagram.com/mananivasampvt?igsh=MmQ3ZnF5MHB4N2pl" 
+                href="https://www.instagram.com/devi.propertyhub/" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="w-12 h-12 md:w-10 md:h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-pink-600/20 transition-colors duration-300 touch-target"
                 aria-label="Follow us on Instagram"
               >
                 <Instagram className="w-5 h-5" />
-              </a>
-              <a 
-                href="https://youtube.com/@mananivasampvt?si=rMOK60xL8lfWuNW7" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-12 h-12 md:w-10 md:h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-red-600/20 transition-colors duration-300 touch-target"
-                aria-label="Subscribe to our YouTube channel"
-              >
-                <Youtube className="w-5 h-5" />
               </a>
             </div>
           </div>
@@ -168,36 +159,50 @@ const Footer = () => {
           <div>
             <h4 className="text-base md:text-lg font-semibold mb-3 md:mb-6">Contact Info</h4>
             <div className="space-y-3 md:space-y-4">
-              <div className="flex items-center space-x-2 md:space-x-3">
-                <div className="w-6 h-6 md:w-8 md:h-8 bg-white/10 rounded-full flex items-center justify-center">
+              <a 
+                href="tel:+919912991671"
+                className="flex items-center space-x-2 md:space-x-3 text-gray-300 hover:text-white transition-colors group"
+                title="Call us"
+              >
+                <div className="w-6 h-6 md:w-8 md:h-8 bg-white/10 group-hover:bg-orange-500 rounded-full flex items-center justify-center transition-colors">
                   <Phone className="w-3 h-3 md:w-4 md:h-4" />
                 </div>
                 <div>
-                  <p className="text-gray-300 text-sm md:text-base">+91 89858 16481</p>
+                  <p className="text-gray-300 text-sm md:text-base group-hover:text-orange-400 transition-colors">+91 99129 91671</p>
                   <p className="text-gray-400 text-xs md:text-sm">Mon-Sat 9AM-7PM</p>
                 </div>
-              </div>
+              </a>
               
-              <div className="flex items-center space-x-2 md:space-x-3">
-                <div className="w-6 h-6 md:w-8 md:h-8 bg-white/10 rounded-full flex items-center justify-center">
+              <a 
+                href="mailto:info.devirealestates@gmail.com?subject=Real%20Estate%20Inquiry%20-%20Devi%20Real%20Estates&body=Hello%20Devi%20Real%20Estates%20Team%2C%0A%0AI%20am%20interested%20in%20inquiring%20about%20your%20properties.%0A%0AThank%20you!"
+                className="flex items-center space-x-2 md:space-x-3 text-gray-300 hover:text-white transition-colors group"
+                title="Send email"
+              >
+                <div className="w-6 h-6 md:w-8 md:h-8 bg-white/10 group-hover:bg-orange-500 rounded-full flex items-center justify-center transition-colors">
                   <Mail className="w-3 h-3 md:w-4 md:h-4" />
                 </div>
                 <div>
-                  <p className="text-gray-300 text-sm md:text-base">devirealestates@gmail.com</p>
+                  <p className="text-gray-300 text-sm md:text-base group-hover:text-orange-400 transition-colors">info.devirealestates@gmail.com</p>
                   <p className="text-gray-400 text-xs md:text-sm">24/7 Support</p>
                 </div>
-              </div>
+              </a>
               
-              <div className="flex items-start space-x-2 md:space-x-3">
-                <div className="w-6 h-6 md:w-8 md:h-8 bg-white/10 rounded-full flex items-center justify-center mt-1">
+              <a 
+                href="https://www.google.com/maps?q=17.034576646816706,82.25008959739333" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-start space-x-2 md:space-x-3 text-gray-300 hover:text-white transition-colors group"
+                title="View on Google Maps"
+              >
+                <div className="w-6 h-6 md:w-8 md:h-8 bg-white/10 group-hover:bg-orange-500 rounded-full flex items-center justify-center mt-1 transition-colors">
                   <MapPin className="w-3 h-3 md:w-4 md:h-4" />
                 </div>
                 <div>
-                  <p className="text-gray-300 text-sm md:text-base">Vishnayalam street, jagannaickpur, <br />Kakinada</p>
-                  <p className="text-gray-300 text-sm md:text-base">Kakinada District, Andhra Pradesh</p>
+                  <p className="text-gray-300 text-sm md:text-base group-hover:text-orange-400 transition-colors">Geetha paatashala road, Thimmapuram</p>
+                  <p className="text-gray-300 text-sm md:text-base group-hover:text-orange-400 transition-colors">Kakinada District, Andhra Pradesh</p>
                   <p className="text-gray-400 text-xs md:text-sm">533005, India</p>
                 </div>
-              </div>
+              </a>
             </div>
           </div>
         </div>

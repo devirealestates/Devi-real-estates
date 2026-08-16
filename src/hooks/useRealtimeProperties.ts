@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { collection, onSnapshot, DocumentData } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-interface Property {
+export interface Property {
   id: string;
   title: string;
   price: string;
@@ -23,6 +23,8 @@ interface Property {
   status?: string;
   approved?: boolean;
   propertyAge?: number;
+  createdAt?: any;
+  updatedAt?: any;
 }
 
 interface UseRealtimePropertiesOptions {
@@ -106,10 +108,14 @@ export const useRealtimeProperties = (options: UseRealtimePropertiesOptions = {}
               bedrooms: data.bedrooms,
               bathrooms: data.bathrooms,
               area: data.area || 'N/A',
+              areaAcres: data.areaAcres,
+              propertyAge: data.propertyAge,
               description: data.description || 'No description available.',
               featured: data.featured || false,
               status: data.status,
-              approved: data.approved
+              approved: data.approved,
+              createdAt: data.createdAt,
+              updatedAt: data.updatedAt
             } as Property;
           });
 

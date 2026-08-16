@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { X, RotateCw, ZoomIn, ZoomOut } from 'lucide-react';
+import { X, RotateCw, ZoomIn, ZoomOut, Crop } from 'lucide-react';
 
 interface CircularImageCropperProps {
   image: string;
@@ -18,6 +18,7 @@ const CircularImageCropper: React.FC<CircularImageCropperProps> = ({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [isProcessing, setIsProcessing] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
 
@@ -45,9 +46,13 @@ const CircularImageCropper: React.FC<CircularImageCropperProps> = ({
   const getCroppedImage = useCallback(async () => {
     if (!imageRef.current || !canvasRef.current) return;
 
+    setIsProcessing(true);
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      setIsProcessing(false);
+      return;
+    }
 
     const img = imageRef.current;
     const outputWidth = 400;  // Output width
@@ -80,33 +85,22 @@ const CircularImageCropper: React.FC<CircularImageCropperProps> = ({
     
     // Get the preview container dimensions
     const previewContainer = imageRef.current.parentElement;
-    const containerWidth = previewContainer?.clientWidth || 400;
-    const containerHeight = previewContainer?.clientHeight || 500;
+    const containerWidth = previewContainer?.clientWidth || 220;
+    const containerHeight = previewContainer?.clientHeight || 275;
     
     // The crop area is 85% of the container (7.5% margin on each side)
     const cropAreaWidth = containerWidth * 0.85;
     const cropAreaHeight = containerHeight * 0.85;
-    const cropAreaCenterX = containerWidth / 2;
-    const cropAreaCenterY = containerHeight / 2;
     
     // The image uses object-contain, so calculate the base scale
     const scaleX = containerWidth / imgWidth;
     const scaleY = containerHeight / imgHeight;
     const baseScale = Math.min(scaleX, scaleY);
     
-    // CSS transform: translate(position.x, position.y) scale(zoom) from center
-    // The image center after transform is at container center + position offset
-    // After scaling, the image is scaled from its center
-    
     // Total scale applied to the image
     const totalScale = baseScale * zoom;
     
-    // In the preview, the crop area center is at the container center
-    // The image center is at containerCenter + position (due to translate)
-    // So the crop area center relative to the image center is: -position
-    
     // Convert from preview coordinates to original image coordinates
-    // The crop area center in image coordinates (before any transforms)
     const cropCenterInImageX = imgWidth / 2 - (position.x / totalScale);
     const cropCenterInImageY = imgHeight / 2 - (position.y / totalScale);
     
@@ -137,7 +131,10 @@ const CircularImageCropper: React.FC<CircularImageCropperProps> = ({
 
     // Convert to blob and upload to Cloudinary
     canvas.toBlob(async (blob) => {
-      if (!blob) return;
+      if (!blob) {
+        setIsProcessing(false);
+        return;
+      }
 
       const formData = new FormData();
       formData.append('file', blob);
@@ -154,28 +151,39 @@ const CircularImageCropper: React.FC<CircularImageCropperProps> = ({
         );
 
         const data = await response.json();
+        setIsProcessing(false);
         onCropComplete(data.secure_url);
       } catch (error) {
         console.error('Error uploading cropped image:', error);
+        setIsProcessing(false);
       }
     }, 'image/jpeg', 0.95);
   }, [zoom, rotation, position, onCropComplete]);
 
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg w-full max-w-md">
+    <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center z-[60] p-3">
+      <div className="bg-white rounded-2xl w-full max-w-[340px] sm:max-w-[360px] max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-gray-100 animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between p-3 border-b">
-          <h3 className="text-base font-semibold">Crop Profile Picture</h3>
-          <Button variant="ghost" size="sm" onClick={onCancel}>
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 bg-gray-50/50">
+          <div className="flex items-center gap-1.5">
+            <Crop className="w-4 h-4 text-orange-500" />
+            <h3 className="text-sm font-semibold text-gray-900">Crop Profile Picture</h3>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onCancel}
+            className="w-7 h-7 p-0 rounded-full text-gray-500 hover:bg-gray-200"
+          >
             <X className="w-4 h-4" />
           </Button>
         </div>
 
-        {/* Crop Area */}
-        <div className="p-4">
+        {/* Scrollable Content Area */}
+        <div className="p-3.5 overflow-y-auto">
+          {/* Crop Area */}
           <div 
-            className="relative w-full max-w-xs mx-auto bg-gray-900 rounded-lg overflow-hidden cursor-move"
+            className="relative w-full max-w-[210px] mx-auto bg-gray-950 rounded-xl overflow-hidden cursor-move shadow-inner"
             style={{ aspectRatio: '4/5' }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
@@ -187,7 +195,7 @@ const CircularImageCropper: React.FC<CircularImageCropperProps> = ({
               ref={imageRef}
               src={image}
               alt="Crop preview"
-              className="absolute inset-0 w-full h-full object-contain"
+              className="absolute inset-0 w-full h-full object-contain select-none pointer-events-none"
               style={{
                 transform: `translate(${position.x}px, ${position.y}px) scale(${zoom}) rotate(${rotation}deg)`,
                 transformOrigin: 'center'
@@ -201,7 +209,7 @@ const CircularImageCropper: React.FC<CircularImageCropperProps> = ({
                 <defs>
                   <mask id="rectMask">
                     <rect x="0" y="0" width="100%" height="100%" fill="white" />
-                    <rect x="7.5%" y="7.5%" width="85%" height="85%" rx="20" ry="20" fill="black" />
+                    <rect x="7.5%" y="7.5%" width="85%" height="85%" rx="16" ry="16" fill="black" />
                   </mask>
                 </defs>
                 <rect
@@ -209,7 +217,7 @@ const CircularImageCropper: React.FC<CircularImageCropperProps> = ({
                   y="0"
                   width="100%"
                   height="100%"
-                  fill="rgba(0, 0, 0, 0.5)"
+                  fill="rgba(0, 0, 0, 0.55)"
                   mask="url(#rectMask)"
                 />
                 <rect
@@ -217,38 +225,42 @@ const CircularImageCropper: React.FC<CircularImageCropperProps> = ({
                   y="7.5%"
                   width="85%"
                   height="85%"
-                  rx="20"
-                  ry="20"
+                  rx="16"
+                  ry="16"
                   fill="none"
                   stroke="white"
-                  strokeWidth="2"
-                  strokeDasharray="5,5"
+                  strokeWidth="1.5"
+                  strokeDasharray="4,4"
                 />
               </svg>
             </div>
           </div>
 
+          <p className="text-[11px] text-gray-400 text-center mt-1.5 mb-2.5">
+            Drag to reposition image
+          </p>
+
           {/* Controls */}
-          <div className="mt-4 space-y-3">
+          <div className="space-y-2 bg-gray-50/80 p-2.5 rounded-xl border border-gray-100">
             {/* Zoom */}
-            <div className="flex items-center gap-2">
-              <ZoomOut className="w-4 h-4 text-gray-600" />
+            <div className="flex items-center gap-2 text-xs text-gray-600">
+              <ZoomOut className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />
               <input
                 type="range"
                 min="1"
                 max="3"
-                step="0.1"
+                step="0.05"
                 value={zoom}
                 onChange={(e) => setZoom(parseFloat(e.target.value))}
-                className="flex-1"
+                className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
               />
-              <ZoomIn className="w-4 h-4 text-gray-600" />
-              <span className="text-sm text-gray-600 w-12">{Math.round(zoom * 100)}%</span>
+              <ZoomIn className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />
+              <span className="w-9 text-right font-medium text-[11px]">{Math.round(zoom * 100)}%</span>
             </div>
 
             {/* Rotation */}
-            <div className="flex items-center gap-2">
-              <RotateCw className="w-4 h-4 text-gray-600" />
+            <div className="flex items-center gap-2 text-xs text-gray-600">
+              <RotateCw className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />
               <input
                 type="range"
                 min="0"
@@ -256,23 +268,24 @@ const CircularImageCropper: React.FC<CircularImageCropperProps> = ({
                 step="1"
                 value={rotation}
                 onChange={(e) => setRotation(parseFloat(e.target.value))}
-                className="flex-1"
+                className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
               />
-              <span className="text-sm text-gray-600 w-12">{rotation}°</span>
+              <span className="w-9 text-right font-medium text-[11px]">{rotation}°</span>
             </div>
 
             {/* Reset Button */}
-            <div className="flex justify-center">
+            <div className="flex justify-center pt-0.5">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
+                className="h-6 text-[11px] text-gray-500 hover:text-gray-900 px-2.5"
                 onClick={() => {
                   setZoom(1);
                   setRotation(0);
                   setPosition({ x: 0, y: 0 });
                 }}
               >
-                Reset
+                Reset Position
               </Button>
             </div>
           </div>
@@ -282,16 +295,21 @@ const CircularImageCropper: React.FC<CircularImageCropperProps> = ({
         <canvas ref={canvasRef} className="hidden" />
 
         {/* Footer */}
-        <div className="flex gap-2 p-3 border-t">
-          <Button variant="outline" onClick={onCancel} className="flex-1" size="sm">
+        <div className="flex gap-2 p-3 border-t border-gray-100 bg-gray-50/50">
+          <Button 
+            variant="outline" 
+            onClick={onCancel} 
+            className="flex-1 h-9 rounded-xl text-xs font-medium"
+            disabled={isProcessing}
+          >
             Cancel
           </Button>
           <Button
             onClick={getCroppedImage}
-            className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
-            size="sm"
+            className="flex-1 h-9 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-medium shadow-sm transition-all"
+            disabled={isProcessing}
           >
-            Apply Crop
+            {isProcessing ? 'Processing...' : 'Apply Crop'}
           </Button>
         </div>
       </div>

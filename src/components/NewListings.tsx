@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowRight, MapPin } from 'lucide-react';
+import { ArrowRight, MapPin, Heart, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import EnhancedShareMenu from '@/components/EnhancedShareMenu';
 
 const newListings = [
   {
@@ -36,6 +37,8 @@ const ListingCard: React.FC<{
 }> = ({ listing, onClick }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -46,8 +49,8 @@ const ListingCard: React.FC<{
         }
       },
       {
-        threshold: 0.5,
-        rootMargin: '-20% 0px -20% 0px'
+        threshold: 0.15,
+        rootMargin: '0px'
       }
     );
 
@@ -59,38 +62,85 @@ const ListingCard: React.FC<{
   }, []);
 
   return (
-    <div
-      ref={cardRef}
-      className={`group cursor-pointer transition-all duration-700 ease-out ${
-        isVisible 
-          ? 'opacity-100 translate-y-0' 
-          : 'opacity-0 translate-y-8'
-      }`}
-      onClick={onClick}
-    >
-      {/* Image */}
-      <div className="relative overflow-hidden rounded-2xl mb-4 aspect-[4/3]">
-        <img
-          src={listing.image}
-          alt={listing.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-        />
-      </div>
-      {/* Info */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">{listing.name}</h3>
-          <p className="text-gray-500 text-sm flex items-center gap-1 mt-1">
-            <MapPin className="w-3.5 h-3.5" />
-            {listing.location}
-          </p>
+    <>
+      <div
+        ref={cardRef}
+        className={`group cursor-pointer transition-all duration-700 ease-out ${
+          isVisible 
+            ? 'opacity-100 translate-y-0' 
+            : 'opacity-0 translate-y-8'
+        }`}
+        onClick={onClick}
+      >
+        {/* Image */}
+        <div className="relative overflow-hidden rounded-xl sm:rounded-2xl mb-2.5 sm:mb-4 aspect-[4/3] bg-gray-100 shadow-sm">
+          <img
+            src={listing.image}
+            alt={listing.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+
+          {/* Top Right: Wish list & Share icon buttons on the card image */}
+          <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex items-center gap-1.5 sm:gap-2 z-10">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsLiked(!isLiked);
+              }}
+              className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/60 active:scale-95 transition-all shadow-sm"
+              aria-label="Wishlist"
+            >
+              <Heart 
+                className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors ${
+                  isLiked 
+                    ? 'text-red-500 fill-red-500' 
+                    : 'text-white stroke-[2.2]'
+                }`} 
+              />
+            </button>
+            
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsShareOpen(true);
+              }}
+              className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/60 active:scale-95 transition-all shadow-sm"
+              aria-label="Share"
+            >
+              <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white stroke-[2.2]" />
+            </button>
+          </div>
         </div>
-        <div className="text-right">
-          <p className="text-lg font-semibold text-gray-900">{listing.price}</p>
-          <p className="text-gray-500 text-sm mt-1">{listing.area}</p>
+        {/* Info */}
+        <div className="space-y-1">
+          <div className="flex items-start justify-between gap-1 sm:gap-2">
+            <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 truncate group-hover:text-orange-600 transition-colors">
+              {listing.name}
+            </h3>
+            <span className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 whitespace-nowrap flex-shrink-0">
+              {listing.price}
+            </span>
+          </div>
+          <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
+            <p className="flex items-center gap-1 min-w-0">
+              <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0 text-gray-400" />
+              <span className="truncate">{listing.location}</span>
+            </p>
+            <span className="whitespace-nowrap flex-shrink-0 ml-1">{listing.area}</span>
+          </div>
         </div>
       </div>
-    </div>
+
+      <EnhancedShareMenu
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        propertyTitle={listing.name}
+        propertyPrice={listing.price}
+        propertyLocation={listing.location}
+        propertyId={String(listing.id)}
+        propertyImage={listing.image}
+      />
+    </>
   );
 };
 
@@ -185,7 +235,7 @@ const NewListings: React.FC = () => {
         </div>
 
         {/* Cards Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6 lg:gap-8">
           {newListings.map((listing) => (
             <ListingCard
               key={listing.id}

@@ -3,7 +3,7 @@ import HeaderRedesign from '@/components/HeaderRedesign';
 import HeroRedesign from '@/components/HeroRedesign';
 import NewListings from '@/components/NewListings';
 import AboutSection from '@/components/AboutSection';
-import FeaturedListings from '@/components/FeaturedListings';
+import LatestProperties from '@/components/LatestProperties';
 import PopularCities from '@/components/PopularCities';
 import OurAgents from '@/components/OurAgents';
 import Testimonials from '@/components/Testimonials';
@@ -17,7 +17,7 @@ const Index = () => {
       <HeroRedesign />
       <NewListings />
       <AboutSection />
-      <FeaturedListings />
+      <LatestProperties />
       <PopularCities />
       <OurAgents />
       <Testimonials />

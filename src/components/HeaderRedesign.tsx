@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Menu, X, ShoppingCart, ChevronDown, User, Home, Info, Building2, Calculator, Heart, Phone, ArrowRight, LogOut } from 'lucide-react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useShortlist } from '@/hooks/useShortlist';
 import ShortlistSidebar from './ShortlistSidebar';
 
 const HeaderRedesign: React.FC = () => {
@@ -10,6 +11,7 @@ const HeaderRedesign: React.FC = () => {
   const [showPagesDropdown, setShowPagesDropdown] = useState(false);
   const [isShortlistOpen, setIsShortlistOpen] = useState(false);
   const { currentUser, logout } = useAuth();
+  const { shortlistedCount } = useShortlist();
   const navigate = useNavigate();
   const location = useLocation();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -91,6 +93,7 @@ const HeaderRedesign: React.FC = () => {
     { name: 'Commercial', path: '/commercial' },
     { name: 'PG/Hostels', path: '/pg-hostels' },
     { name: 'Land', path: '/land' },
+    { name: 'My Shortlist', path: '/shortlist' },
     { name: 'EMI Calculator', path: '/emi-calculator' },
   ];
 
@@ -172,11 +175,13 @@ const HeaderRedesign: React.FC = () => {
           <div className="hidden lg:flex items-center gap-4">
             <button
               onClick={() => setIsShortlistOpen(true)}
-              className="relative w-10 h-10 flex items-center justify-center"
+              className="relative w-10 h-10 flex items-center justify-center transition-transform hover:scale-105 active:scale-95"
+              title="My Shortlist"
+              aria-label="My Shortlist"
             >
-              <ShoppingCart className={`w-5 h-5 ${textColor} ${hoverColor} transition-colors`} strokeWidth={1.5} />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full text-white text-[10px] flex items-center justify-center font-bold">
-                0
+              <Heart className={`w-5 h-5 ${textColor} ${hoverColor} transition-colors`} strokeWidth={1.75} />
+              <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-orange-500 rounded-full text-white text-[10px] flex items-center justify-center font-bold">
+                {shortlistedCount}
               </span>
             </button>
 

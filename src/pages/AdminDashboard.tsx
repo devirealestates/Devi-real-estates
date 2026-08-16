@@ -5,9 +5,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Edit, Trash2, Building, Home, Users, MapPin, Image as ImageIcon, Mail, BarChart3, Calendar, Settings, Menu, ChevronDown, Eye, Database, MessageSquare } from 'lucide-react';
+import { LogOut, Plus, Edit, Trash2, Building, Home, Users, MapPin, Image as ImageIcon, Mail, BarChart3, Calendar, Settings, Menu, ChevronDown, Eye, Database, MessageSquare, Quote } from 'lucide-react';
 import AdminPropertyForm from '@/components/AdminPropertyForm';
 import TeamMemberForm from '@/components/TeamMemberForm';
+import TestimonialForm, { Testimonial } from '@/components/TestimonialForm';
 import StoryImageForm from '@/components/StoryImageForm';
 import CEOMessageForm from '@/components/CEOMessageForm';
 import CityManagementForm from '@/components/CityManagementForm';
@@ -82,6 +83,7 @@ interface City {
 const AdminDashboard = () => {
   const [properties, setProperties] = useState<AdminProperty[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [storyImages, setStoryImages] = useState<StoryImage[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(true);
@@ -93,11 +95,13 @@ const AdminDashboard = () => {
   
   const [showPropertyForm, setShowPropertyForm] = useState(false);
   const [showTeamForm, setShowTeamForm] = useState(false);
+  const [showTestimonialForm, setShowTestimonialForm] = useState(false);
   const [showStoryImageForm, setShowStoryImageForm] = useState(false);
   const [showCEOMessageForm, setShowCEOMessageForm] = useState(false);
   const [showCityForm, setShowCityForm] = useState(false);
   const [editingProperty, setEditingProperty] = useState<AdminProperty | null>(null);
   const [editingTeamMember, setEditingTeamMember] = useState<TeamMember | null>(null);
+  const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
   const [editingStoryImage, setEditingStoryImage] = useState<StoryImage | null>(null);
   const [editingCity, setEditingCity] = useState<City | null>(null);
   const [activeTab, setActiveTab] = useState('properties');
@@ -112,6 +116,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchProperties();
     fetchTeamMembers();
+    fetchTestimonials();
     fetchStoryImages();
     fetchCities();
   }, []);
@@ -175,6 +180,27 @@ const AdminDashboard = () => {
       toast({
         title: "Error",
         description: "Failed to fetch team members",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchTestimonials = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'testimonials'));
+      const testimonialsData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Testimonial[];
+      
+      // Sort by order field
+      testimonialsData.sort((a, b) => (a.order || 0) - (b.order || 0));
+      setTestimonials(testimonialsData);
+    } catch (error) {
+      console.error('Error fetching testimonials:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch testimonials",
         variant: "destructive",
       });
     }
@@ -310,6 +336,25 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteTestimonial = async (testimonialId: string) => {
+    if (window.confirm('Are you sure you want to delete this testimonial?')) {
+      try {
+        await deleteDoc(doc(db, 'testimonials', testimonialId));
+        setTestimonials(testimonials.filter(t => t.id !== testimonialId));
+        toast({
+          title: "Success",
+          description: "Testimonial deleted successfully",
+        });
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: "Failed to delete testimonial",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   const handleDeleteCity = async (cityId: string) => {
     if (window.confirm('Are you sure you want to delete this city?')) {
       try {
@@ -339,6 +384,11 @@ const AdminDashboard = () => {
     setShowTeamForm(true);
   };
 
+  const handleEditTestimonial = (testimonial: Testimonial) => {
+    setEditingTestimonial(testimonial);
+    setShowTestimonialForm(true);
+  };
+
   const handleEditStoryImage = (image: StoryImage) => {
     setEditingStoryImage(image);
     setShowStoryImageForm(true);
@@ -359,6 +409,11 @@ const AdminDashboard = () => {
     setEditingTeamMember(null);
   };
 
+  const handleCloseTestimonialForm = () => {
+    setShowTestimonialForm(false);
+    setEditingTestimonial(null);
+  };
+
   const handleCloseStoryImageForm = () => {
     setShowStoryImageForm(false);
     setEditingStoryImage(null);
@@ -377,6 +432,11 @@ const AdminDashboard = () => {
   const handleTeamFormSuccess = () => {
     fetchTeamMembers();
     handleCloseTeamForm();
+  };
+
+  const handleTestimonialFormSuccess = () => {
+    fetchTestimonials();
+    handleCloseTestimonialForm();
   };
 
   const handleStoryImageFormSuccess = () => {
@@ -1115,6 +1175,99 @@ const AdminDashboard = () => {
               </>
             )}
 
+            {activeTab === 'testimonials' && (
+              <Card className="bg-white/60 backdrop-blur-lg border border-white/30 shadow-xl w-full">
+                <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                  <CardTitle className="text-lg md:text-2xl bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent flex items-center gap-2">
+                    <Quote className="w-6 h-6 text-orange-500" />
+                    Testimonials ({testimonials.length})
+                  </CardTitle>
+                  <Button 
+                    onClick={() => setShowTestimonialForm(true)}
+                    className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl text-sm rounded-xl"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Testimonial
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {testimonials.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 w-full">
+                      {testimonials.map((item) => (
+                        <div 
+                          key={item.id} 
+                          className="bg-white/80 backdrop-blur-sm border border-orange-100 rounded-xl md:rounded-2xl p-5 hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] flex flex-col justify-between"
+                        >
+                          <div>
+                            {/* Profile & Designation */}
+                            <div className="flex items-center gap-3.5 mb-3">
+                              <img 
+                                src={item.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}
+                                alt={item.name}
+                                className="w-12 h-12 rounded-full object-cover ring-2 ring-orange-200 shadow-sm"
+                                onError={(e) => {
+                                  e.currentTarget.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80';
+                                }}
+                              />
+                              <div className="min-w-0 flex-1">
+                                <h4 className="font-bold text-gray-900 text-sm truncate">{item.name}</h4>
+                                <p className="text-orange-600 font-medium text-xs truncate">{item.designation}</p>
+                              </div>
+                            </div>
+
+                            {/* Review Message */}
+                            <p className="text-gray-600 text-xs sm:text-sm italic leading-relaxed line-clamp-4 mb-4 bg-orange-50/50 p-3 rounded-xl border border-orange-100/50">
+                              "{item.quote}"
+                            </p>
+                          </div>
+
+                          {/* Footer: Order & Action Buttons */}
+                          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                            <span className="text-[11px] text-gray-400 font-medium">Order: {item.order ?? 0}</span>
+                            <div className="flex space-x-1.5">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleEditTestimonial(item)}
+                                className="p-1.5 h-8 w-8 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 rounded-lg transition-all"
+                                title="Edit"
+                              >
+                                <Edit className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleDeleteTestimonial(item.id)}
+                                className="p-1.5 h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 hover:border-red-300 rounded-lg transition-all"
+                                title="Delete"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-r from-orange-100 to-amber-100 rounded-full mx-auto mb-6 flex items-center justify-center">
+                        <Quote className="w-8 h-8 md:w-10 md:h-10 text-orange-500" />
+                      </div>
+                      <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2">No Testimonials Added Yet</h3>
+                      <p className="text-gray-600 mb-6 text-sm md:text-base">Add client reviews and testimonials that will display on the homepage in real-time.</p>
+                      <Button 
+                        className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl rounded-xl"
+                        onClick={() => setShowTestimonialForm(true)}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Testimonial
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {activeTab === 'story' && (
               <Card className="bg-white/60 backdrop-blur-lg border border-white/30 shadow-xl w-full">
                 <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
@@ -1474,6 +1627,14 @@ const AdminDashboard = () => {
           onClose={handleCloseTeamForm}
           onSuccess={handleTeamFormSuccess}
           member={editingTeamMember}
+        />
+      )}
+
+      {showTestimonialForm && (
+        <TestimonialForm
+          onClose={handleCloseTestimonialForm}
+          onSuccess={handleTestimonialFormSuccess}
+          testimonial={editingTestimonial}
         />
       )}
 

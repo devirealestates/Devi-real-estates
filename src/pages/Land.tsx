@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { db } from '@/lib/firebase';
 import HeaderRedesign from '@/components/HeaderRedesign';
 import FooterRedesign from '@/components/FooterRedesign';
@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePropertyLocations } from '@/hooks/usePropertyLocations';
 import { useRealtimeProperties } from '@/hooks/useRealtimeProperties';
+import PropertyCard from '@/components/PropertyCard';
 
 interface Property {
   id: string;
@@ -155,13 +156,13 @@ const Land = () => {
       </section>
 
       {/* Property Listing Section */}
-      <section ref={sectionRef} id="properties-section" className="py-16 sm:py-20 lg:py-24">
+      <section ref={sectionRef} id="properties-section" className="pt-6 sm:pt-8 lg:pt-10 pb-16 sm:pb-20 lg:pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header and Filters */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-12">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6 mb-8 sm:mb-12">
             <div>
               <h2 
-                className={`text-3xl sm:text-4xl font-medium text-gray-900 mb-2 properties-reveal ${isVisible ? 'visible' : ''}`}
+                className={`text-3xl sm:text-4xl font-medium text-gray-900 mb-1.5 properties-reveal ${isVisible ? 'visible' : ''}`}
                 style={{ fontFamily: "'DM Sans', sans-serif" }}
               >
                 Property Listing
@@ -172,82 +173,84 @@ const Land = () => {
             </div>
 
             {/* Filters */}
-            <div className={`flex flex-wrap items-center gap-4 properties-reveal ${isVisible ? 'visible' : ''}`} style={{ animationDelay: '0.2s' }}>
-              {/* Location Dropdown */}
-              <div className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg bg-white min-w-[150px]">
-                <MapPin className="w-4 h-4 text-gray-400" />
-                <Select 
-                  value={searchQuery || 'all-locations'} 
-                  onValueChange={(value) => setSearchQuery(value === 'all-locations' ? '' : value)}
+            <div className={`w-full lg:w-auto properties-reveal ${isVisible ? 'visible' : ''}`} style={{ animationDelay: '0.2s' }}>
+              <div className="grid grid-cols-2 lg:flex lg:items-center gap-3 sm:gap-4">
+                {/* Location Dropdown */}
+                <div className="col-span-1 flex items-center gap-2 px-3 sm:px-4 py-2 border border-gray-200 rounded-lg bg-white min-w-0 lg:min-w-[150px]">
+                  <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <Select 
+                    value={searchQuery || 'all-locations'} 
+                    onValueChange={(value) => setSearchQuery(value === 'all-locations' ? '' : value)}
+                  >
+                    <SelectTrigger className="border-0 p-0 h-auto shadow-none focus:ring-0 w-full">
+                      <div className="flex flex-col items-start min-w-0">
+                        <span className="text-[11px] sm:text-xs text-gray-400 truncate">Location</span>
+                        <SelectValue placeholder="All Locations" className="truncate text-xs sm:text-sm font-medium" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-gray-200 rounded-xl shadow-lg z-[200]">
+                      <SelectItem value="all-locations">All Locations</SelectItem>
+                      {locationData.locations.map((location, index) => (
+                        <SelectItem key={index} value={location}>{location}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Property Type Dropdown (aside to Location) */}
+                <div className="col-span-1 flex items-center gap-2 px-3 sm:px-4 py-2 border border-gray-200 rounded-lg bg-white min-w-0 lg:min-w-[180px]">
+                  <Mountain className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <Select value={selectedType} onValueChange={setSelectedType}>
+                    <SelectTrigger className="border-0 p-0 h-auto shadow-none focus:ring-0 w-full">
+                      <div className="flex flex-col items-start min-w-0">
+                        <span className="text-[11px] sm:text-xs text-gray-400 truncate">Types of Property</span>
+                        <SelectValue placeholder="All Types" className="truncate text-xs sm:text-sm font-medium" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-gray-200 rounded-xl shadow-lg z-[200]">
+                      {propertyTypes.map(type => (
+                        <SelectItem key={type} value={type}>
+                          {type === 'all' ? 'All Types' : type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Price Range Dropdown */}
+                <div className="col-span-1 flex items-center gap-2 px-3 sm:px-4 py-2 border border-gray-200 rounded-lg bg-white min-w-0 lg:min-w-[180px]">
+                  <span className="text-gray-400 text-sm flex-shrink-0">₹</span>
+                  <Select value={priceRange} onValueChange={setPriceRange}>
+                    <SelectTrigger className="border-0 p-0 h-auto shadow-none focus:ring-0 w-full">
+                      <div className="flex flex-col items-start min-w-0">
+                        <span className="text-[11px] sm:text-xs text-gray-400 truncate">In price range of</span>
+                        <SelectValue placeholder="All Prices" className="truncate text-xs sm:text-sm font-medium" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border border-gray-200 rounded-xl shadow-lg z-[200]">
+                      <SelectItem value="all">All Prices</SelectItem>
+                      <SelectItem value="0-1000000">Under ₹10,00,000</SelectItem>
+                      <SelectItem value="1000000-5000000">₹10,00,000 - ₹50,00,000</SelectItem>
+                      <SelectItem value="5000000-10000000">₹50,00,000 - ₹1,00,00,000</SelectItem>
+                      <SelectItem value="10000000+">Above ₹1,00,00,000</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Search Button */}
+                <button 
+                  onClick={handleSearch}
+                  className="col-span-1 h-full min-h-[46px] px-6 py-2.5 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 active:scale-95 transition-all flex items-center justify-center shadow-sm"
                 >
-                  <SelectTrigger className="border-0 p-0 h-auto shadow-none focus:ring-0">
-                    <div className="flex flex-col items-start">
-                      <span className="text-xs text-gray-400">Location</span>
-                      <SelectValue placeholder="All Locations" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border border-gray-200 rounded-xl shadow-lg z-[200]">
-                    <SelectItem value="all-locations">All Locations</SelectItem>
-                    {locationData.locations.map((location, index) => (
-                      <SelectItem key={index} value={location}>{location}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  Search
+                </button>
               </div>
-
-              {/* Property Type Dropdown */}
-              <div className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg bg-white min-w-[180px]">
-                <Mountain className="w-4 h-4 text-gray-400" />
-                <Select value={selectedType} onValueChange={setSelectedType}>
-                  <SelectTrigger className="border-0 p-0 h-auto shadow-none focus:ring-0">
-                    <div className="flex flex-col items-start">
-                      <span className="text-xs text-gray-400">Types of Property</span>
-                      <SelectValue placeholder="All Types" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border border-gray-200 rounded-xl shadow-lg z-[200]">
-                    {propertyTypes.map(type => (
-                      <SelectItem key={type} value={type}>
-                        {type === 'all' ? 'All Types' : type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Price Range Dropdown */}
-              <div className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg bg-white min-w-[180px]">
-                <span className="text-gray-400 text-sm">₹</span>
-                <Select value={priceRange} onValueChange={setPriceRange}>
-                  <SelectTrigger className="border-0 p-0 h-auto shadow-none focus:ring-0">
-                    <div className="flex flex-col items-start">
-                      <span className="text-xs text-gray-400">In price range of</span>
-                      <SelectValue placeholder="All Prices" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border border-gray-200 rounded-xl shadow-lg z-[200]">
-                    <SelectItem value="all">All Prices</SelectItem>
-                    <SelectItem value="0-1000000">Under ₹10,00,000</SelectItem>
-                    <SelectItem value="1000000-5000000">₹10,00,000 - ₹50,00,000</SelectItem>
-                    <SelectItem value="5000000-10000000">₹50,00,000 - ₹1,00,00,000</SelectItem>
-                    <SelectItem value="10000000+">Above ₹1,00,00,000</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Search Button */}
-              <button 
-                onClick={handleSearch}
-                className="px-6 py-3 bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600 transition-colors"
-              >
-                Search
-              </button>
             </div>
           </div>
 
           {/* Properties Grid */}
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6 lg:gap-8">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="animate-pulse">
                   <div className="aspect-[4/3] bg-gray-200 rounded-xl mb-4"></div>
@@ -263,39 +266,14 @@ const Land = () => {
               ))}
             </div>
           ) : filteredProperties.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6 lg:gap-8">
               {filteredProperties.map((property, index) => (
                 <div 
                   key={property.id}
-                  className={`cursor-pointer group properties-reveal ${isVisible ? 'visible' : ''}`}
+                  className={`properties-reveal ${isVisible ? 'visible' : ''}`}
                   style={{ animationDelay: `${0.3 + index * 0.1}s` }}
-                  onClick={() => navigate(`/property/${property.id}`)}
                 >
-                  {/* Image */}
-                  <div className="aspect-[4/3] rounded-xl overflow-hidden mb-4">
-                    <img 
-                      src={property.images[0]}
-                      alt={property.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=600';
-                      }}
-                    />
-                  </div>
-                  
-                  {/* Details */}
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-semibold text-gray-900 group-hover:text-orange-500 transition-colors">
-                      {property.title}
-                    </h3>
-                    <span className="text-gray-900 font-semibold whitespace-nowrap ml-2">
-                      {property.price}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>{property.location}</span>
-                    <span>{property.area}</span>
-                  </div>
+                  <PropertyCard property={property} />
                 </div>
               ))}
             </div>

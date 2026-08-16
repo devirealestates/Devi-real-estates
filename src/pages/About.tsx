@@ -30,7 +30,7 @@ const About = () => {
   const [ceoMessage, setCEOMessage] = useState<CEOMessage | null>(null);
   const [loading, setLoading] = useState(true);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
-  const [visibleSections, setVisibleSections] = useState<boolean[]>([false, false, false, false, false, false, false]);
+  const [visibleSections, setVisibleSections] = useState<boolean[]>([false, false, false, false, false, false]);
 
   useEffect(() => {
     // Subscribe to real-time updates from the teamMembers collection
@@ -164,12 +164,7 @@ const About = () => {
   const agents = teamMembers.slice(0, 4);
   console.log('About page: agents array length:', agents.length, 'teamMembers length:', teamMembers.length, 'loading:', loading);
 
-  const jobs = [
-    { title: 'Real Estate Broker', type: 'Full Time', location: 'Remote', salary: '$200-40K' },
-    { title: 'Property Manager', type: 'Part Time', location: 'Remote', salary: '$20K-35K' },
-    { title: 'Realtor Agent', type: 'Part Time', location: 'Remote', salary: '$20K-40K' },
-    { title: 'Operations Manager', type: 'Full Time', location: 'In House', salary: '$20K-40K' },
-  ];
+
 
   return (
     <div className="min-h-screen bg-white">
@@ -242,13 +237,13 @@ const About = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-12 bg-white border-t border-gray-100">
+      <section className="py-10 sm:py-12 bg-white border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:justify-between gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
             {stats.map((stat, index) => (
               <div key={index} className="text-center sm:text-left">
-                <p className="text-4xl sm:text-5xl font-light text-orange-500 mb-2">{stat.value}</p>
-                <p className="text-gray-500 text-sm max-w-[200px]">{stat.label}</p>
+                <p className="text-3xl sm:text-4xl lg:text-5xl font-light text-orange-500 mb-1.5 sm:mb-2">{stat.value}</p>
+                <p className="text-gray-500 text-xs sm:text-sm max-w-[200px] sm:max-w-none mx-auto sm:mx-0 leading-tight sm:leading-normal">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -443,48 +438,9 @@ const About = () => {
         </div>
       </section>
 
-      {/* Career Section */}
-      <section 
-        ref={el => sectionRefs.current[5] = el}
-        className="py-16 sm:py-20 lg:py-24 bg-gray-50"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-            <div>
-              <p className="text-orange-500 text-sm font-medium mb-4">Career</p>
-              <h2 
-                className={`text-3xl sm:text-4xl lg:text-5xl font-medium text-gray-900 leading-tight about-reveal ${visibleSections[5] ? 'visible' : ''}`}
-                style={{ fontFamily: "'DM Sans', sans-serif" }}
-              >
-                Discover Your Career Path at Devi Real Estates
-              </h2>
-            </div>
-            <div className="space-y-4">
-              {jobs.map((job, index) => (
-                <div 
-                  key={index}
-                  className={`bg-white rounded-xl p-6 border border-gray-200 hover:border-orange-300 transition-colors about-reveal ${visibleSections[5] ? 'visible' : ''}`}
-                  style={{ animationDelay: `${0.1 + index * 0.1}s` }}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">{job.title}</h3>
-                      <p className="text-gray-500 text-sm">{job.type} • {job.location} • {job.salary}</p>
-                    </div>
-                    <button className="inline-flex items-center gap-1 text-orange-500 text-sm font-medium hover:text-orange-600 transition-colors">
-                      Apply Now <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section 
-        ref={el => sectionRefs.current[6] = el}
+        ref={el => sectionRefs.current[5] = el}
         className="relative py-20 lg:py-32 overflow-hidden"
       >
         <div className="absolute inset-0">
@@ -497,14 +453,14 @@ const About = () => {
         </div>
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 
-            className={`text-3xl sm:text-4xl lg:text-5xl font-medium text-white mb-6 leading-tight about-reveal ${visibleSections[6] ? 'visible' : ''}`}
+            className={`text-3xl sm:text-4xl lg:text-5xl font-medium text-white mb-6 leading-tight about-reveal ${visibleSections[5] ? 'visible' : ''}`}
             style={{ fontFamily: "'DM Sans', sans-serif" }}
           >
             Are you looking to buy<br />or rent a property?
           </h2>
           <button 
             onClick={() => navigate('/contact')}
-            className={`inline-flex items-center gap-2 px-8 py-3 border-2 border-white text-white rounded-full text-sm font-medium hover:bg-white hover:text-gray-900 transition-all duration-300 about-reveal ${visibleSections[6] ? 'visible' : ''}`}
+            className={`inline-flex items-center gap-2 px-8 py-3 border-2 border-white text-white rounded-full text-sm font-medium hover:bg-white hover:text-gray-900 transition-all duration-300 about-reveal ${visibleSections[5] ? 'visible' : ''}`}
             style={{ animationDelay: '0.2s' }}
           >
             Get in Touch <ArrowRight className="w-4 h-4" />

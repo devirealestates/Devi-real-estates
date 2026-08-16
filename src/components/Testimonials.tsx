@@ -1,12 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
-const testimonials = [
+export interface TestimonialItem {
+  id?: string;
+  quote: string;
+  name: string;
+  designation?: string;
+  title?: string;
+  avatar: string;
+  order?: number;
+}
+
+const defaultTestimonials: TestimonialItem[] = [
   {
     quote:
       '"Devi Real Estates has been an invaluable partner in our search for the perfect commercial space. Their team is incredibly knowledgeable and dedicated, making the entire process seamless and stress-free."',
     name: 'Ravi Kumar',
-    title: 'CEO, Tech Innovations Inc.',
+    designation: 'CEO, Tech Innovations Inc.',
     avatar:
       'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80',
   },
@@ -14,7 +26,7 @@ const testimonials = [
     quote:
       '"The professionalism and expertise of Devi Real Estates made finding our dream home an absolute joy. They understood exactly what we were looking for and delivered beyond our expectations."',
     name: 'Priya Sharma',
-    title: 'Business Owner',
+    designation: 'Business Owner',
     avatar:
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80',
   },
@@ -22,17 +34,61 @@ const testimonials = [
     quote:
       '"I was impressed by how quickly and efficiently the team at Devi Real Estates found the perfect investment property for me. Their market knowledge is unmatched."',
     name: 'Anil Reddy',
-    title: 'Real Estate Investor',
+    designation: 'Real Estate Investor',
     avatar:
       'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80',
   },
 ];
 
 const Testimonials: React.FC = () => {
+  const [testimonialsList, setTestimonialsList] = useState<TestimonialItem[]>(defaultTestimonials);
   const [current, setCurrent] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
+
+  // Real-time Firestore subscription
+  useEffect(() => {
+    try {
+      const q = query(collection(db, 'testimonials'), orderBy('order', 'asc'));
+      const unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          if (!snapshot.empty) {
+            const items = snapshot.docs.map((doc) => {
+              const data = doc.data();
+              return {
+                id: doc.id,
+                quote: data.quote || data.message || '',
+                name: data.name || 'Anonymous',
+                designation: data.designation || data.title || 'Client',
+                avatar: data.avatar || data.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+                order: data.order ?? 0,
+              };
+            });
+            setTestimonialsList(items);
+          } else {
+            setTestimonialsList(defaultTestimonials);
+          }
+        },
+        (error) => {
+          console.error('Error fetching real-time testimonials:', error);
+          setTestimonialsList(defaultTestimonials);
+        }
+      );
+
+      return () => unsubscribe();
+    } catch (err) {
+      console.error('Firestore listener setup error:', err);
+    }
+  }, []);
+
+  // Reset index if it exceeds array length
+  useEffect(() => {
+    if (current >= testimonialsList.length) {
+      setCurrent(0);
+    }
+  }, [testimonialsList.length, current]);
 
   // Intersection observer for section visibility
   useEffect(() => {
@@ -53,38 +109,40 @@ const Testimonials: React.FC = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Auto-scroll every 2 seconds
+  // Auto-scroll every 3 seconds
   useEffect(() => {
-    if (!isVisible) return;
+    if (!isVisible || testimonialsList.length <= 1) return;
 
     const interval = setInterval(() => {
       setIsAnimating(true);
       setTimeout(() => {
-        setCurrent((prev) => (prev === testimonials.length - 1 ? 0 : prev + 1));
+        setCurrent((prev) => (prev === testimonialsList.length - 1 ? 0 : prev + 1));
         setIsAnimating(false);
       }, 300);
-    }, 2000);
+    }, 3000);
 
     return () => clearInterval(interval);
-  }, [isVisible]);
+  }, [isVisible, testimonialsList.length]);
 
   const handlePrev = () => {
+    if (testimonialsList.length <= 1) return;
     setIsAnimating(true);
     setTimeout(() => {
-      setCurrent((prev) => (prev === 0 ? testimonials.length - 1 : prev - 1));
+      setCurrent((prev) => (prev === 0 ? testimonialsList.length - 1 : prev - 1));
       setIsAnimating(false);
     }, 300);
   };
 
   const handleNext = () => {
+    if (testimonialsList.length <= 1) return;
     setIsAnimating(true);
     setTimeout(() => {
-      setCurrent((prev) => (prev === testimonials.length - 1 ? 0 : prev + 1));
+      setCurrent((prev) => (prev === testimonialsList.length - 1 ? 0 : prev + 1));
       setIsAnimating(false);
     }, 300);
   };
 
-  const testimonial = testimonials[current];
+  const testimonial = testimonialsList[current] || defaultTestimonials[0];
 
   return (
     <section 
@@ -105,12 +163,14 @@ const Testimonials: React.FC = () => {
             <button
               onClick={handlePrev}
               className="w-10 h-10 rounded-full border-2 border-white/50 flex items-center justify-center hover:border-white hover:bg-white/10 transition-all"
+              aria-label="Previous Testimonial"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               onClick={handleNext}
               className="w-10 h-10 rounded-full border-2 border-white/50 flex items-center justify-center hover:border-white hover:bg-white/10 transition-all"
+              aria-label="Next Testimonial"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -129,7 +189,7 @@ const Testimonials: React.FC = () => {
               isAnimating ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0'
             }`}
           >
-            {testimonial.quote}
+            {testimonial.quote.startsWith('"') ? testimonial.quote : `"${testimonial.quote}"`}
           </p>
           <div 
             className={`flex items-center gap-4 transition-all duration-300 ${
@@ -140,11 +200,14 @@ const Testimonials: React.FC = () => {
             <img
               src={testimonial.avatar}
               alt={testimonial.name}
-              className="w-12 h-12 rounded-full object-cover border-2 border-white/50"
+              className="w-12 h-12 rounded-full object-cover border-2 border-white/50 shadow-sm"
+              onError={(e) => {
+                e.currentTarget.src = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80';
+              }}
             />
             <div>
               <p className="font-semibold text-base">{testimonial.name}</p>
-              <p className="text-white/80 text-sm">{testimonial.title}</p>
+              <p className="text-white/80 text-sm">{testimonial.designation || testimonial.title}</p>
             </div>
           </div>
         </div>
@@ -156,7 +219,7 @@ const Testimonials: React.FC = () => {
           }`}
           style={{ transitionDelay: '400ms' }}
         >
-          {testimonials.map((_, index) => (
+          {testimonialsList.map((_, index) => (
             <button
               key={index}
               onClick={() => {
@@ -171,6 +234,7 @@ const Testimonials: React.FC = () => {
                   ? 'w-8 bg-white' 
                   : 'w-4 bg-white/40 hover:bg-white/60'
               }`}
+              aria-label={`Go to slide ${index + 1}`}
             />
           ))}
         </div>

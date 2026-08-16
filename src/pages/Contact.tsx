@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import HeaderRedesign from '@/components/HeaderRedesign';
 import FooterRedesign from '@/components/FooterRedesign';
 import { ArrowRight } from 'lucide-react';
@@ -48,19 +48,19 @@ Message: ${formData.message}`;
     <div className="min-h-screen bg-white">
       <HeaderRedesign />
       
-      {/* Hero Section - 80% viewport height */}
-      <section className="relative h-[80vh] min-h-[500px] flex items-end pb-16">
+      {/* Hero Section - Cropped half height on mobile, 80% viewport height on desktop */}
+      <section className="relative h-[35vh] min-h-[220px] sm:h-[80vh] sm:min-h-[500px] flex items-end pb-8 sm:pb-16">
         <div className="absolute inset-0">
           <img 
             src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2075" 
             alt="Luxury Modern Home" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-center"
           />
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <h1 
-            className="text-6xl sm:text-7xl lg:text-8xl font-medium text-white"
+            className="text-4xl sm:text-7xl lg:text-8xl font-semibold sm:font-medium text-white"
             style={{ fontFamily: "'DM Sans', sans-serif" }}
           >
             Contact Us

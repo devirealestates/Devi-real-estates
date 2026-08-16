@@ -1,6 +1,6 @@
-
-import React from 'react';
-import { Send, X } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -23,45 +23,50 @@ const ShareMenu: React.FC<ShareMenuProps> = ({
 }) => {
   const isMobile = useIsMobile();
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isOpen]);
+
+  if (!isOpen || typeof document === 'undefined') return null;
+
+  const propertyUrl = `${window.location.origin}/property/${propertyId}`;
 
   const handleWhatsAppShare = () => {
-    const propertyUrl = `${window.location.origin}/property/${propertyId}`;
     const message = `Check out this property: ${propertyTitle}\n📍 ${propertyLocation}\n💰 ${propertyPrice}\n\n${propertyUrl}`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    
     window.open(whatsappUrl, '_blank');
     onClose();
   };
 
   const handleInstagramShare = () => {
-    // Instagram doesn't support direct URL sharing, so we'll copy the link to clipboard
-    // and guide the user to paste it in their Instagram story/post
-    const propertyUrl = `${window.location.origin}/property/${propertyId}`;
     navigator.clipboard.writeText(propertyUrl).then(() => {
-      // Open Instagram web
       window.open('https://www.instagram.com/', '_blank');
       onClose();
     }).catch(() => {
-      // Fallback: just open Instagram
       window.open('https://www.instagram.com/', '_blank');
       onClose();
     });
   };
 
-  return (
-    <>
+  const modalContent = (
+    <div className="fixed inset-0 z-[99999] flex items-end md:items-center justify-center pointer-events-auto">
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/50 z-50"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
       
       {/* Share Menu */}
-      <div className={`fixed z-50 bg-white rounded-2xl p-6 animate-in slide-in-from-bottom duration-300 ${
+      <div className={`relative z-10 bg-white rounded-t-3xl md:rounded-2xl p-6 shadow-2xl animate-in slide-in-from-bottom duration-300 ${
         isMobile 
-          ? 'bottom-0 left-0 right-0 rounded-t-2xl' 
-          : 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 min-w-[320px]'
+          ? 'w-full' 
+          : 'w-full max-w-sm'
       }`}>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Share Property</h3>
@@ -69,7 +74,7 @@ const ShareMenu: React.FC<ShareMenuProps> = ({
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 rounded-full"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -78,7 +83,7 @@ const ShareMenu: React.FC<ShareMenuProps> = ({
         <div className="flex items-center justify-center gap-4">
           <Button
             onClick={handleWhatsAppShare}
-            className="flex flex-col items-center gap-2 bg-green-500 hover:bg-green-600 text-white rounded-xl p-4 min-w-[80px] h-auto"
+            className="flex flex-col items-center gap-2 bg-green-500 hover:bg-green-600 text-white rounded-xl p-4 min-w-[80px] h-auto shadow-md shadow-green-500/20"
           >
             <svg
               className="w-8 h-8"
@@ -92,7 +97,7 @@ const ShareMenu: React.FC<ShareMenuProps> = ({
           
           <Button
             onClick={handleInstagramShare}
-            className="flex flex-col items-center gap-2 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 hover:from-purple-600 hover:via-pink-600 hover:to-orange-600 text-white rounded-xl p-4 min-w-[80px] h-auto"
+            className="flex flex-col items-center gap-2 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 hover:from-purple-600 hover:via-pink-600 hover:to-orange-600 text-white rounded-xl p-4 min-w-[80px] h-auto shadow-md shadow-pink-500/20"
           >
             <svg
               className="w-8 h-8"
@@ -105,8 +110,11 @@ const ShareMenu: React.FC<ShareMenuProps> = ({
           </Button>
         </div>
       </div>
-    </>
+    </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default ShareMenu;
+

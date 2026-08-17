@@ -12,6 +12,8 @@
       "destination": "/api/property-share?id=:id"
     },
     { "source": "/api/property-share", "destination": "/api/property-share" },
+    { "source": "/api/send-notification", "destination": "/api/send-notification" },
+    { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/" }
   ],
   "buildCommand": "npm run build",

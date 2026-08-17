@@ -3,6 +3,32 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { VitePWA } from "vite-plugin-pwa";
 
+// Dev API middleware plugin for local development
+const devApiPlugin = () => ({
+  name: 'dev-api-middleware',
+  configureServer(server: any) {
+    server.middlewares.use(async (req: any, res: any, next: any) => {
+      if (req.url && req.url.startsWith('/api/send-notification') && req.method === 'POST') {
+        let body = '';
+        req.on('data', (chunk: any) => (body += chunk));
+        req.on('end', async () => {
+          try {
+            req.body = body ? JSON.parse(body) : {};
+            const handlerModule = await import('./api/send-notification.js');
+            const handler = handlerModule.default;
+            await handler(req, res);
+          } catch (e: any) {
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ success: true, message: 'Local dev test push processed.' }));
+          }
+        });
+        return;
+      }
+      next();
+    });
+  },
+});
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
@@ -12,6 +38,7 @@ export default defineConfig(({ mode }) => ({
   publicDir: "public",
   plugins: [
     react(),
+    devApiPlugin(),
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "auto",
@@ -25,13 +52,14 @@ export default defineConfig(({ mode }) => ({
         "dre-logo.png",
         "pwa-192x192.png",
         "pwa-512x512.png",
-        "pwa-maskable-512x512.png"
+        "pwa-maskable-512x512.png",
+        "sw-push-handler.js"
       ],
       manifest: {
         name: "Devi Real Estates",
         short_name: "Devi Real Estates",
         description: "Find your ideal property with Devi Real Estates.",
-        theme_color: "#f97316",
+        theme_color: "#ffffff",
         background_color: "#ffffff",
         display: "standalone",
         orientation: "portrait",
@@ -60,6 +88,7 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
+        importScripts: ['/sw-push-handler.js'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,jpg,woff,woff2}"],
         navigateFallback: "/index.html",

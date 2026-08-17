@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Phone, Mail, MessageCircle, User, Send } from 'lucide-react';
 import { toast } from 'sonner';
+import { triggerEnquiryNotification } from '@/lib/notificationTriggers';
 
 interface PropertyContactProps {
   contactName?: string;
@@ -76,6 +77,14 @@ const PropertyContact: React.FC<PropertyContactProps> = ({
     window.open(whatsappUrl, '_blank');
     
     toast.success('Opening WhatsApp...');
+
+    // Trigger notification to admin and subscribers
+    triggerEnquiryNotification({
+      propertyTitle,
+      userName: formData.name,
+      phone: formData.phone,
+    }).catch((err) => console.warn('Could not trigger enquiry notification:', err));
+
     // Reset form
     setFormData({ 
       name: '', 

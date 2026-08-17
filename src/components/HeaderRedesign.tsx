@@ -4,6 +4,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useShortlist } from '@/hooks/useShortlist';
 import { usePWAInstall } from '@/hooks/usePWAInstall';
+import { NotificationBell } from './NotificationBell';
 import ShortlistSidebar from './ShortlistSidebar';
 
 const HeaderRedesign: React.FC = () => {
@@ -229,6 +230,9 @@ const HeaderRedesign: React.FC = () => {
               </button>
             )}
 
+            {/* Notification Bell - Desktop */}
+            <NotificationBell isHomePage={isHomePage} isScrolled={isScrolled} />
+
             {/* Logout Button - Desktop */}
             {currentUser && (
               <button
@@ -241,17 +245,20 @@ const HeaderRedesign: React.FC = () => {
             )}
           </div>
 
-          {/* Mobile Menu Toggle */}
-          <button
-            className="lg:hidden w-10 h-10 flex items-center justify-center"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            {isMobileMenuOpen ? (
-              <X className={`w-6 h-6 ${isMobileMenuOpen ? 'text-gray-900' : textColor}`} />
-            ) : (
-              <Menu className={`w-6 h-6 ${textColor}`} />
-            )}
-          </button>
+          {/* Mobile Right Section: Bell & Menu Toggle */}
+          <div className="flex items-center gap-1 lg:hidden">
+            <NotificationBell isHomePage={isHomePage} isScrolled={isScrolled} />
+            <button
+              className="w-10 h-10 flex items-center justify-center"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? (
+                <X className={`w-6 h-6 ${isMobileMenuOpen ? 'text-gray-900' : textColor}`} />
+              ) : (
+                <Menu className={`w-6 h-6 ${textColor}`} />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 

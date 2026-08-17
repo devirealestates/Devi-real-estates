@@ -1,6 +1,5 @@
 
-import React from 'react';
-import { Building, Users, Image as ImageIcon, BarChart3, X, TrendingUp, Eye, Settings, Database, MapPin, CalendarCheck, Quote } from 'lucide-react';
+import { Building, Users, Image as ImageIcon, BarChart3, X, TrendingUp, Eye, Settings, Database, MapPin, CalendarCheck, Quote, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -40,6 +39,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       label: 'Properties',
       icon: Building,
       hasDropdown: true,
+    },
+    {
+      id: 'notifications',
+      label: 'Push Notifications',
+      icon: Bell,
+      hasDropdown: false,
     },
     {
       id: 'analytics',

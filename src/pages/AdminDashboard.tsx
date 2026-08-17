@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Edit, Trash2, Building, Home, Users, MapPin, Image as ImageIcon, Mail, BarChart3, Calendar, Settings, Menu, ChevronDown, Eye, Database, MessageSquare, Quote } from 'lucide-react';
+import { LogOut, Plus, Edit, Trash2, Building, Home, Users, MapPin, Image as ImageIcon, Mail, BarChart3, Calendar, Settings, Menu, ChevronDown, Eye, Database, MessageSquare, Quote, Bell } from 'lucide-react';
 import AdminPropertyForm from '@/components/AdminPropertyForm';
 import TeamMemberForm from '@/components/TeamMemberForm';
 import TestimonialForm, { Testimonial } from '@/components/TestimonialForm';
@@ -24,6 +24,7 @@ import RealtimeUserSignups from '@/components/RealtimeUserSignups';
 import UserSettingsPanel from '@/components/UserSettingsPanel';
 import SimpleUserDashboard from '@/components/SimpleUserDashboard';
 import { formatPriceWithSlash } from '@/lib/utils';
+import { AdminNotificationPanel } from '@/components/AdminNotificationPanel';
 import FirebaseAuthUserManagement from '@/components/FirebaseAuthUserManagement';
 import FirebaseAuthDashboard from '@/components/FirebaseAuthDashboard';
 import FirebaseAuthSummary from '@/components/FirebaseAuthSummary';
@@ -710,6 +711,15 @@ const AdminDashboard = () => {
                 </div>
                 
                 {/* Other Menu Items */}
+                <Button
+                  variant="ghost"
+                  onClick={() => handleMobileNavClick('notifications')}
+                  className={`w-full justify-start hover:bg-blue-50 ${activeTab === 'notifications' ? 'bg-blue-50 text-blue-600 font-medium' : ''}`}
+                >
+                  <Bell className="w-4 h-4 mr-3" />
+                  Push Notifications
+                </Button>
+
                 <Button
                   variant="ghost"
                   onClick={() => handleMobileNavClick('analytics')}
@@ -1425,6 +1435,10 @@ const AdminDashboard = () => {
                   )}
                 </CardContent>
               </Card>
+            )}
+
+            {activeTab === 'notifications' && (
+              <AdminNotificationPanel />
             )}
 
             {activeTab === 'analytics' && (

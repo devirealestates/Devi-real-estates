@@ -10,6 +10,7 @@ import ImageUploader from './ImageUploader';
 import VideoUploader from './VideoUploader';
 import AdminMediaPreview from './AdminMediaPreview';
 import { toast } from 'sonner';
+import { triggerNewPropertyNotification, triggerPriceUpdateNotification } from '@/lib/notificationTriggers';
 
 interface AdminPropertyFormProps {
   onClose?: () => void;
@@ -330,13 +331,33 @@ const AdminPropertyForm: React.FC<AdminPropertyFormProps> = ({
 
       if (property?.id) {
         // Update existing property
+        const oldPrice = property.price;
         await updateDoc(doc(db, 'properties', property.id), propertyData);
         toast.success('Property updated successfully!');
+
+        // Check if price changed
+        if (oldPrice && formData.price && oldPrice !== formData.price) {
+          triggerPriceUpdateNotification({
+            id: property.id,
+            title: formData.title,
+            newPrice: formData.price,
+            location: formData.location,
+          }).catch((err) => console.warn('Notification trigger error:', err));
+        }
       } else {
         // Add new property
         const docRef = await addDoc(collection(db, 'properties'), propertyData);
         console.log('Property successfully saved with ID:', docRef.id);
         toast.success('Property added successfully!');
+
+        // Trigger real device push notification for new property
+        triggerNewPropertyNotification({
+          id: docRef.id,
+          title: formData.title,
+          price: formData.price,
+          location: formData.location,
+          category: formData.category,
+        }).catch((err) => console.warn('Notification trigger error:', err));
       }
       
       // Call success callback and close form

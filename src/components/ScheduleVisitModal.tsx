@@ -5,6 +5,7 @@ import { X, Calendar, Clock, User, Phone, MessageSquare, CheckCircle } from 'luc
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { triggerSiteVisitNotification } from '@/lib/notificationTriggers';
 
 interface ScheduleVisitModalProps {
   isOpen: boolean;
@@ -109,6 +110,15 @@ const ScheduleVisitModal: React.FC<ScheduleVisitModalProps> = ({
       });
 
       setSuccess(true);
+
+      // Trigger real device notification for site visit confirmation
+      triggerSiteVisitNotification({
+        propertyTitle,
+        propertyId,
+        visitDate: formData.date,
+        visitTime: formData.time,
+        userName: formData.name,
+      }).catch((err) => console.warn('Could not trigger site visit notification:', err));
 
       // Reset form after delay
       setTimeout(() => {

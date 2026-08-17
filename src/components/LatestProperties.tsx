@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { ArrowRight, Image as ImageIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useRealtimeProperties, Property } from '@/hooks/useRealtimeProperties';
+import { formatPriceWithSlash } from '@/lib/utils';
 
 interface DisplayListing {
   id: string;
@@ -34,18 +35,18 @@ const getPropertyTimestamp = (prop: Property): number => {
   return 0;
 };
 
-// Helper to format price cleanly with Indian currency styling if needed
+// Helper to format price cleanly with Indian currency styling and /-
 const formatPrice = (price?: string): string => {
   if (!price) return 'Price on Request';
   const trimmed = price.trim();
   if (trimmed.startsWith('₹') || trimmed.toLowerCase().startsWith('rs')) {
-    return trimmed;
+    return formatPriceWithSlash(trimmed);
   }
   const numeric = Number(trimmed.replace(/[^0-9.]/g, ''));
   if (!isNaN(numeric) && numeric > 0) {
-    return `₹ ${numeric.toLocaleString('en-IN')}`;
+    return formatPriceWithSlash(`₹ ${numeric.toLocaleString('en-IN')}`);
   }
-  return `₹ ${trimmed}`;
+  return formatPriceWithSlash(`₹ ${trimmed}`);
 };
 
 // Helper to determine rental period label

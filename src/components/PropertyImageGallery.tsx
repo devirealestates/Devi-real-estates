@@ -26,6 +26,44 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
   const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
+  // Touch Swipe Gesture State
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [touchEndX, setTouchEndX] = useState<number | null>(null);
+  const minSwipeDistance = 40;
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEndX(null);
+    setTouchStartX(e.targetTouches[0].clientX);
+    setTouchStartY(e.targetTouches[0].clientY);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEndX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null || touchEndX === null) return;
+    const distanceX = touchStartX - touchEndX;
+    const currentY = e.changedTouches?.[0]?.clientY ?? touchStartY ?? 0;
+    const distanceY = touchStartY !== null ? Math.abs(currentY - touchStartY) : 0;
+
+    // Check if horizontal swipe exceeds minimum distance and is predominantly horizontal
+    if (Math.abs(distanceX) > minSwipeDistance && Math.abs(distanceX) > distanceY) {
+      if (distanceX > 0) {
+        // Swiped Left -> Show Next
+        nextMedia();
+      } else {
+        // Swiped Right -> Show Previous
+        prevMedia();
+      }
+    }
+
+    setTouchStartX(null);
+    setTouchStartY(null);
+    setTouchEndX(null);
+  };
+
   // Combine images and videos into media items
   const getMediaItems = (): MediaItem[] => {
     const mediaItems = combineMediaItems(images, videos);
@@ -59,9 +97,14 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
   };
 
   return (
-    <div className="space-y-3">
-      {/* Main Media Display */}
-      <div className="relative aspect-[16/10] rounded-lg overflow-hidden bg-gray-100 group cursor-pointer">
+    <div className="space-y-3 select-none">
+      {/* Main Media Display with Touch Swipe */}
+      <div 
+        className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-gray-100 group cursor-pointer touch-pan-y"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         {currentMedia?.type === 'video' ? (
           // Video Display
           <div className="relative w-full h-full">
@@ -104,7 +147,7 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
           />
         )}
         
-        {/* Navigation Arrows */}
+        {/* Navigation Arrows - Always visible on mobile & desktop */}
         {mediaItems.length > 1 && (
           <>
             <button
@@ -112,18 +155,20 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                 e.stopPropagation();
                 prevMedia();
               }}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-black/40"
+              className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 hover:bg-white text-gray-800 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 z-20"
+              aria-label="Previous Image"
             >
-              <ChevronLeft className="w-4 h-4 text-white" />
+              <ChevronLeft className="w-5 h-5 text-gray-800" />
             </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 nextMedia();
               }}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black/20 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-black/40"
+              className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/90 hover:bg-white text-gray-800 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 z-20"
+              aria-label="Next Image"
             >
-              <ChevronRight className="w-4 h-4 text-white" />
+              <ChevronRight className="w-5 h-5 text-gray-800" />
             </button>
           </>
         )}
@@ -206,7 +251,12 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
 
       {/* Lightbox */}
       {isLightboxOpen && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+        <div 
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 touch-pan-y"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           <div className="relative max-w-7xl max-h-full w-full">
             {currentMedia?.type === 'video' ? (
               // Video Lightbox

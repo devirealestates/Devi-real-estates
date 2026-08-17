@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { collection, getDocs, query, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
+import { formatPriceWithSlash } from '@/lib/utils';
 
 interface Property {
   id: string;
@@ -232,7 +233,7 @@ const ShortlistSidebar: React.FC<ShortlistSidebarProps> = ({ isOpen, onClose }) 
                       <h3 className="font-semibold text-gray-900 text-sm line-clamp-1 mb-1">
                         {property.title}
                       </h3>
-                      <p className="text-orange-600 font-bold text-sm mb-1">{property.price}</p>
+                      <p className="text-orange-600 font-bold text-sm mb-1">{formatPriceWithSlash(property.price)}</p>
                       <p className="text-gray-500 text-xs line-clamp-1">{property.location}</p>
                       {property.area && (
                         <p className="text-gray-400 text-xs">{property.area}</p>

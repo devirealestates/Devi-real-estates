@@ -13,6 +13,7 @@ import Footer from '@/components/Footer';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useContactOwner } from '@/hooks/useContactOwner';
+import { formatPriceWithSlash } from '@/lib/utils';
 
 interface UserProfile {
   username: string;
@@ -431,7 +432,7 @@ const Profile = () => {
                         />
                       </div>
                       <div className="flex-1 px-3 py-2">
-                        <div className="text-base font-bold text-gray-900 mb-1">{property.price}</div>
+                        <div className="text-base font-bold text-gray-900 mb-1">{formatPriceWithSlash(property.price)}</div>
                         <h3 className="text-sm font-medium text-gray-800 mb-1 line-clamp-1">
                           {property.title}
                         </h3>

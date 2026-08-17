@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useShortlist } from '@/hooks/useShortlist';
 import { useContactOwner } from '@/hooks/useContactOwner';
 import EnhancedShareMenu from '@/components/EnhancedShareMenu';
+import { formatPriceWithSlash } from '@/lib/utils';
 
 interface Property {
   id: string;
@@ -212,7 +213,7 @@ const SuggestedProperties: React.FC<SuggestedPropertiesProps> = ({
                       {/* Equal Height Content */}
                       <div className="p-2 h-24 flex flex-col justify-between">
                         <div>
-                          <div className="text-xs font-bold text-gray-900 mb-1 line-clamp-1">{property.price}</div>
+                          <div className="text-xs font-bold text-gray-900 mb-1 line-clamp-1">{formatPriceWithSlash(property.price)}</div>
                           <h3 className="text-xs font-semibold text-gray-800 mb-1 line-clamp-1 truncate">
                             {property.title}
                           </h3>
@@ -302,7 +303,7 @@ const SuggestedProperties: React.FC<SuggestedPropertiesProps> = ({
                           <div className="flex-1 p-3 pr-16 flex flex-col justify-between">
                             {/* Price */}
                             <div className="text-lg font-bold text-gray-900">
-                              {property.price}
+                              {formatPriceWithSlash(property.price)}
                             </div>
                             
                             {/* Title - Fixed visibility issue */}

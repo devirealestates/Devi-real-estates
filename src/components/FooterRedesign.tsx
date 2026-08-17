@@ -5,9 +5,9 @@ const FooterRedesign: React.FC = () => {
   return (
     <footer className="bg-white border-t border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-10">
           {/* Brand */}
-          <div>
+          <div className="lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <img 
                 src="/dre-logo.png" 
@@ -50,7 +50,6 @@ const FooterRedesign: React.FC = () => {
               <li><a href="/buy" className="text-gray-500 text-sm hover:text-orange-500 transition-colors">Properties</a></li>
               <li><a href="/my-bookings" className="text-gray-500 text-sm hover:text-orange-500 transition-colors">My Bookings</a></li>
               <li><a href="/contact" className="text-gray-500 text-sm hover:text-orange-500 transition-colors">Contact</a></li>
-              <li><a href="/privacy-policy" className="text-gray-500 text-sm hover:text-orange-500 transition-colors">Privacy</a></li>
             </ul>
           </div>
 
@@ -63,6 +62,17 @@ const FooterRedesign: React.FC = () => {
               <li><a href="/rent" className="text-gray-500 text-sm hover:text-orange-500 transition-colors">Houses for Rent</a></li>
               <li><a href="/commercial" className="text-gray-500 text-sm hover:text-orange-500 transition-colors">Commercial</a></li>
               <li><a href="/land" className="text-gray-500 text-sm hover:text-orange-500 transition-colors">Land</a></li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-4">Legal</h4>
+            <ul className="space-y-3">
+              <li><a href="/privacy-policy" className="text-gray-500 text-sm hover:text-orange-500 transition-colors">Privacy Policy</a></li>
+              <li><a href="/terms-and-conditions" className="text-gray-500 text-sm hover:text-orange-500 transition-colors">Terms & Conditions</a></li>
+              <li><a href="/disclaimer" className="text-gray-500 text-sm hover:text-orange-500 transition-colors">Disclaimer</a></li>
+              <li><a href="/rera-disclaimer" className="text-gray-500 text-sm hover:text-orange-500 transition-colors">RERA & Property Info</a></li>
             </ul>
           </div>
 

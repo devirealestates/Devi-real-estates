@@ -23,6 +23,7 @@ import UserAnalyticsDashboard from '@/components/UserAnalyticsDashboard';
 import RealtimeUserSignups from '@/components/RealtimeUserSignups';
 import UserSettingsPanel from '@/components/UserSettingsPanel';
 import SimpleUserDashboard from '@/components/SimpleUserDashboard';
+import { formatPriceWithSlash } from '@/lib/utils';
 import FirebaseAuthUserManagement from '@/components/FirebaseAuthUserManagement';
 import FirebaseAuthDashboard from '@/components/FirebaseAuthDashboard';
 import FirebaseAuthSummary from '@/components/FirebaseAuthSummary';
@@ -991,7 +992,7 @@ const AdminDashboard = () => {
                                   {property.category}
                                 </span>
                                 <span className="text-xs md:text-sm font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
-                                  {property.price}
+                                  {formatPriceWithSlash(property.price)}
                                 </span>
                                 {property.createdAt && (
                                   <span className="text-xs text-gray-500">

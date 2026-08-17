@@ -9,6 +9,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import BottomNavigation from "@/components/BottomNavigation";
 import NetworkStatus from "@/components/NetworkStatus";
 import ScrollToTop from "@/components/ScrollToTop";
+import { PWAInstallBanner } from "@/components/PWAInstallBanner";
 
 // Pages
 import Index from "./pages/Index";
@@ -28,6 +29,9 @@ import AdminDashboard from "./pages/AdminDashboard";
 import PropertyDetails from "./pages/PropertyDetails";
 import EMICalculator from "./pages/EMICalculator";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsConditions from "./pages/TermsConditions";
+import Disclaimer from "./pages/Disclaimer";
+import ReraDisclaimer from "./pages/ReraDisclaimer";
 import BookingHistory from "./pages/BookingHistory";
 import NotFound from "./pages/NotFound";
 
@@ -57,7 +61,13 @@ const App = () => {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/shortlist" element={<Shortlist />} />
                 <Route path="/emi-calculator" element={<EMICalculator />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/privacypolicy" element={<PrivacyPolicy />} />
+                <Route path="/terms-and-conditions" element={<TermsConditions />} />
+                <Route path="/terms" element={<TermsConditions />} />
+                <Route path="/disclaimer" element={<Disclaimer />} />
+                <Route path="/rera-disclaimer" element={<ReraDisclaimer />} />
+                <Route path="/rera" element={<ReraDisclaimer />} />
                 <Route path="/property/:id" element={<PropertyDetails />} />
                 <Route path="/my-bookings" element={<BookingHistory />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
@@ -72,6 +82,7 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <BottomNavigation />
+              <PWAInstallBanner />
               <NetworkStatus />
             </BrowserRouter>
           </LocationProvider>

@@ -22,30 +22,37 @@ const Signup = () => {
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      const userDocRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userDocRef);
+      // Sync user profile to Firestore safely without failing the auth session if Firestore errors
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
 
-      if (!userDoc.exists()) {
-        const deviceInfo = {
-          userAgent: navigator.userAgent,
-          platform: navigator.platform,
-          language: navigator.language,
-          screenResolution: `${screen.width}x${screen.height}`,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        };
+        if (!userDoc.exists()) {
+          const deviceInfo = {
+            userAgent: navigator.userAgent || '',
+            platform: navigator.platform || '',
+            language: navigator.language || '',
+            screenResolution: typeof window !== 'undefined' && window.screen ? `${window.screen.width}x${window.screen.height}` : 'unknown',
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+          };
 
-        await setDoc(userDocRef, {
-          uid: user.uid,
-          username: user.displayName || 'User',
-          email: user.email,
-          role: 'user',
-          createdAt: serverTimestamp(),
-          deviceInfo,
-          signInMethod: 'google',
-        });
+          await setDoc(userDocRef, {
+            uid: user.uid,
+            username: user.displayName || user.email?.split('@')[0] || 'User',
+            email: user.email || '',
+            role: 'user',
+            createdAt: serverTimestamp(),
+            deviceInfo,
+            signInMethod: 'google',
+          }, { merge: true });
+        }
+      } catch (firestoreErr) {
+        console.warn('Firestore profile sync warning (auth succeeded):', firestoreErr);
       }
 
       toast({
@@ -55,9 +62,22 @@ const Signup = () => {
 
       navigate('/');
     } catch (error: any) {
+      console.error('Google sign-up error details:', error);
+      let errorMsg = error.message || "Failed to sign up with Google";
+
+      if (error.code === 'auth/unauthorized-domain') {
+        errorMsg = "This domain is not authorized in Firebase Console. Go to Firebase Console > Authentication > Settings > Authorized domains and add your current domain/IP.";
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        errorMsg = "Sign-in popup was closed before completing.";
+      } else if (error.code === 'auth/popup-blocked') {
+        errorMsg = "Popup was blocked by your browser. Please enable popups for this site.";
+      } else if (error.code === 'auth/operation-not-allowed') {
+        errorMsg = "Google Sign-In is not enabled in Firebase Console > Authentication > Sign-in method.";
+      }
+
       toast({
-        title: "Error",
-        description: error.message || "Failed to sign up with Google",
+        title: "Google Sign-up Error",
+        description: errorMsg,
         variant: "destructive",
       });
     } finally {

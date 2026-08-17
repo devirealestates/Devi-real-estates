@@ -36,9 +36,10 @@ const ShareMenu: React.FC<ShareMenuProps> = ({
   if (!isOpen || typeof document === 'undefined') return null;
 
   const propertyUrl = `${window.location.origin}/property/${propertyId}`;
+  const shareLink = `${window.location.origin}/api/property-share?id=${propertyId}`;
 
   const handleWhatsAppShare = () => {
-    const message = `Check out this property: ${propertyTitle}\n📍 ${propertyLocation}\n💰 ${propertyPrice}\n\n${propertyUrl}`;
+    const message = `🏠 *${propertyTitle}*\n\n📍 *Location:* ${propertyLocation}\n💰 *Price:* ${propertyPrice}\n\n🔗 *View Details:* ${shareLink}`;
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
     onClose();

@@ -215,15 +215,18 @@ const Footer = () => {
             <p className="text-gray-400 text-xs md:text-sm mb-3 md:mb-0">
               © 2025 Devi Real Estates. All rights reserved.
             </p>
-            <div className="flex space-x-4 md:space-x-6 text-xs md:text-sm">
+            <div className="flex flex-wrap gap-4 md:gap-6 text-xs md:text-sm">
               <a href="/privacy-policy" className="text-gray-400 hover:text-white transition-colors duration-300">
                 Privacy Policy
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors duration-300">
-                Terms of Service
+              <a href="/terms-and-conditions" className="text-gray-400 hover:text-white transition-colors duration-300">
+                Terms & Conditions
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors duration-300">
-                Cookie Policy
+              <a href="/disclaimer" className="text-gray-400 hover:text-white transition-colors duration-300">
+                Disclaimer
+              </a>
+              <a href="/rera-disclaimer" className="text-gray-400 hover:text-white transition-colors duration-300">
+                RERA & Property Info
               </a>
             </div>
           </div>

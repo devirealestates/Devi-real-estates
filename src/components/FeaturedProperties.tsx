@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Heart, Send } from 'lucide-react';
 import { useShortlist } from '@/hooks/useShortlist';
 import { useNavigate } from 'react-router-dom';
+import { formatPriceWithSlash } from '@/lib/utils';
 
 // Custom hook for scroll-triggered animations
 const useScrollAnimation = () => {
@@ -393,7 +394,7 @@ const FeaturedProperties = () => {
                     {/* Content */}
                     <div className="p-3">
                       {/* Price */}
-                      <div className="text-lg font-bold text-gray-900 mb-1">{property.price}</div>
+                      <div className="text-lg font-bold text-gray-900 mb-1">{formatPriceWithSlash(property.price)}</div>
 
                       {/* Title */}
                       <h3 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2 leading-tight">

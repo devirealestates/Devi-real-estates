@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, MapPin, Calendar, Home, ImageIcon, MapIcon, Phone, CheckCircle, Heart, CalendarDays } from 'lucide-react';
 import { useShortlist } from '@/hooks/useShortlist';
+import { formatPriceWithSlash } from '@/lib/utils';
 
 interface Property {
   id: string;
@@ -69,12 +70,36 @@ const PropertyDetails = () => {
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
+        const rawData = docSnap.data() || {};
         const propertyData = {
           id: docSnap.id,
-          ...docSnap.data()
+          ...rawData,
+          price: formatPriceWithSlash(rawData.price),
         } as Property;
         console.log('Property data fetched:', propertyData);
         setProperty(propertyData);
+
+        // Update document title and Open Graph tags dynamically
+        if (typeof document !== 'undefined') {
+          document.title = `${propertyData.title} | Devi Real Estates`;
+          
+          const updateMeta = (prop: string, content: string) => {
+            let meta = document.querySelector(`meta[property="${prop}"]`) as HTMLMetaElement;
+            if (!meta) {
+              meta = document.createElement('meta');
+              meta.setAttribute('property', prop);
+              document.head.appendChild(meta);
+            }
+            meta.content = content;
+          };
+
+          if (propertyData.images && propertyData.images.length > 0) {
+            updateMeta('og:image', propertyData.images[0]);
+            updateMeta('twitter:image', propertyData.images[0]);
+          }
+          updateMeta('og:title', propertyData.title);
+          updateMeta('og:description', `📍 ${propertyData.location} | 💰 ${propertyData.price}`);
+        }
       } else {
         setError('Property not found');
       }
@@ -147,7 +172,7 @@ const PropertyDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-20">
+    <div className="min-h-screen bg-white pb-20 lg:pb-0">
       <HeaderRedesign />
       
       {/* Navigation - Back button */}
@@ -349,6 +374,25 @@ const PropertyDetails = () => {
                   </div>
                 )}
               </div>
+
+              {/* Action Buttons for Desktop */}
+              <div className="space-y-3 pt-6 border-t border-gray-100">
+                <Button
+                  onClick={handleContactOwner}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-full py-3 font-normal transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  <Phone className="w-4 h-4" />
+                  <span>Contact Owner</span>
+                </Button>
+
+                <Button
+                  onClick={handleScheduleVisit}
+                  className="w-full bg-transparent hover:bg-slate-50 text-slate-900 border-2 border-slate-900 rounded-full py-3 font-normal transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  <CalendarDays className="w-4 h-4" />
+                  <span>Schedule visit</span>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -363,8 +407,8 @@ const PropertyDetails = () => {
 
       <FooterRedesign />
 
-      {/* Fixed Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 pb-safe">
+      {/* Fixed Bottom Action Bar - Mobile Only */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 pb-safe">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-2 sm:gap-3">
           {/* Contact Owner Button */}
           <Button

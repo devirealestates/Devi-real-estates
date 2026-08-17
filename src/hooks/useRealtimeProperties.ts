@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { collection, onSnapshot, DocumentData } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { formatPriceWithSlash } from '@/lib/utils';
 
 export interface Property {
   id: string;
@@ -97,7 +98,7 @@ export const useRealtimeProperties = (options: UseRealtimePropertiesOptions = {}
             return {
               id: doc.id,
               title: data.title || '',
-              price: data.price || '',
+              price: formatPriceWithSlash(data.price),
               location: data.location || '',
               fullAddress: data.fullAddress || '',
               type: data.type || 'Property',

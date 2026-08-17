@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useShortlist } from '@/hooks/useShortlist';
 import EnhancedShareMenu from '@/components/EnhancedShareMenu';
 import { combineMediaItems, MediaItem } from '@/lib/mediaUtils';
+import { formatPriceWithSlash } from '@/lib/utils';
 
 interface PropertyCardProps {
   property: {
@@ -139,7 +140,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
             {property.title}
           </h3>
           <span className="font-semibold text-gray-900 text-xs sm:text-base lg:text-lg whitespace-nowrap flex-shrink-0 ml-1 sm:ml-2">
-            {property.price}
+            {formatPriceWithSlash(property.price)}
           </span>
         </div>
 

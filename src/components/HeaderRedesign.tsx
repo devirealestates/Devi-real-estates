@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, ShoppingCart, ChevronDown, User, Home, Info, Building2, Calculator, Heart, Phone, ArrowRight, LogOut } from 'lucide-react';
+import { Menu, X, ShoppingCart, ChevronDown, User, Home, Info, Building2, Calculator, Heart, Phone, ArrowRight, LogOut, Download } from 'lucide-react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useShortlist } from '@/hooks/useShortlist';
+import { usePWAInstall } from '@/hooks/usePWAInstall';
 import ShortlistSidebar from './ShortlistSidebar';
 
 const HeaderRedesign: React.FC = () => {
@@ -12,6 +13,7 @@ const HeaderRedesign: React.FC = () => {
   const [isShortlistOpen, setIsShortlistOpen] = useState(false);
   const { currentUser, logout } = useAuth();
   const { shortlistedCount } = useShortlist();
+  const { isInstalled, promptInstall } = usePWAInstall();
   const navigate = useNavigate();
   const location = useLocation();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -196,6 +198,22 @@ const HeaderRedesign: React.FC = () => {
             >
               Contact Us
             </button>
+
+            {/* Install App Button - Desktop (Show only if not installed) */}
+            {!isInstalled && (
+              <button
+                onClick={() => promptInstall()}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 shadow-sm ${
+                  isHomePage && !isScrolled
+                    ? 'bg-slate-900/80 hover:bg-slate-900 text-white backdrop-blur-md border border-slate-700/60'
+                    : 'bg-slate-900 hover:bg-slate-800 text-white border border-slate-800'
+                }`}
+                title="Install Devi Real Estates App"
+              >
+                <Download className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Install App</span>
+              </button>
+            )}
 
             {/* Show Sign In button if user is not logged in */}
             {!currentUser && (
@@ -382,6 +400,36 @@ const HeaderRedesign: React.FC = () => {
               >
                 Contact
               </button>
+
+              {/* Install App Button - Mobile (Professional Dark Slate & Emerald styling) */}
+              {!isInstalled && (
+                <div className="py-3 border-b border-gray-100">
+                  <button
+                    onClick={() => {
+                      document.body.style.overflow = '';
+                      setIsMobileMenuOpen(false);
+                      promptInstall();
+                    }}
+                    className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-md shadow-slate-900/10 hover:shadow-lg transition-all duration-300 active:scale-[0.98] group text-left border border-slate-700/60"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                        <Download className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-base font-semibold text-white tracking-wide font-display">Install App</span>
+                          <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full uppercase tracking-wider">Free</span>
+                        </div>
+                        <p className="text-xs text-slate-300 mt-0.5 font-sans">Faster access & home screen app</p>
+                      </div>
+                    </div>
+                    <div className="px-3 py-1.5 rounded-xl bg-white/10 text-xs font-semibold text-white group-hover:bg-white group-hover:text-slate-900 transition-all font-sans">
+                      Get
+                    </div>
+                  </button>
+                </div>
+              )}
 
               {/* Sign In Button - Only show if user is NOT logged in */}
               {!currentUser && (

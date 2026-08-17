@@ -51,11 +51,12 @@ const EnhancedShareMenu: React.FC<EnhancedShareMenuProps> = ({
   if (!isOpen || typeof document === 'undefined') return null;
 
   const propertyUrl = `${window.location.origin}/property/${propertyId}`;
+  const shareLink = `${window.location.origin}/api/property-share?id=${propertyId}`;
   const shareText = `Check out this property: ${propertyTitle}\n📍 ${propertyLocation}\n💰 ${propertyPrice}`;
 
   const handleWhatsAppShare = () => {
     try {
-      const message = `🏠 *${propertyTitle}*\n\n📍 *Location:* ${propertyLocation}\n💰 *Price:* ${propertyPrice}\n\n🔗 *View Details:* ${propertyUrl}`;
+      const message = `🏠 *${propertyTitle}*\n\n📍 *Location:* ${propertyLocation}\n💰 *Price:* ${propertyPrice}\n\n🔗 *View Details:* ${shareLink}`;
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
     } catch (error) {

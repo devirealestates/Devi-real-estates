@@ -118,12 +118,17 @@ export const AdminNotificationPanel: React.FC = () => {
   const handleSendTestToAdmin = async () => {
     setIsSending(true);
     try {
-      const result = await sendTestDevicePush();
+      const result = await broadcastPushNotification({
+        title: '🔔 Devi Real Estates Test Alert',
+        message: 'Push notifications are working successfully across all your connected devices!',
+        url: '/',
+      });
       if (result.success) {
         toast({
-          title: '🔔 Test Notification Sent',
-          description: 'A test notification has been sent directly to your device!',
+          title: '🔔 Test Notification Sent to All Devices',
+          description: result.message || 'Dispatched to all connected phones and computers!',
         });
+        loadData();
       } else {
         toast({
           title: 'Test Failed',

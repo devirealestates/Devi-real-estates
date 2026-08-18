@@ -130,7 +130,10 @@ export default async function handler(req, res) {
               auth: sub.auth,
             },
           };
-          await webpush.sendNotification(pushConfig, payload);
+          await webpush.sendNotification(pushConfig, payload, {
+            TTL: 86400,
+            urgency: 'high',
+          });
           sentCount++;
         } catch (err) {
           failedCount++;

@@ -358,9 +358,19 @@ export async function broadcastPushNotification(payload: {
     // 2. Query all active subscribed devices from Firestore
     let subscriptionsList: any[] = [];
     try {
-      const q = query(collection(db, 'pushSubscriptions'), where('active', '==', true));
-      const querySnapshot = await getDocs(q);
-      subscriptionsList = querySnapshot.docs.map((docSnap) => docSnap.data());
+      const subsSnap = await getDocs(collection(db, 'pushSubscriptions'));
+      subscriptionsList = subsSnap.docs
+        .map((docSnap) => {
+          const data = docSnap.data();
+          return {
+            id: docSnap.id,
+            endpoint: data.endpoint,
+            p256dh: data.p256dh,
+            auth: data.auth,
+            active: data.active !== false,
+          };
+        })
+        .filter((sub) => sub.active && sub.endpoint && sub.p256dh && sub.auth);
     } catch (fsReadErr) {
       console.warn('[Push] Subscription query notice:', fsReadErr);
     }

@@ -18,33 +18,31 @@ self.addEventListener('push', function (event) {
         ...notificationData,
         ...parsed,
         data: {
-          url: parsed.url || parsed.destinationUrl || '/',
+          url: parsed.url || parsed.destinationUrl || (parsed.data && parsed.data.url) || '/',
           ...parsed.data,
         },
       };
     } catch (e) {
-      notificationData.body = event.data.text();
+      try {
+        notificationData.body = event.data.text();
+      } catch (err) {}
     }
   }
 
   const title = notificationData.title || 'Devi Real Estates';
   const options = {
-    body: notificationData.body || notificationData.message,
+    body: notificationData.body || notificationData.message || 'You have a new update from Devi Real Estates.',
     icon: notificationData.icon || '/pwa-192x192.png',
     badge: notificationData.badge || '/favicon.png',
-    image: notificationData.image || undefined,
     data: notificationData.data || { url: '/' },
-    tag: notificationData.tag || 'dre-update',
+    tag: notificationData.tag || 'dre-update-' + Date.now(),
     renotify: true,
-    requireInteraction: notificationData.requireInteraction || false,
     vibrate: [200, 100, 200],
-    actions: notificationData.actions || [
-      {
-        action: 'open',
-        title: 'View Details',
-      },
-    ],
   };
+
+  if (notificationData.image) {
+    options.image = notificationData.image;
+  }
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
@@ -76,5 +74,4 @@ self.addEventListener('notificationclick', function (event) {
 
 self.addEventListener('pushsubscriptionchange', function (event) {
   console.log('[SW] Push subscription expired or changed');
-  // Re-subscription is handled on next app launch
 });

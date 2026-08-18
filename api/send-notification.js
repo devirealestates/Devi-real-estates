@@ -38,6 +38,7 @@ export default async function handler(req, res) {
       targetUserId = null,
       targetLocation = null,
       targetSubscription = null,
+      subscriptions: incomingSubscriptions = null,
       icon = '/pwa-192x192.png',
       badge = '/favicon.png',
       tag = 'dre-push-' + Date.now(),
@@ -57,7 +58,7 @@ export default async function handler(req, res) {
       tag,
     });
 
-    // 1. If a single target subscription is passed directly (e.g. instant test)
+    // 1. Direct single target subscription (e.g. instant test)
     if (targetSubscription && targetSubscription.endpoint) {
       try {
         await webpush.sendNotification(targetSubscription, payload);
@@ -77,28 +78,37 @@ export default async function handler(req, res) {
       }
     }
 
-    // 2. Query active subscriptions from Firestore
-    const subscriptions = await fetchSubscriptionsFromFirestore({
-      audience,
-      targetUserId,
-      targetLocation,
-      type,
-    });
-
-    if (!subscriptions || subscriptions.length === 0) {
-      // Save notification to in-app history even if no push subscribers yet
-      await saveNotificationToFirestore({
-        title,
-        message: notificationBody,
-        url,
-        type,
+    // 2. Resolve subscriptions (either passed directly from authenticated client or queried from Firestore REST)
+    let subscriptions = incomingSubscriptions;
+    if (!subscriptions || !Array.isArray(subscriptions) || subscriptions.length === 0) {
+      subscriptions = await fetchSubscriptionsFromFirestore({
+        audience,
         targetUserId,
-        createdAt: new Date().toISOString(),
+        targetLocation,
+        type,
       });
+    }
 
+    // Normalize subscription format
+    const activeSubs = (subscriptions || [])
+      .map((sub) => {
+        const endpoint = sub.endpoint || sub.keys?.endpoint;
+        const p256dh = sub.p256dh || sub.keys?.p256dh;
+        const auth = sub.auth || sub.keys?.auth;
+        return {
+          id: sub.id,
+          endpoint,
+          p256dh,
+          auth,
+          docPath: sub.docPath,
+        };
+      })
+      .filter((s) => s.endpoint && s.p256dh && s.auth);
+
+    if (activeSubs.length === 0) {
       return res.status(200).json({
         success: true,
-        message: 'No active device subscriptions matched. Notification saved to in-app history.',
+        message: 'Notification saved. No active subscribed devices at the moment.',
         sentCount: 0,
         failedCount: 0,
         totalSubscriptions: 0,
@@ -109,9 +119,9 @@ export default async function handler(req, res) {
     let failedCount = 0;
     const failedEndpoints = [];
 
-    // 3. Dispatch Web Push to all matching subscriptions
+    // 3. Dispatch Web Push in parallel to all active subscriber devices
     await Promise.all(
-      subscriptions.map(async (sub) => {
+      activeSubs.map(async (sub) => {
         try {
           const pushConfig = {
             endpoint: sub.endpoint,
@@ -124,39 +134,27 @@ export default async function handler(req, res) {
           sentCount++;
         } catch (err) {
           failedCount++;
-          console.warn(`[WebPush] Failed sending to endpoint (${err.statusCode}):`, sub.id);
-          // If subscription is expired (410 Gone / 404 Not Found), track for cleanup
+          console.warn(`[WebPush] Failed sending to endpoint (${err.statusCode}):`, sub.endpoint);
           if (err.statusCode === 410 || err.statusCode === 404) {
-            failedEndpoints.push(sub.docPath);
+            if (sub.docPath) failedEndpoints.push(sub.docPath);
           }
         }
       })
     );
 
-    // 4. Clean up invalid/expired subscriptions in Firestore asynchronously
+    // 4. Clean up invalid/expired subscriptions
     if (failedEndpoints.length > 0) {
       cleanupExpiredSubscriptions(failedEndpoints).catch((e) =>
         console.error('[WebPush] Cleanup error:', e)
       );
     }
 
-    // 5. Save notification to in-app history
-    await saveNotificationToFirestore({
-      title,
-      message: notificationBody,
-      url,
-      type,
-      targetUserId,
-      sentCount,
-      createdAt: new Date().toISOString(),
-    });
-
     return res.status(200).json({
       success: true,
-      message: `Push notifications sent to ${sentCount} devices.`,
+      message: `Push notification delivered to ${sentCount} device(s).`,
       sentCount,
       failedCount,
-      totalSubscriptions: subscriptions.length,
+      totalSubscriptions: activeSubs.length,
     });
   } catch (error) {
     console.error('[WebPush API Error]:', error);
@@ -178,7 +176,6 @@ async function fetchSubscriptionsFromFirestore({ audience, targetUserId, type })
 
     const data = await response.json();
     const documents = data.documents || [];
-
     const parsedSubscriptions = [];
 
     for (const doc of documents) {
@@ -193,19 +190,8 @@ async function fetchSubscriptionsFromFirestore({ audience, targetUserId, type })
 
       if (!endpoint || !p256dh || !auth) continue;
 
-      // Filter by specific user if requested
       if (audience === 'specific_user' && targetUserId && userId !== targetUserId) {
         continue;
-      }
-
-      // Check category preferences if present
-      const prefs = fields.preferences?.mapValue?.fields;
-      if (prefs) {
-        if (type === 'property' && prefs.propertyUpdates?.booleanValue === false) continue;
-        if (type === 'price' && prefs.priceChanges?.booleanValue === false) continue;
-        if (type === 'visit' && prefs.siteVisitReminders?.booleanValue === false) continue;
-        if (type === 'enquiry' && prefs.enquiryUpdates?.booleanValue === false) continue;
-        if (type === 'offer' && prefs.offers?.booleanValue === false) continue;
       }
 
       parsedSubscriptions.push({
@@ -222,32 +208,6 @@ async function fetchSubscriptionsFromFirestore({ audience, targetUserId, type })
   } catch (err) {
     console.error('[WebPush] Error fetching subscriptions from Firestore:', err);
     return [];
-  }
-}
-
-async function saveNotificationToFirestore(notification) {
-  try {
-    const url = `${FIRESTORE_BASE_URL}/notifications`;
-    const payload = {
-      fields: {
-        title: { stringValue: notification.title || '' },
-        message: { stringValue: notification.message || '' },
-        url: { stringValue: notification.url || '/' },
-        type: { stringValue: notification.type || 'general' },
-        targetUserId: { stringValue: notification.targetUserId || '' },
-        read: { booleanValue: false },
-        createdAt: { stringValue: notification.createdAt || new Date().toISOString() },
-        sentCount: { integerValue: String(notification.sentCount || 0) },
-      },
-    };
-
-    await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-  } catch (err) {
-    console.error('[WebPush] Error saving notification to Firestore:', err);
   }
 }
 

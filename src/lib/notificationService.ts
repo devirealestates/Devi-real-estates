@@ -355,12 +355,25 @@ export async function broadcastPushNotification(payload: {
       console.warn('[Push] Direct Firestore notification write notice:', fsErr);
     }
 
-    // 2. Dispatch via serverless backend
+    // 2. Query all active subscribed devices from Firestore
+    let subscriptionsList: any[] = [];
+    try {
+      const q = query(collection(db, 'pushSubscriptions'), where('active', '==', true));
+      const querySnapshot = await getDocs(q);
+      subscriptionsList = querySnapshot.docs.map((docSnap) => docSnap.data());
+    } catch (fsReadErr) {
+      console.warn('[Push] Subscription query notice:', fsReadErr);
+    }
+
+    // 3. Dispatch via serverless backend with subscriptions list
     try {
       const response = await fetch('/api/send-notification', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          ...payload,
+          subscriptions: subscriptionsList,
+        }),
       });
 
       if (response.ok) {
@@ -374,6 +387,25 @@ export async function broadcastPushNotification(payload: {
       }
     } catch (apiErr) {
       console.warn('[Push] Serverless broadcast notice:', apiErr);
+    }
+
+    // 4. In addition, trigger immediate client device notification if permission is granted
+    if (Notification.permission === 'granted') {
+      try {
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (registration && registration.showNotification) {
+          registration.showNotification(payload.title, {
+            body: payload.message,
+            icon: '/pwa-192x192.png',
+            badge: '/favicon.png',
+            data: { url: payload.url || '/' },
+            vibrate: [200, 100, 200],
+            tag: 'dre-prop-' + Date.now(),
+          });
+        }
+      } catch (clientNotifErr) {
+        console.warn('[Push] Client notification notice:', clientNotifErr);
+      }
     }
 
     return {

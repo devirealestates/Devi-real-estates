@@ -10,6 +10,7 @@ import {
   Megaphone,
   Settings,
   X,
+  ArrowLeft,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -210,23 +211,28 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
             {/* Header */}
             <div className="p-4 sm:p-5 border-b border-slate-100 bg-white flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+                {/* Mobile Back Arrow Button */}
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-1.5 -ml-1 text-slate-700 hover:bg-slate-100 active:scale-95 rounded-full transition-colors md:hidden"
+                  aria-label="Go back"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+
+                <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center hidden sm:flex">
                   <Bell className="w-4 h-4" />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-base sm:text-lg font-bold text-slate-900 font-display">
-                      Notifications
-                    </h3>
-                    {unreadCount > 0 && (
-                      <span className="px-2 py-0.5 text-[10px] font-bold bg-orange-100 text-orange-700 rounded-full">
-                        {unreadCount} new
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-slate-400">
-                    Latest properties, price drops & updates
-                  </p>
+
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 font-display">
+                    Notifications
+                  </h3>
+                  {unreadCount > 0 && (
+                    <span className="px-2 py-0.5 text-[10px] font-bold bg-orange-100 text-orange-700 rounded-full">
+                      {unreadCount} new
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -254,9 +260,10 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                   <Settings className="w-4 h-4" />
                 </button>
 
+                {/* Desktop Close Icon */}
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors ml-1"
+                  className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors hidden md:flex"
                   title="Close notifications"
                 >
                   <X className="w-5 h-5" />
@@ -335,22 +342,6 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                   </div>
                 ))
               )}
-            </div>
-
-            {/* Bottom Bar: Clean notification settings link */}
-            <div className="p-3.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between px-4 flex-shrink-0">
-              <span className="text-xs text-slate-500 font-medium">
-                Notification Preferences
-              </span>
-              <button
-                onClick={() => {
-                  setIsSettingsOpen(true);
-                }}
-                className="text-xs font-semibold text-orange-600 hover:text-orange-700 transition-colors flex items-center gap-1"
-              >
-                <Settings className="w-3.5 h-3.5" />
-                <span>Customize</span>
-              </button>
             </div>
           </div>
         </div>

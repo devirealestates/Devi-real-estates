@@ -3,18 +3,9 @@ import {
   Bell,
   Send,
   Smartphone,
-  Users,
   CheckCircle2,
-  AlertCircle,
-  Building,
-  Tag,
-  Calendar,
-  MessageSquare,
-  Sparkles,
-  Megaphone,
   Layers,
   History,
-  TrendingUp,
   RefreshCw,
 } from 'lucide-react';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
@@ -23,23 +14,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { broadcastPushNotification, sendTestDevicePush } from '@/lib/notificationService';
 
 export const AdminNotificationPanel: React.FC = () => {
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
-  const [type, setType] = useState<'property' | 'price' | 'visit' | 'enquiry' | 'offer' | 'general'>('property');
-  const [audience, setAudience] = useState<'all' | 'specific_user' | 'location'>('all');
   const [destinationUrl, setDestinationUrl] = useState('/');
-  const [targetLocation, setTargetLocation] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [subscribers, setSubscribers] = useState<any[]>([]);
   const [sentHistory, setSentHistory] = useState<any[]>([]);
@@ -80,12 +61,10 @@ export const AdminNotificationPanel: React.FC = () => {
   const handleApplyPreset = (preset: {
     title: string;
     message: string;
-    type: any;
     url: string;
   }) => {
     setTitle(preset.title);
     setMessage(preset.message);
-    setType(preset.type);
     setDestinationUrl(preset.url);
   };
 
@@ -105,16 +84,14 @@ export const AdminNotificationPanel: React.FC = () => {
       const result = await broadcastPushNotification({
         title: title.trim(),
         message: message.trim(),
-        type,
         url: destinationUrl.trim() || '/',
-        audience,
-        targetLocation: targetLocation.trim() || undefined,
+        audience: 'all',
       });
 
       if (result.success) {
         toast({
-          title: '✓ Push Notification Broadcasted',
-          description: result.message || 'Notification was delivered to active devices.',
+          title: '✓ Notification Sent to All Users',
+          description: result.message || 'Notification was delivered to all devices.',
         });
         setTitle('');
         setMessage('');
@@ -123,7 +100,7 @@ export const AdminNotificationPanel: React.FC = () => {
       } else {
         toast({
           title: 'Broadcast Failed',
-          description: result.message || 'Failed to deliver push notification.',
+          description: result.message || 'Failed to deliver notification.',
           variant: 'destructive',
         });
       }
@@ -144,7 +121,7 @@ export const AdminNotificationPanel: React.FC = () => {
       const result = await sendTestDevicePush();
       if (result.success) {
         toast({
-          title: '🔔 Test Push Sent',
+          title: '🔔 Test Notification Sent',
           description: 'A test notification has been sent directly to your device!',
         });
       } else {
@@ -176,28 +153,24 @@ export const AdminNotificationPanel: React.FC = () => {
       label: '🏠 New House/Flat',
       title: '🏠 New Property Available',
       message: 'A luxury 3 BHK residential house is now available in Kakinada. Tap to explore!',
-      type: 'property' as const,
       url: '/buy',
     },
     {
       label: '💰 Price Drop Alert',
       title: '💰 Price Dropped on Listed Property',
-      message: 'Great news! A property you were viewing has reduced its price. Check it out!',
-      type: 'price' as const,
+      message: 'Great news! A property has reduced its price. Check it out now!',
       url: '/buy',
     },
     {
       label: '📅 Site Visit Reminder',
-      title: '📅 Site Visit Reminder for Tomorrow',
-      message: 'Your scheduled property visit is planned for tomorrow. Our executive will guide you.',
-      type: 'visit' as const,
+      title: '📅 Site Visit Reminder',
+      message: 'Your scheduled property visit is planned. Our executive will guide you.',
       url: '/my-bookings',
     },
     {
-      label: '🎉 Festive Property Offer',
+      label: '🎉 Special Offer',
       title: '🎉 Special Festive Property Deals',
-      message: 'Exclusive discounts and premium plots available this festival season. Inquire now!',
-      type: 'offer' as const,
+      message: 'Exclusive discounts and premium plots available this season. Inquire now!',
       url: '/contact',
     },
   ];
@@ -207,9 +180,9 @@ export const AdminNotificationPanel: React.FC = () => {
       {/* Top Header & Quick Actions */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 font-display">Push Notification Center</h2>
+          <h2 className="text-2xl font-bold text-slate-900 font-display">Notification Center</h2>
           <p className="text-xs text-slate-500 mt-1">
-            Send real-time device push notifications to all subscribed mobile and desktop devices.
+            Broadcast notifications to all users and devices with notification permissions enabled.
           </p>
         </div>
 
@@ -231,7 +204,7 @@ export const AdminNotificationPanel: React.FC = () => {
             className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm shadow-emerald-500/20"
           >
             <Send className="w-3.5 h-3.5" />
-            <span>Send Test to My Device</span>
+            <span>Send Test Notification</span>
           </Button>
         </div>
       </div>
@@ -251,7 +224,7 @@ export const AdminNotificationPanel: React.FC = () => {
             </div>
             <p className="text-[11px] text-slate-500 mt-3 flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-              Subscribed to Web Push
+              Receiving all alerts
             </p>
           </CardContent>
         </Card>
@@ -267,7 +240,7 @@ export const AdminNotificationPanel: React.FC = () => {
                 <Smartphone className="w-5 h-5" />
               </div>
             </div>
-            <p className="text-[11px] text-slate-500 mt-3">Native Android Chrome/PWA</p>
+            <p className="text-[11px] text-slate-500 mt-3">Android Mobile Devices</p>
           </CardContent>
         </Card>
 
@@ -284,7 +257,7 @@ export const AdminNotificationPanel: React.FC = () => {
                 <Layers className="w-5 h-5" />
               </div>
             </div>
-            <p className="text-[11px] text-slate-500 mt-3">Windows & macOS Desktops</p>
+            <p className="text-[11px] text-slate-500 mt-3">Computer Browsers</p>
           </CardContent>
         </Card>
 
@@ -292,14 +265,14 @@ export const AdminNotificationPanel: React.FC = () => {
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Broadcasts Sent</p>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Broadcasts</p>
                 <h3 className="text-2xl font-bold text-slate-900 mt-1">{sentHistory.length}</h3>
               </div>
               <div className="w-11 h-11 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center">
                 <History className="w-5 h-5" />
               </div>
             </div>
-            <p className="text-[11px] text-slate-500 mt-3">Logged in notification history</p>
+            <p className="text-[11px] text-slate-500 mt-3">Logged in notification center</p>
           </CardContent>
         </Card>
       </div>
@@ -316,10 +289,10 @@ export const AdminNotificationPanel: React.FC = () => {
                 </div>
                 <div>
                   <CardTitle className="text-base font-bold text-slate-900 font-display">
-                    Create Push Notification
+                    Send Notification to All Users
                   </CardTitle>
                   <CardDescription className="text-xs text-slate-500">
-                    Dispatches real OS push notifications to eligible user devices.
+                    Delivers a notification directly to all users and devices.
                   </CardDescription>
                 </div>
               </div>
@@ -366,53 +339,16 @@ export const AdminNotificationPanel: React.FC = () => {
                   <Textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="e.g. A new 2 BHK apartment in Thimmapuram, Kakinada is now available for ₹ 45,00,000/-. Tap to view!"
+                    placeholder="e.g. A new 2 BHK apartment in Kakinada is now available for ₹ 45,00,000/-. Tap to view!"
                     required
                     rows={3}
                     className="rounded-xl border-slate-200 text-sm resize-none"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Notification Type
-                    </label>
-                    <Select value={type} onValueChange={(val: any) => setType(val)}>
-                      <SelectTrigger className="rounded-xl border-slate-200 h-10 text-sm">
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl">
-                        <SelectItem value="property">🏠 New Property</SelectItem>
-                        <SelectItem value="price">💰 Price Update</SelectItem>
-                        <SelectItem value="visit">📅 Site Visit</SelectItem>
-                        <SelectItem value="enquiry">🔥 Enquiry Update</SelectItem>
-                        <SelectItem value="offer">🎉 Offer & Promo</SelectItem>
-                        <SelectItem value="general">📢 General Announcement</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                      Target Audience
-                    </label>
-                    <Select value={audience} onValueChange={(val: any) => setAudience(val)}>
-                      <SelectTrigger className="rounded-xl border-slate-200 h-10 text-sm">
-                        <SelectValue placeholder="Select audience" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl">
-                        <SelectItem value="all">🌐 All Subscribed Devices</SelectItem>
-                        <SelectItem value="location">📍 Location-Specific</SelectItem>
-                        <SelectItem value="specific_user">👤 Specific User</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Destination URL (Opened on Click)
+                    Destination Page / Link (Opened on Click)
                   </label>
                   <Input
                     value={destinationUrl}
@@ -425,11 +361,11 @@ export const AdminNotificationPanel: React.FC = () => {
                 <div className="pt-2">
                   <Button
                     type="submit"
-                    disabled={isSending || subscribers.length === 0}
+                    disabled={isSending}
                     className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-2xl py-3 h-11 text-sm font-semibold shadow-lg shadow-slate-900/15 flex items-center justify-center gap-2"
                   >
                     <Send className="w-4 h-4 text-emerald-400" />
-                    <span>{isSending ? 'Broadcasting...' : `Send Notification to ${subscribers.length} Device(s)`}</span>
+                    <span>{isSending ? 'Sending...' : 'Send Notification to All Users'}</span>
                   </Button>
                 </div>
               </form>
@@ -443,7 +379,7 @@ export const AdminNotificationPanel: React.FC = () => {
           <Card className="rounded-3xl border-slate-100 shadow-xl bg-white overflow-hidden">
             <CardHeader className="border-b border-slate-100 pb-3">
               <CardTitle className="text-sm font-bold text-slate-900 font-display">
-                Device Popup Preview
+                Device Notification Preview
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
@@ -460,7 +396,7 @@ export const AdminNotificationPanel: React.FC = () => {
                     {title || '🏠 New Property Available'}
                   </h5>
                   <p className="text-[11px] text-slate-300 mt-0.5 line-clamp-2 leading-relaxed">
-                    {message || 'A new property matching your interests is now available. Tap to view!'}
+                    {message || 'A new property is now available. Tap to view details and photos!'}
                   </p>
                 </div>
                 <div className="pt-1 text-[10px] text-emerald-400 font-medium">
@@ -474,13 +410,13 @@ export const AdminNotificationPanel: React.FC = () => {
           <Card className="rounded-3xl border-slate-100 shadow-xl bg-white">
             <CardHeader className="border-b border-slate-100 pb-3">
               <CardTitle className="text-sm font-bold text-slate-900 font-display">
-                Recent Broadcast History
+                Recent Notifications History
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
               <div className="space-y-3 max-h-64 overflow-y-auto divide-y divide-slate-100">
                 {sentHistory.length === 0 ? (
-                  <p className="text-xs text-slate-400 text-center py-6">No broadcasts sent yet.</p>
+                  <p className="text-xs text-slate-400 text-center py-6">No notifications sent yet.</p>
                 ) : (
                   sentHistory.map((h, i) => (
                     <div key={i} className="pt-2.5 first:pt-0">

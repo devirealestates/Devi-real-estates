@@ -9,8 +9,7 @@ import {
   Sparkles,
   Megaphone,
   Settings,
-  ExternalLink,
-  Trash2,
+  X,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -22,18 +21,10 @@ import {
   doc,
   updateDoc,
   writeBatch,
-  where,
-  getDocs,
 } from 'firebase/firestore';
-import { db, auth } from '@/lib/firebase';
+import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { NotificationPreferencesModal } from '@/components/NotificationPreferencesModal';
-import { useDeviceNotifications } from '@/hooks/useDeviceNotifications';
 
 interface InAppNotification {
   id: string;
@@ -61,7 +52,6 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | 'unread'>('all');
   const navigate = useNavigate();
-  const { isSubscribed, permission } = useDeviceNotifications();
 
   // Listen to in-app notifications from Firestore in real time
   useEffect(() => {
@@ -69,7 +59,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
       const q = query(
         collection(db, 'notifications'),
         orderBy('createdAt', 'desc'),
-        limit(20)
+        limit(30)
       );
 
       const unsubscribe = onSnapshot(
@@ -100,6 +90,18 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
     }
   }, []);
 
+  // Lock body scroll when notification sidebar/full screen is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleNotificationClick = async (notification: InAppNotification) => {
@@ -122,6 +124,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
   const handleMarkAllAsRead = async () => {
     try {
       const unread = notifications.filter((n) => !n.read);
+      if (unread.length === 0) return;
       const batch = writeBatch(db);
       unread.forEach((n) => {
         const docRef = doc(db, 'notifications', n.id);
@@ -174,153 +177,184 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
 
   return (
     <>
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <PopoverTrigger asChild>
-          <button
-            className={`relative p-2 rounded-full transition-all duration-300 ${
-              isHomePage && !isScrolled
-                ? 'text-white hover:bg-white/10'
-                : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-            } ${className}`}
-            aria-label="View notifications"
-            title="Notifications"
-          >
-            <Bell className="w-5 h-5" />
-            {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-white animate-pulse">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
-          </button>
-        </PopoverTrigger>
+      {/* Bell Trigger Button */}
+      <button
+        onClick={() => setIsOpen(true)}
+        className={`relative p-2 rounded-full transition-all duration-300 ${
+          isHomePage && !isScrolled
+            ? 'text-white hover:bg-white/10'
+            : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+        } ${className}`}
+        aria-label="View notifications"
+        title="Notifications"
+      >
+        <Bell className="w-5 h-5" />
+        {unreadCount > 0 && (
+          <span className="absolute top-1 right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-orange-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-white animate-pulse">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </button>
 
-        <PopoverContent
-          align="end"
-          className="w-80 sm:w-96 p-0 rounded-3xl border border-slate-100 shadow-2xl bg-white overflow-hidden z-50 animate-in fade-in-0 zoom-in-95 duration-200"
-        >
-          {/* Header */}
-          <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h4 className="text-sm font-bold text-slate-900 font-display">Notifications</h4>
-              {unreadCount > 0 && (
-                <span className="px-2 py-0.5 text-[10px] font-bold bg-orange-100 text-orange-700 rounded-full">
-                  {unreadCount} new
-                </span>
+      {/* Notifications Drawer / Slide-Over & Mobile Full Screen */}
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex justify-end">
+          {/* Backdrop */}
+          <div
+            onClick={() => setIsOpen(false)}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+          />
+
+          {/* Panel Container (Mobile: Fullscreen, Desktop: Right Slide-over Sidebar) */}
+          <div className="relative w-full h-full bg-white shadow-2xl z-10 flex flex-col md:max-w-md md:border-l md:border-slate-200 animate-in slide-in-from-right duration-300">
+            {/* Header */}
+            <div className="p-4 sm:p-5 border-b border-slate-100 bg-white flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+                  <Bell className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 font-display">
+                      Notifications
+                    </h3>
+                    {unreadCount > 0 && (
+                      <span className="px-2 py-0.5 text-[10px] font-bold bg-orange-100 text-orange-700 rounded-full">
+                        {unreadCount} new
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Latest properties, price drops & updates
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                {unreadCount > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleMarkAllAsRead}
+                    className="h-8 px-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-xl"
+                    title="Mark all as read"
+                  >
+                    <Check className="w-3.5 h-3.5 mr-1" />
+                    Mark all read
+                  </Button>
+                )}
+
+                <button
+                  onClick={() => {
+                    setIsSettingsOpen(true);
+                  }}
+                  className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
+                  title="Notification Settings"
+                >
+                  <Settings className="w-4 h-4" />
+                </button>
+
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors ml-1"
+                  title="Close notifications"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="flex border-b border-slate-100 text-xs px-4 bg-white flex-shrink-0">
+              <button
+                onClick={() => setActiveFilter('all')}
+                className={`py-3 px-3 border-b-2 font-semibold transition-colors ${
+                  activeFilter === 'all'
+                    ? 'border-orange-500 text-orange-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                All ({notifications.length})
+              </button>
+              <button
+                onClick={() => setActiveFilter('unread')}
+                className={`py-3 px-3 border-b-2 font-semibold transition-colors ${
+                  activeFilter === 'unread'
+                    ? 'border-orange-500 text-orange-600'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Unread ({unreadCount})
+              </button>
+            </div>
+
+            {/* Notification List */}
+            <div className="flex-1 overflow-y-auto divide-y divide-slate-100 bg-white">
+              {filteredNotifications.length === 0 ? (
+                <div className="py-20 px-6 text-center">
+                  <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3 text-slate-400">
+                    <Bell className="w-7 h-7" />
+                  </div>
+                  <h4 className="text-sm font-semibold text-slate-800">No notifications yet</h4>
+                  <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+                    You will be notified here whenever new properties, price updates, or visits are scheduled.
+                  </p>
+                </div>
+              ) : (
+                filteredNotifications.map((n) => (
+                  <div
+                    key={n.id}
+                    onClick={() => handleNotificationClick(n)}
+                    className={`p-4 flex items-start gap-3.5 hover:bg-slate-50 cursor-pointer transition-colors ${
+                      !n.read ? 'bg-orange-50/30' : ''
+                    }`}
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-center flex-shrink-0 mt-0.5">
+                      {getTypeIcon(n.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <h5
+                          className={`text-xs sm:text-sm truncate ${
+                            !n.read ? 'font-bold text-slate-900' : 'font-medium text-slate-700'
+                          }`}
+                        >
+                          {n.title}
+                        </h5>
+                        <span className="text-[11px] text-slate-400 whitespace-nowrap flex-shrink-0">
+                          {formatTime(n.createdAt)}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 line-clamp-2 mt-1 leading-relaxed">
+                        {n.message}
+                      </p>
+                    </div>
+                    {!n.read && (
+                      <span className="w-2 h-2 rounded-full bg-orange-500 flex-shrink-0 mt-2" />
+                    )}
+                  </div>
+                ))
               )}
             </div>
 
-            <div className="flex items-center gap-1">
-              {unreadCount > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleMarkAllAsRead}
-                  className="h-7 px-2 text-[11px] font-semibold text-slate-600 hover:text-slate-900 rounded-lg"
-                  title="Mark all as read"
-                >
-                  <Check className="w-3 h-3 mr-1" />
-                  Mark all read
-                </Button>
-              )}
+            {/* Bottom Bar: Clean notification settings link */}
+            <div className="p-3.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between px-4 flex-shrink-0">
+              <span className="text-xs text-slate-500 font-medium">
+                Notification Preferences
+              </span>
               <button
                 onClick={() => {
-                  setIsOpen(false);
                   setIsSettingsOpen(true);
                 }}
-                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-lg transition-colors"
-                title="Notification Settings"
+                className="text-xs font-semibold text-orange-600 hover:text-orange-700 transition-colors flex items-center gap-1"
               >
-                <Settings className="w-4 h-4" />
+                <Settings className="w-3.5 h-3.5" />
+                <span>Customize</span>
               </button>
             </div>
           </div>
-
-          {/* Filter Tabs */}
-          <div className="flex border-b border-slate-100 text-xs px-3 bg-white">
-            <button
-              onClick={() => setActiveFilter('all')}
-              className={`py-2 px-3 border-b-2 font-medium transition-colors ${
-                activeFilter === 'all'
-                  ? 'border-orange-500 text-orange-600 font-bold'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              All ({notifications.length})
-            </button>
-            <button
-              onClick={() => setActiveFilter('unread')}
-              className={`py-2 px-3 border-b-2 font-medium transition-colors ${
-                activeFilter === 'unread'
-                  ? 'border-orange-500 text-orange-600 font-bold'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              Unread ({unreadCount})
-            </button>
-          </div>
-
-          {/* Notification List */}
-          <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
-            {filteredNotifications.length === 0 ? (
-              <div className="py-12 px-4 text-center">
-                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-2 text-slate-400">
-                  <Bell className="w-6 h-6" />
-                </div>
-                <p className="text-xs font-semibold text-slate-700">No notifications yet</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  You'll be notified here when new properties or visits are updated.
-                </p>
-              </div>
-            ) : (
-              filteredNotifications.map((n) => (
-                <div
-                  key={n.id}
-                  onClick={() => handleNotificationClick(n)}
-                  className={`p-3.5 flex items-start gap-3 hover:bg-slate-50 cursor-pointer transition-colors ${
-                    !n.read ? 'bg-orange-50/30' : ''
-                  }`}
-                >
-                  <div className="w-8 h-8 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-center flex-shrink-0 mt-0.5">
-                    {getTypeIcon(n.type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-1">
-                      <h5 className={`text-xs truncate ${!n.read ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
-                        {n.title}
-                      </h5>
-                      <span className="text-[10px] text-slate-400 whitespace-nowrap flex-shrink-0">
-                        {formatTime(n.createdAt)}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-500 line-clamp-2 mt-0.5 leading-relaxed">
-                      {n.message}
-                    </p>
-                  </div>
-                  {!n.read && (
-                    <span className="w-2 h-2 rounded-full bg-orange-500 flex-shrink-0 mt-2" />
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-
-          {/* Footer Bar */}
-          <div className="p-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs px-3">
-            <span className="text-[11px] text-slate-500">
-              {isSubscribed ? '🟢 Device Push Active' : '⚪ Device Push Disabled'}
-            </span>
-            <button
-              onClick={() => {
-                setIsOpen(false);
-                setIsSettingsOpen(true);
-              }}
-              className="text-[11px] font-semibold text-orange-600 hover:text-orange-700 transition-colors"
-            >
-              Configure Push Settings →
-            </button>
-          </div>
-        </PopoverContent>
-      </Popover>
+        </div>
+      )}
 
       {/* Preferences Modal */}
       <NotificationPreferencesModal

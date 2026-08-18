@@ -2,19 +2,15 @@ import React from 'react';
 import { useDeviceNotifications } from '@/hooks/useDeviceNotifications';
 import {
   Bell,
-  BellOff,
   CheckCircle2,
   AlertTriangle,
-  Send,
   Building,
   Calendar,
   MessageSquare,
   Tag,
   Sparkles,
   Megaphone,
-  X,
   Smartphone,
-  ShieldCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -41,9 +37,7 @@ export const NotificationPreferencesModal: React.FC<NotificationPreferencesModal
     isLoading,
     preferences,
     enableNotifications,
-    disableNotifications,
     updatePreferences,
-    sendTestNotification,
   } = useDeviceNotifications();
 
   const handleToggleCategory = (key: keyof typeof preferences, value: boolean) => {
@@ -108,39 +102,27 @@ export const NotificationPreferencesModal: React.FC<NotificationPreferencesModal
             </div>
             <div>
               <DialogTitle className="text-xl font-bold text-slate-900 font-display">
-                Device Notifications
+                Notification Settings
               </DialogTitle>
               <DialogDescription className="text-xs text-slate-500 mt-0.5">
-                Stay updated about properties, site visits, and important real estate updates.
+                Choose which property updates and alerts you want to receive.
               </DialogDescription>
             </div>
           </div>
         </div>
 
         <div className="p-6 space-y-6">
-          {/* Permission Status Banner */}
+          {/* Status Banner */}
           <div className="rounded-2xl p-4 border transition-all">
             {permission === 'granted' && isSubscribed ? (
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="text-sm font-bold text-emerald-900">✓ Notifications Enabled</h4>
-                    <p className="text-xs text-emerald-700 mt-0.5 leading-relaxed">
-                      Your device is active and receiving instant property alerts.
-                    </p>
-                  </div>
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-sm font-bold text-emerald-900">✓ Notifications are Active</h4>
+                  <p className="text-xs text-emerald-700 mt-0.5 leading-relaxed">
+                    You will receive instant alerts for new properties and updates.
+                  </p>
                 </div>
-                <Button
-                  onClick={sendTestNotification}
-                  disabled={isLoading}
-                  size="sm"
-                  variant="outline"
-                  className="rounded-xl border-emerald-300 text-emerald-700 hover:bg-emerald-50 text-xs font-semibold h-8 flex items-center gap-1.5"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Test Push</span>
-                </Button>
               </div>
             ) : permission === 'denied' ? (
               <div className="space-y-2">
@@ -149,7 +131,7 @@ export const NotificationPreferencesModal: React.FC<NotificationPreferencesModal
                   <div>
                     <h4 className="text-sm font-bold text-rose-900">Notifications are blocked</h4>
                     <p className="text-xs text-rose-700 mt-0.5 leading-relaxed">
-                      To receive notifications, please click the lock/settings icon in your browser address bar and change Notifications permission to <strong>Allow</strong>.
+                      To receive notifications, please tap the lock/settings icon in your browser address bar and set Notifications to <strong>Allow</strong>.
                     </p>
                   </div>
                 </div>
@@ -160,16 +142,16 @@ export const NotificationPreferencesModal: React.FC<NotificationPreferencesModal
                 <div>
                   <h4 className="text-sm font-bold text-slate-800">Browser Not Supported</h4>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Web Push notifications are not supported on this browser. On iOS devices, install our PWA to your Home Screen to enable notifications.
+                    Notifications are not supported on this browser. On iOS devices, install our app to your Home Screen to receive notifications.
                   </p>
                 </div>
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900">Enable Device Notifications</h4>
+                  <h4 className="text-sm font-bold text-slate-900">Enable Notifications</h4>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Get instant OS notifications for new properties and scheduled site visits.
+                    Get instant notifications for new property listings and visit updates.
                   </p>
                 </div>
                 <Button
@@ -187,7 +169,7 @@ export const NotificationPreferencesModal: React.FC<NotificationPreferencesModal
           {/* Notification Category Preferences */}
           <div className="space-y-3">
             <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">
-              Notification Preferences
+              Preferences
             </h4>
 
             <div className="divide-y divide-slate-100 rounded-2xl border border-slate-100 overflow-hidden bg-slate-50/50">
@@ -201,51 +183,28 @@ export const NotificationPreferencesModal: React.FC<NotificationPreferencesModal
                       <cat.icon className="w-4 h-4" />
                     </div>
                     <div>
-                      <h5 className="text-sm font-semibold text-slate-900 leading-snug">{cat.label}</h5>
+                      <h5 className="text-sm font-semibold text-slate-900">{cat.label}</h5>
                       <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{cat.desc}</p>
                     </div>
                   </div>
                   <Switch
                     checked={preferences[cat.key]}
                     onCheckedChange={(checked) => handleToggleCategory(cat.key, checked)}
-                    disabled={permission === 'denied'}
-                    className="data-[state=checked]:bg-emerald-500"
+                    className="data-[state=checked]:bg-orange-500"
                   />
                 </div>
               ))}
             </div>
           </div>
+        </div>
 
-          {/* Privacy & Security Note */}
-          <div className="flex items-center gap-2 text-[11px] text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100">
-            <ShieldCheck className="w-4 h-4 text-slate-400 flex-shrink-0" />
-            <span>
-              We respect your privacy. You can adjust your preferences or disable notifications at any time.
-            </span>
-          </div>
-
-          {/* Disable Option */}
-          {isSubscribed && (
-            <div className="pt-2 flex justify-between items-center">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={disableNotifications}
-                disabled={isLoading}
-                className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl"
-              >
-                <BellOff className="w-3.5 h-3.5 mr-1.5" />
-                Disable All Notifications
-              </Button>
-
-              <Button
-                onClick={onClose}
-                className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-5 text-xs font-semibold"
-              >
-                Done
-              </Button>
-            </div>
-          )}
+        <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end">
+          <Button
+            onClick={onClose}
+            className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-5 text-xs font-semibold h-9"
+          >
+            Done
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

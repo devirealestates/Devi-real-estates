@@ -72,8 +72,18 @@ export const useDeviceNotifications = () => {
 
     setIsLoading(true);
     try {
+      // 1. Subscribe to Web Push
       const result = await subscribeToPushNotifications(currentUser?.uid, preferences);
-      if (result.success) {
+
+      // 2. Also register official Firebase Cloud Messaging (FCM) Device Token
+      try {
+        const { registerFCMDevice } = await import('@/lib/fcmService');
+        await registerFCMDevice();
+      } catch (fcmErr) {
+        console.warn('[FCM] registerFCMDevice background warning:', fcmErr);
+      }
+
+      if (result.success || Notification.permission === 'granted') {
         setPermission('granted');
         setIsSubscribed(true);
         toast({

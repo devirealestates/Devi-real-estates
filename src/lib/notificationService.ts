@@ -21,7 +21,8 @@ export const DEFAULT_PREFERENCES: NotificationPreferences = {
 
 export const VAPID_PUBLIC_KEY =
   import.meta.env.VITE_VAPID_PUBLIC_KEY ||
-  'BOj5sThQXA6jwvo6_dDlw90FoKR2bWkTu53Rk18btuhnl6jGUfr5IqcddnpPKYnSlHya_o6cF-6-_D-enqdLOC8';
+  import.meta.env.VITE_FCM_VAPID_KEY ||
+  'BGkbUt3PqmghdTLfY4u70apQ0kGBNEG0oGKAIpzY8H5jg6-XMvfJnS4JQMFEiR4Z76seb0Lz9eNYJOzLNHhRwxI';
 
 /**
  * Convert URL-safe base64 string to Uint8Array for PushManager subscribe

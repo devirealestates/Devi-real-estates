@@ -1,6 +1,6 @@
 import webpush from 'web-push';
 
-const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || process.env.VITE_VAPID_PUBLIC_KEY || 'BOj5sThQXA6jwvo6_dDlw90FoKR2bWkTu53Rk18btuhnl6jGUfr5IqcddnpPKYnSlHya_o6cF-6-_D-enqdLOC8';
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || process.env.VITE_VAPID_PUBLIC_KEY || process.env.VITE_FCM_VAPID_KEY || 'BGkbUt3PqmghdTLfY4u70apQ0kGBNEG0oGKAIpzY8H5jg6-XMvfJnS4JQMFEiR4Z76seb0Lz9eNYJOzLNHhRwxI';
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || 'kL1rqmwIbHlUxziiMFDfBhqZmGg3yDagw3WNeV8f6_A';
 const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'mailto:info.devirealestates@gmail.com';
 

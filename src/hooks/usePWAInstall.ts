@@ -7,9 +7,13 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export const usePWAInstall = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(() => {
+    return (typeof window !== 'undefined' && (window as any).__deferredPwaPrompt) || null;
+  });
   const [isInstalled, setIsInstalled] = useState<boolean>(false);
-  const [isInstallable, setIsInstallable] = useState<boolean>(false);
+  const [isInstallable, setIsInstallable] = useState<boolean>(() => {
+    return typeof window !== 'undefined' && Boolean((window as any).__deferredPwaPrompt);
+  });
   const [isIOS, setIsIOS] = useState<boolean>(false);
   const [isDismissed, setIsDismissed] = useState<boolean>(false);
   const [showIOSModal, setShowIOSModal] = useState<boolean>(false);
@@ -40,27 +44,46 @@ export const usePWAInstall = () => {
       setIsDismissed(true);
     }
 
-    // 4. Listen for beforeinstallprompt
+    // 4. If window already captured deferred prompt before React mounted
+    if ((window as any).__deferredPwaPrompt) {
+      setDeferredPrompt((window as any).__deferredPwaPrompt);
+      setIsInstallable(true);
+    }
+
+    // 5. Listen for beforeinstallprompt & custom early prompt event
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
+      (window as any).__deferredPwaPrompt = e;
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setIsInstallable(true);
     };
 
-    // 5. Listen for appinstalled
+    const handlePromptAvailable = (e: any) => {
+      if (e.detail) {
+        setDeferredPrompt(e.detail);
+        setIsInstallable(true);
+      }
+    };
+
+    // 6. Listen for appinstalled
     const handleAppInstalled = () => {
       setIsInstalled(true);
       setIsInstallable(false);
       setDeferredPrompt(null);
-      console.log('Devi Real Estates PWA was installed successfully');
+      (window as any).__deferredPwaPrompt = null;
+      console.log('[PWA] Installed successfully');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('pwa-prompt-available', handlePromptAvailable);
     window.addEventListener('appinstalled', handleAppInstalled);
+    window.addEventListener('pwa-installed', handleAppInstalled);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('pwa-prompt-available', handlePromptAvailable);
       window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener('pwa-installed', handleAppInstalled);
     };
   }, []);
 
@@ -70,24 +93,29 @@ export const usePWAInstall = () => {
       return false;
     }
 
-    if (deferredPrompt) {
+    const promptToUse = deferredPrompt || (typeof window !== 'undefined' ? (window as any).__deferredPwaPrompt : null);
+
+    if (promptToUse) {
       try {
-        await deferredPrompt.prompt();
-        const choiceResult = await deferredPrompt.userChoice;
+        await promptToUse.prompt();
+        const choiceResult = await promptToUse.userChoice;
         if (choiceResult.outcome === 'accepted') {
           setIsInstalled(true);
           setIsInstallable(false);
         }
         setDeferredPrompt(null);
+        if (typeof window !== 'undefined') {
+          (window as any).__deferredPwaPrompt = null;
+        }
         return choiceResult.outcome === 'accepted';
       } catch (err) {
-        console.error('Error triggering PWA installation:', err);
+        console.error('Error triggering native PWA prompt:', err);
       }
     } else {
-      // Fallback instruction for browsers without direct prompt
+      // Fallback instruction only if native prompt event was not provided by browser
       toast({
         title: "Install Devi Real Estates",
-        description: "Tap the browser menu (⋮ or Share) and select 'Install app' or 'Add to Home screen'.",
+        description: "Tap your browser menu (⋮ or Share) and choose 'Install app' or 'Add to Home screen'.",
       });
     }
     return false;

@@ -56,6 +56,7 @@ export default defineConfig(({ mode }) => ({
         "sw-push-handler.js"
       ],
       manifest: {
+        id: "/",
         name: "Devi Real Estates",
         short_name: "Devi Real Estates",
         description: "Find your ideal property with Devi Real Estates.",

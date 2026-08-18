@@ -16,6 +16,22 @@
     <meta name="application-name" content="Devi Real Estates" />
     <meta name="format-detection" content="telephone=no" />
 
+    <!-- Early PWA Install Prompt Capture -->
+    <script>
+      window.__deferredPwaPrompt = null;
+      window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        window.__deferredPwaPrompt = e;
+        window.dispatchEvent(new CustomEvent('pwa-prompt-available', { detail: e }));
+        console.log('[PWA] Native install prompt captured early');
+      });
+      window.addEventListener('appinstalled', function() {
+        window.__deferredPwaPrompt = null;
+        window.dispatchEvent(new CustomEvent('pwa-installed'));
+        console.log('[PWA] App successfully installed');
+      });
+    </script>
+
     <!-- Icons & Apple Touch Icon -->
     <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />

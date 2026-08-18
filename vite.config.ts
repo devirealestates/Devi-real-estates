@@ -14,6 +14,7 @@ const devApiPlugin = () => ({
         req.on('end', async () => {
           try {
             req.body = body ? JSON.parse(body) : {};
+            // @ts-ignore
             const handlerModule = await import('./api/send-notification.js');
             const handler = handlerModule.default;
             await handler(req, res);

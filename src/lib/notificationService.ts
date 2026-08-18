@@ -271,7 +271,7 @@ export async function sendTestDevicePush(): Promise<{ success: boolean; message:
             data: { url: '/' },
             vibrate: [200, 100, 200],
             tag: 'dre-test-' + Date.now(),
-          });
+          } as any);
         } else if (typeof Notification !== 'undefined') {
           new Notification('🔔 Devi Real Estates', {
             body: 'Notifications are working successfully on your device!',
@@ -401,7 +401,7 @@ export async function broadcastPushNotification(payload: {
             data: { url: payload.url || '/' },
             vibrate: [200, 100, 200],
             tag: 'dre-prop-' + Date.now(),
-          });
+          } as any);
         }
       } catch (clientNotifErr) {
         console.warn('[Push] Client notification notice:', clientNotifErr);

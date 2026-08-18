@@ -1,29 +1,40 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { ArrowRight, MapPin, Heart, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useRealtimeProperties } from '@/hooks/useRealtimeProperties';
+import { formatPriceWithSlash } from '@/lib/utils';
 import EnhancedShareMenu from '@/components/EnhancedShareMenu';
 
-const newListings = [
+interface ListingItem {
+  id: string | number;
+  name: string;
+  price: string;
+  location: string;
+  area: string;
+  image: string;
+}
+
+const defaultListings: ListingItem[] = [
   {
-    id: 1,
+    id: '1',
     name: 'Serenity Haven',
-    price: '₹ 30,00,000',
+    price: '₹ 30,00,000/-',
     location: 'Kakinada',
     area: '2500 Sq.Ft',
     image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
   },
   {
-    id: 2,
+    id: '2',
     name: 'Riverside Villa',
-    price: '₹ 45,00,000',
+    price: '₹ 45,00,000/-',
     location: 'Rajahmundry',
     area: '2500 Sq.Ft',
     image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
   },
   {
-    id: 3,
+    id: '3',
     name: 'Serene Suburban',
-    price: '₹ 22,00,000',
+    price: '₹ 22,00,000/-',
     location: 'Visakhapatnam',
     area: '1800 Sq.Ft',
     image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
@@ -32,7 +43,7 @@ const newListings = [
 
 // Individual card component with its own intersection observer
 const ListingCard: React.FC<{
-  listing: typeof newListings[0];
+  listing: ListingItem;
   onClick: () => void;
 }> = ({ listing, onClick }) => {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -78,6 +89,9 @@ const ListingCard: React.FC<{
             src={listing.image}
             alt={listing.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            onError={(e) => {
+              e.currentTarget.src = 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
+            }}
           />
 
           {/* Top Right: Wish list & Share icon buttons on the card image */}
@@ -148,6 +162,24 @@ const NewListings: React.FC = () => {
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
+  const { properties } = useRealtimeProperties();
+
+  const displayListings = useMemo<ListingItem[]>(() => {
+    if (properties && properties.length > 0) {
+      return properties.slice(0, 3).map((prop) => ({
+        id: prop.id,
+        name: prop.title || 'Featured Property',
+        price: formatPriceWithSlash(prop.price),
+        location: prop.location || 'Andhra Pradesh',
+        area: prop.area ? `${prop.area} Sq.Ft` : 'Prime Space',
+        image:
+          prop.images && prop.images.length > 0 && prop.images[0]
+            ? prop.images[0]
+            : 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      }));
+    }
+    return defaultListings;
+  }, [properties]);
 
   useEffect(() => {
     const headerObserver = new IntersectionObserver(([entry]) => {
@@ -165,6 +197,16 @@ const NewListings: React.FC = () => {
       headerObserver.disconnect();
     };
   }, []);
+
+  const handleCardClick = (listing: ListingItem) => {
+    if (listing.id && listing.id !== '1' && listing.id !== '2' && listing.id !== '3') {
+      navigate(`/property/${listing.id}`);
+    } else if (properties && properties.length > 0) {
+      navigate(`/property/${properties[0].id}`);
+    } else {
+      navigate('/buy');
+    }
+  };
 
   return (
     <section ref={sectionRef} className="py-16 sm:py-20 lg:py-24 bg-white">
@@ -236,11 +278,11 @@ const NewListings: React.FC = () => {
 
         {/* Cards Section */}
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6 lg:gap-8">
-          {newListings.map((listing) => (
+          {displayListings.map((listing) => (
             <ListingCard
               key={listing.id}
               listing={listing}
-              onClick={() => navigate('/buy')}
+              onClick={() => handleCardClick(listing)}
             />
           ))}
         </div>

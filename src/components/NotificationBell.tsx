@@ -8,7 +8,6 @@ import {
   MessageSquare,
   Sparkles,
   Megaphone,
-  Settings,
   X,
   ArrowLeft,
 } from 'lucide-react';
@@ -25,7 +24,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
-import { NotificationPreferencesModal } from '@/components/NotificationPreferencesModal';
+import { useDeviceNotifications } from '@/hooks/useDeviceNotifications';
 
 interface InAppNotification {
   id: string;
@@ -50,9 +49,9 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
 }) => {
   const [notifications, setNotifications] = useState<InAppNotification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | 'unread'>('all');
   const navigate = useNavigate();
+  const { permission, isLoading, enableNotifications } = useDeviceNotifications();
 
   // Listen to in-app notifications from Firestore in real time
   useEffect(() => {
@@ -250,16 +249,6 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                   </Button>
                 )}
 
-                <button
-                  onClick={() => {
-                    setIsSettingsOpen(true);
-                  }}
-                  className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
-                  title="Notification Settings"
-                >
-                  <Settings className="w-4 h-4" />
-                </button>
-
                 {/* Desktop Close Icon */}
                 <button
                   onClick={() => setIsOpen(false)}
@@ -270,6 +259,29 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                 </button>
               </div>
             </div>
+
+            {/* Simple Enable Push Banner (only if permission not granted yet) */}
+            {permission !== 'granted' && typeof Notification !== 'undefined' && (
+              <div className="p-3.5 bg-orange-50/80 border-b border-orange-100 flex items-center justify-between gap-3 flex-shrink-0">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-orange-500 text-white flex items-center justify-center flex-shrink-0">
+                    <Bell className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-slate-900 truncate">Enable Phone Alerts</p>
+                    <p className="text-[11px] text-slate-600 truncate">Receive property updates on your device</p>
+                  </div>
+                </div>
+                <Button
+                  onClick={enableNotifications}
+                  disabled={isLoading}
+                  size="sm"
+                  className="bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-semibold h-7 px-3 flex-shrink-0 shadow-sm"
+                >
+                  {isLoading ? '...' : 'Allow'}
+                </Button>
+              </div>
+            )}
 
             {/* Filter Tabs */}
             <div className="flex border-b border-slate-100 text-xs px-4 bg-white flex-shrink-0">
@@ -304,7 +316,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                   </div>
                   <h4 className="text-sm font-semibold text-slate-800">No notifications yet</h4>
                   <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
-                    You will be notified here whenever new properties, price updates, or visits are scheduled.
+                    You will receive notifications here whenever new properties, price updates, or visits are scheduled.
                   </p>
                 </div>
               ) : (
@@ -346,12 +358,6 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
           </div>
         </div>
       )}
-
-      {/* Preferences Modal */}
-      <NotificationPreferencesModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-      />
     </>
   );
 };

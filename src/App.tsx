@@ -10,6 +10,7 @@ import BottomNavigation from "@/components/BottomNavigation";
 import NetworkStatus from "@/components/NetworkStatus";
 import ScrollToTop from "@/components/ScrollToTop";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
+import { NotificationOptInBanner } from "@/components/NotificationOptInBanner";
 
 // Pages
 import Index from "./pages/Index";
@@ -83,6 +84,7 @@ const App = () => {
               </Routes>
               <BottomNavigation />
               <PWAInstallBanner />
+              <NotificationOptInBanner />
               <NetworkStatus />
             </BrowserRouter>
           </LocationProvider>

@@ -8,11 +8,17 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * Automatically appends "/-" to property price if not already present.
  * Handles cases where admin adds "/-", "/ -", or leaves raw price like "₹ 45,00,000", "50 Lakhs", "₹ 25,000 / month", etc.
+ * Also handles "Price on Request" or flexible price states without adding trailing slashes.
  */
 export function formatPriceWithSlash(price?: string | number | null): string {
-  if (!price && price !== 0) return '';
+  if (!price && price !== 0) return 'Price on Request';
   let str = String(price).trim();
-  if (!str) return '';
+  if (!str) return 'Price on Request';
+
+  // If price indicates on request / call / contact / may change, return clean as is
+  if (/^(price on request|on request|contact for price|call for price|price on call|prices? may (?:change|vary))$/i.test(str)) {
+    return str;
+  }
 
   // If price already ends with /- or /-, normalize to /-
   if (str.endsWith('/-') || str.endsWith('/ -')) {

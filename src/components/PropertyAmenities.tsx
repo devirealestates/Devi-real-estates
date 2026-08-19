@@ -6,14 +6,24 @@ import {
   Zap, 
   Droplets, 
   Shield, 
+  ShieldCheck,
   UtensilsCrossed,
   Dumbbell,
   Trees,
+  Leaf,
   Camera,
   Wind,
   Sofa,
   Building,
-  CheckCircle
+  CheckCircle,
+  MapPin,
+  Compass,
+  Waves,
+  Sun,
+  Sparkles,
+  Flame,
+  Wrench,
+  Layers
 } from 'lucide-react';
 
 interface PropertyAmenitiesProps {
@@ -24,11 +34,19 @@ const PropertyAmenities: React.FC<PropertyAmenitiesProps> = ({ amenities }) => {
   const getAmenityIcon = (amenity: string) => {
     const amenityLower = amenity.toLowerCase();
     
+    if (amenityLower.includes('vastu') || amenityLower.includes('vaastu')) return Compass;
+    if (amenityLower.includes('pooja') || amenityLower.includes('puja') || amenityLower.includes('prayer') || amenityLower.includes('mandir')) return Flame;
+    if (amenityLower.includes('utility') || amenityLower.includes('service') || amenityLower.includes('work area')) return Layers;
     if (amenityLower.includes('wifi') || amenityLower.includes('internet')) return Wifi;
     if (amenityLower.includes('parking') || amenityLower.includes('car')) return Car;
-    if (amenityLower.includes('power') || amenityLower.includes('backup') || amenityLower.includes('generator')) return Zap;
-    if (amenityLower.includes('water') || amenityLower.includes('supply')) return Droplets;
+    if (amenityLower.includes('power') || amenityLower.includes('electricity') || amenityLower.includes('backup') || amenityLower.includes('generator')) return Zap;
+    if (amenityLower.includes('water') || amenityLower.includes('supply') || amenityLower.includes('facility')) return Droplets;
+    if (amenityLower.includes('gated') || amenityLower.includes('community')) return ShieldCheck;
     if (amenityLower.includes('security') || amenityLower.includes('guard')) return Shield;
+    if (amenityLower.includes('road') || amenityLower.includes('wide')) return Compass;
+    if (amenityLower.includes('prime') || amenityLower.includes('location')) return MapPin;
+    if (amenityLower.includes('green') || amenityLower.includes('pollution') || amenityLower.includes('environment') || amenityLower.includes('tree') || amenityLower.includes('nature')) return Leaf;
+    if (amenityLower.includes('pool') || amenityLower.includes('swimming')) return Waves;
     if (amenityLower.includes('kitchen') || amenityLower.includes('meal') || amenityLower.includes('food')) return UtensilsCrossed;
     if (amenityLower.includes('gym') || amenityLower.includes('fitness')) return Dumbbell;
     if (amenityLower.includes('garden') || amenityLower.includes('park')) return Trees;

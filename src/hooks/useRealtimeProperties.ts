@@ -7,9 +7,13 @@ import { formatPriceWithSlash } from '@/lib/utils';
 export interface Property {
   id: string;
   title: string;
+  developer?: string;
+  badge?: string;
   price: string;
+  priceMayChange?: boolean;
   location: string;
   fullAddress?: string;
+  mapEmbedLink?: string;
   type: string;
   category: string;
   subCategory?: string;
@@ -19,11 +23,19 @@ export interface Property {
   bathrooms?: number;
   area: string;
   areaAcres?: number;
+  plinthArea?: string;
+  saleableArea?: string;
+  plotSize?: string;
+  uds?: string;
   description: string;
   featured?: boolean;
   status?: string;
   approved?: boolean;
   propertyAge?: number;
+  facing?: string;
+  amenities?: string[];
+  locationHighlights?: string[];
+  buildingSpecifications?: Record<string, string[]>;
   createdAt?: any;
   updatedAt?: any;
 }
@@ -98,9 +110,13 @@ export const useRealtimeProperties = (options: UseRealtimePropertiesOptions = {}
             return {
               id: doc.id,
               title: data.title || '',
+              developer: data.developer,
+              badge: data.badge,
               price: formatPriceWithSlash(data.price),
+              priceMayChange: data.priceMayChange,
               location: data.location || '',
               fullAddress: data.fullAddress || '',
+              mapEmbedLink: data.mapEmbedLink,
               type: data.type || 'Property',
               category: data.category || 'For Sale',
               subCategory: data.subCategory || '',
@@ -110,11 +126,19 @@ export const useRealtimeProperties = (options: UseRealtimePropertiesOptions = {}
               bathrooms: data.bathrooms,
               area: data.area || 'N/A',
               areaAcres: data.areaAcres,
+              plinthArea: data.plinthArea,
+              saleableArea: data.saleableArea,
+              plotSize: data.plotSize,
+              uds: data.uds,
               propertyAge: data.propertyAge,
               description: data.description || 'No description available.',
               featured: data.featured || false,
               status: data.status,
               approved: data.approved,
+              facing: data.facing,
+              amenities: data.amenities,
+              locationHighlights: data.locationHighlights,
+              buildingSpecifications: data.buildingSpecifications,
               createdAt: data.createdAt,
               updatedAt: data.updatedAt
             } as Property;

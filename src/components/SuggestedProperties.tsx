@@ -8,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { useShortlist } from '@/hooks/useShortlist';
 import { useContactOwner } from '@/hooks/useContactOwner';
 import EnhancedShareMenu from '@/components/EnhancedShareMenu';
+import { ProtectedImage } from '@/components/ProtectedImage';
+import PropertyBadge from '@/components/PropertyBadge';
 import { formatPriceWithSlash } from '@/lib/utils';
 
 interface Property {
@@ -17,6 +19,7 @@ interface Property {
   location: string;
   fullAddress?: string;
   type: string;
+  badge?: string;
   category: string;
   images: string[];
   area: string;
@@ -50,23 +53,23 @@ const SuggestedProperties: React.FC<SuggestedPropertiesProps> = ({
   const fetchSuggestedProperties = async () => {
     try {
       console.log('Fetching suggested properties for category:', category, 'location:', location);
-      
+
       // First try to get properties from same category
       let q = query(
         collection(db, 'properties'),
         where('category', '==', category),
         limit(6)
       );
-      
+
       let querySnapshot = await getDocs(q);
       let properties = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       })) as Property[];
-      
+
       // Filter out current property
       properties = properties.filter(prop => prop.id !== currentPropertyId);
-      
+
       // If we don't have enough properties from same category, get from same location
       if (properties.length < 4) {
         const locationQuery = query(
@@ -74,13 +77,13 @@ const SuggestedProperties: React.FC<SuggestedPropertiesProps> = ({
           where('location', '==', location),
           limit(4)
         );
-        
+
         const locationSnapshot = await getDocs(locationQuery);
         const locationProperties = locationSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         })) as Property[];
-        
+
         // Add location-based properties that aren't already included
         locationProperties.forEach(prop => {
           if (prop.id !== currentPropertyId && !properties.find(p => p.id === prop.id)) {
@@ -88,7 +91,7 @@ const SuggestedProperties: React.FC<SuggestedPropertiesProps> = ({
           }
         });
       }
-      
+
       console.log('Found suggested properties:', properties.length);
       setSuggestedProperties(properties.slice(0, 4));
     } catch (error) {
@@ -149,7 +152,7 @@ const SuggestedProperties: React.FC<SuggestedPropertiesProps> = ({
               </div>
               <h2 className="text-xs sm:text-3xl font-bold text-gray-900">You Might Also Like</h2>
             </div>
-            
+
             {/* See All Button - Hidden on Desktop Grid, Shown on Mobile */}
             <button
               onClick={handleSeeAll}
@@ -159,7 +162,7 @@ const SuggestedProperties: React.FC<SuggestedPropertiesProps> = ({
               <ChevronRight className="w-3 h-3" />
             </button>
           </div>
-          
+
           {/* Mobile View with "See All" functionality */}
           <div className="md:hidden">
             {!showAllOnMobile ? (
@@ -169,47 +172,49 @@ const SuggestedProperties: React.FC<SuggestedPropertiesProps> = ({
                   <div
                     key={property.id}
                     className="flex-none w-36 opacity-0 animate-[fade-in-up_0.6s_ease-out_forwards] cursor-pointer"
-                    style={{animationDelay: `${index * 0.1}s`}}
+                    style={{ animationDelay: `${index * 0.1}s` }}
                     onClick={() => handlePropertyCardClick(property.id)}
                   >
                     <div className="bg-white rounded-lg border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow h-44">
-                      {/* Equal Height Image */}
-                      <div className="relative h-20 overflow-hidden">
-                        <img 
-                          src={property.images[0]}
-                          alt={property.title}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.src = 'https://images.unsplash.com/photo-1721322800607-8c38375eef04?q=80&w=500';
-                          }}
-                        />
-                        
+                      {/* Equal Height Protected Image */}
+                      <ProtectedImage
+                        src={property.images[0]}
+                        alt={property.title}
+                        className="h-20 w-full"
+                        watermarkSize="sm"
+                      >
+                        {/* Top Left Property Badge */}
+                        {property.badge && (
+                          <div className="absolute top-1 left-1 z-20 max-w-[80%]">
+                            <PropertyBadge badge={property.badge} size="xs" showIcon={false} />
+                          </div>
+                        )}
+
                         {/* Top right icons - Heart and Share */}
-                        <div className="absolute top-1 right-1 flex gap-1">
-                          <button 
+                        <div className="absolute top-1 right-1 flex gap-1 z-20">
+                          <button
                             onClick={(e) => handleShortlistClick(e, property.id)}
                             className="w-5 h-5 flex items-center justify-center transition-all duration-200 hover:scale-110"
                           >
-                            <Heart 
-                              className={`w-4 h-4 transition-all duration-200 ${
-                                isShortlisted(property.id) 
-                                  ? 'text-red-500 fill-red-500' 
+                            <Heart
+                              className={`w-4 h-4 transition-all duration-200 ${isShortlisted(property.id)
+                                  ? 'text-red-500 fill-red-500'
                                   : 'text-white hover:text-red-400 drop-shadow-md'
-                              }`} 
+                                }`}
                             />
                           </button>
-                          
-                          <button 
+
+                          <button
                             onClick={(e) => handleShareClick(e, property)}
                             className="w-5 h-5 flex items-center justify-center transition-all duration-200 hover:scale-110"
                           >
-                            <Send 
+                            <Send
                               className="w-4 h-4 text-white hover:text-blue-400 drop-shadow-md"
                             />
                           </button>
                         </div>
-                      </div>
-                      
+                      </ProtectedImage>
+
                       {/* Equal Height Content */}
                       <div className="p-2 h-24 flex flex-col justify-between">
                         <div>
@@ -254,32 +259,31 @@ const SuggestedProperties: React.FC<SuggestedPropertiesProps> = ({
                 {/* Compact Card Layout with Updated Styling */}
                 <div className="space-y-3">
                   {suggestedProperties.map((property, index) => (
-                    <div 
-                      key={property.id} 
-                      className="opacity-0 animate-[fade-in-up_0.6s_ease-out_forwards]" 
-                      style={{animationDelay: `${index * 0.05}s`}}
+                    <div
+                      key={property.id}
+                      className="opacity-0 animate-[fade-in-up_0.6s_ease-out_forwards]"
+                      style={{ animationDelay: `${index * 0.05}s` }}
                     >
                       <div className="bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200 relative">
                         {/* Top right icons - Heart and Share */}
                         <div className="absolute top-2 right-2 flex gap-1 z-10">
-                          <button 
+                          <button
                             onClick={(e) => handleShortlistClick(e, property.id)}
                             className="w-5 h-5 flex items-center justify-center transition-all duration-200 hover:scale-110"
                           >
-                            <Heart 
-                              className={`w-4 h-4 transition-all duration-200 ${
-                                isShortlisted(property.id) 
-                                  ? 'text-red-500 fill-red-500' 
+                            <Heart
+                              className={`w-4 h-4 transition-all duration-200 ${isShortlisted(property.id)
+                                  ? 'text-red-500 fill-red-500'
                                   : 'text-gray-600 hover:text-red-500'
-                              }`} 
+                                }`}
                             />
                           </button>
-                          
-                          <button 
+
+                          <button
                             onClick={(e) => handleShareClick(e, property)}
                             className="w-5 h-5 flex items-center justify-center transition-all duration-200 hover:scale-110"
                           >
-                            <Send 
+                            <Send
                               className="w-4 h-4 text-gray-600 hover:text-blue-500"
                             />
                           </button>
@@ -288,29 +292,31 @@ const SuggestedProperties: React.FC<SuggestedPropertiesProps> = ({
                         {/* Top Section: Thumbnail + Details */}
                         <div className="flex h-20">
                           {/* Thumbnail Image - Slightly wider and shorter */}
-                          <div className="w-28 h-20 flex-shrink-0 overflow-hidden">
-                            <img 
-                              src={property.images[0]}
-                              alt={property.title}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.currentTarget.src = 'https://images.unsplash.com/photo-1721322800607-8c38375eef04?q=80&w=500';
-                              }}
-                            />
-                          </div>
-                          
+                          <ProtectedImage
+                            src={property.images[0]}
+                            alt={property.title}
+                            className="w-28 h-20 flex-shrink-0"
+                            watermarkSize="sm"
+                          >
+                            {property.badge && (
+                              <div className="absolute top-1 left-1 z-20 max-w-[90%]">
+                                <PropertyBadge badge={property.badge} size="xs" showIcon={false} />
+                              </div>
+                            )}
+                          </ProtectedImage>
+
                           {/* Property Details */}
                           <div className="flex-1 p-3 pr-16 flex flex-col justify-between">
                             {/* Price */}
                             <div className="text-lg font-bold text-gray-900">
                               {formatPriceWithSlash(property.price)}
                             </div>
-                            
+
                             {/* Title - Fixed visibility issue */}
                             <h3 className="text-sm font-semibold text-gray-800 line-clamp-1 break-words">
                               {property.title}
                             </h3>
-                            
+
                             {/* Location and Area */}
                             <div className="space-y-1 mt-1">
                               <div className="flex items-center text-xs text-gray-600">
@@ -323,7 +329,7 @@ const SuggestedProperties: React.FC<SuggestedPropertiesProps> = ({
                             </div>
                           </div>
                         </div>
-                        
+
                         {/* Bottom Section: Action Buttons with increased spacing */}
                         <div className="px-3 pb-3 pt-4">
                           <div className="flex gap-2 w-full">
@@ -356,7 +362,7 @@ const SuggestedProperties: React.FC<SuggestedPropertiesProps> = ({
           <div className="hidden md:block">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {suggestedProperties.map((property, index) => (
-                <div key={property.id} className="fade-in-up" style={{animationDelay: `${index * 0.1}s`}}>
+                <div key={property.id} className="fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
                   <PropertyCard property={property} />
                 </div>
               ))}

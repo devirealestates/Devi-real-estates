@@ -3,6 +3,9 @@ import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, X, Maximize2, Play, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { combineMediaItems, MediaItem, getEmbedUrl } from '@/lib/mediaUtils';
+import { ProtectedImage } from '@/components/ProtectedImage';
+import { ProtectedVideoPlayer } from '@/components/ProtectedVideoPlayer';
+import { WatermarkOverlay } from '@/components/WatermarkOverlay';
 
 interface PropertyImageGalleryProps {
   images: string[];
@@ -97,53 +100,52 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
   };
 
   return (
-    <div className="space-y-3 select-none">
-      {/* Main Media Display with Touch Swipe */}
+    <div className="space-y-3 select-none protected-media" onContextMenu={(e) => e.preventDefault()}>
+      {/* Main Media Display with Touch Swipe & Protection */}
       <div 
-        className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-gray-100 group cursor-pointer touch-pan-y"
+        className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-gray-100 group cursor-pointer touch-pan-y shadow-sm"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        onContextMenu={(e) => e.preventDefault()}
       >
         {currentMedia?.type === 'video' ? (
           // Video Display
           <div className="relative w-full h-full">
-            <img
-              src={currentMedia.thumbnail}
+            <ProtectedImage
+              src={currentMedia.thumbnail || 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=300&fit=crop'}
               alt={`${title} - Video ${selectedMediaIndex + 1}`}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="w-full h-full"
+              imgClassName="group-hover:scale-105"
+              watermarkSize="md"
               onClick={() => openLightbox(selectedMediaIndex)}
-              onError={(e) => {
-                e.currentTarget.src = 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=300&fit=crop';
-              }}
             />
             
             {/* Video Play Button Overlay */}
             <div 
-              className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center cursor-pointer"
+              className="absolute inset-0 bg-black/30 flex items-center justify-center cursor-pointer z-20"
               onClick={() => openLightbox(selectedMediaIndex)}
             >
-              <div className="w-16 h-16 bg-white bg-opacity-90 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-opacity-100 hover:scale-110">
-                <Play className="w-8 h-8 text-gray-800 ml-1" />
+              <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white hover:scale-110 shadow-lg">
+                <Play className="w-8 h-8 text-gray-800 ml-1 fill-gray-800" />
               </div>
             </div>
             
             {/* Video Type Indicator */}
-            <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs flex items-center gap-1">
-              <Play className="w-3 h-3" />
+            <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm text-white px-2.5 py-1 rounded-md text-xs flex items-center gap-1.5 z-20">
+              <Play className="w-3.5 h-3.5 fill-white" />
               Video
             </div>
           </div>
         ) : (
-          // Image Display
-          <img
+          // Protected Image Display
+          <ProtectedImage
             src={currentMedia?.url}
             alt={`${title} - Main image`}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-full"
+            imgClassName="group-hover:scale-105"
+            watermarkSize="md"
             onClick={() => openLightbox(selectedMediaIndex)}
-            onError={(e) => {
-              e.currentTarget.src = 'https://images.unsplash.com/photo-1721322800607-8c38375eef04?q=80&w=500';
-            }}
           />
         )}
         
@@ -176,14 +178,14 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
         {/* View Full Gallery Button */}
         <button
           onClick={() => openLightbox(selectedMediaIndex)}
-          className="absolute bottom-2 right-2 bg-black/50 backdrop-blur-sm text-white px-2 py-1 rounded-md text-xs flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300"
+          className="absolute bottom-2 right-2 bg-black/50 backdrop-blur-sm text-white px-2 py-1 rounded-md text-xs flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20"
         >
           <Maximize2 className="w-3 h-3" />
           Gallery
         </button>
 
         {/* Media Counter */}
-        <div className="absolute top-2 right-2 bg-black/50 backdrop-blur-sm text-white px-2 py-1 rounded-md text-xs">
+        <div className="absolute top-2 right-2 bg-black/50 backdrop-blur-sm text-white px-2 py-1 rounded-md text-xs z-20">
           {selectedMediaIndex + 1} / {mediaItems.length}
         </div>
 
@@ -195,7 +197,7 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
               onToggleShortlist(e);
             }}
             disabled={shortlistLoading}
-            className="absolute top-2 left-2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white hover:scale-110 shadow-lg"
+            className="absolute top-2 left-2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center transition-all duration-300 hover:bg-white hover:scale-110 shadow-lg z-20"
           >
             <Heart 
               className={`w-5 h-5 transition-all duration-300 ${
@@ -217,22 +219,20 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
               onClick={() => setSelectedMediaIndex(index)}
               className={`flex-shrink-0 w-16 h-12 rounded-md overflow-hidden border-2 transition-all duration-200 ${
                 index === selectedMediaIndex 
-                  ? 'border-blue-500 ring-1 ring-blue-200' 
-                  : 'border-gray-200 hover:border-blue-300'
+                  ? 'border-emerald-600 ring-1 ring-emerald-200' 
+                  : 'border-gray-200 hover:border-emerald-300'
               }`}
             >
               <div className="relative w-full h-full">
-                <img
-                  src={media.type === 'video' ? media.thumbnail : media.url}
+                <ProtectedImage
+                  src={media.type === 'video' ? (media.thumbnail || '') : media.url}
                   alt={`${title} - Thumbnail ${index + 1}`}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1721322800607-8c38375eef04?q=80&w=500';
-                  }}
+                  className="w-full h-full"
+                  showWatermark={false}
                 />
                 {media.type === 'video' && (
-                  <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                    <Play className="w-3 h-3 text-white" />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20">
+                    <Play className="w-3 h-3 text-white fill-white" />
                   </div>
                 )}
               </div>
@@ -241,7 +241,7 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
           {mediaItems.length > 6 && (
             <button
               onClick={() => openLightbox(0)}
-              className="flex-shrink-0 w-16 h-12 rounded-md bg-gray-100 border-2 border-gray-200 hover:border-blue-300 flex items-center justify-center text-gray-600 text-xs"
+              className="flex-shrink-0 w-16 h-12 rounded-md bg-gray-100 border-2 border-gray-200 hover:border-emerald-300 flex items-center justify-center text-gray-600 text-xs font-semibold"
             >
               +{mediaItems.length - 6}
             </button>
@@ -249,46 +249,38 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
         </div>
       )}
 
-      {/* Lightbox */}
+      {/* Lightbox with Watermark & Protected Player */}
       {isLightboxOpen && (
         <div 
-          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 touch-pan-y"
+          className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 touch-pan-y select-none"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onContextMenu={(e) => e.preventDefault()}
         >
-          <div className="relative max-w-7xl max-h-full w-full">
+          <div className="relative max-w-7xl max-h-full w-full flex items-center justify-center">
             {currentMedia?.type === 'video' ? (
-              // Video Lightbox
-              <div className="aspect-video w-full bg-black rounded-lg overflow-hidden">
-                {currentMedia.url.includes('youtube.com') || currentMedia.url.includes('vimeo.com') ? (
-                  <iframe
-                    src={getEmbedUrl(currentMedia.url)}
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                ) : (
-                  <video
-                    src={currentMedia.url}
-                    controls
-                    className="w-full h-full"
-                    autoPlay
-                  >
-                    Your browser does not support the video tag.
-                  </video>
-                )}
+              // Protected Video Lightbox
+              <div className="w-full max-w-4xl aspect-video rounded-xl overflow-hidden shadow-2xl">
+                <ProtectedVideoPlayer
+                  url={currentMedia.url}
+                  title={title}
+                  thumbnail={currentMedia.thumbnail}
+                  autoPlay={true}
+                  showWatermark={true}
+                />
               </div>
             ) : (
-              // Image Lightbox
-              <img
-                src={currentMedia?.url}
-                alt={`${title} - Full size`}
-                className="max-w-full max-h-full object-contain"
-                onError={(e) => {
-                  e.currentTarget.src = 'https://images.unsplash.com/photo-1721322800607-8c38375eef04?q=80&w=500';
-                }}
-              />
+              // Protected Image Lightbox
+              <div className="relative max-w-full max-h-[85vh] flex items-center justify-center">
+                <ProtectedImage
+                  src={currentMedia?.url}
+                  alt={`${title} - Full size`}
+                  className="max-w-full max-h-[85vh] rounded-lg shadow-2xl"
+                  imgClassName="max-w-full max-h-[85vh] object-contain"
+                  watermarkSize="lg"
+                />
+              </div>
             )}
             
             {/* Close Button */}
@@ -296,7 +288,7 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
               onClick={closeLightbox}
               variant="outline"
               size="icon"
-              className="absolute top-4 right-4 bg-white/20 backdrop-blur-md border-white/30 text-white hover:bg-white/40"
+              className="absolute top-4 right-4 bg-white/20 backdrop-blur-md border-white/30 text-white hover:bg-white/40 z-30"
             >
               <X className="w-6 h-6" />
             </Button>
@@ -308,7 +300,7 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                   onClick={prevMedia}
                   variant="outline"
                   size="icon"
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-md border-white/30 text-white hover:bg-white/40"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-md border-white/30 text-white hover:bg-white/40 z-30"
                 >
                   <ChevronLeft className="w-6 h-6" />
                 </Button>
@@ -316,7 +308,7 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                   onClick={nextMedia}
                   variant="outline"
                   size="icon"
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-md border-white/30 text-white hover:bg-white/40"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 backdrop-blur-md border-white/30 text-white hover:bg-white/40 z-30"
                 >
                   <ChevronRight className="w-6 h-6" />
                 </Button>
@@ -324,7 +316,7 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
             )}
 
             {/* Media Counter in Lightbox */}
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm">
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/60 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm z-30 border border-white/20">
               {selectedMediaIndex + 1} of {mediaItems.length}
             </div>
           </div>

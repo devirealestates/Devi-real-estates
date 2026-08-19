@@ -3,6 +3,8 @@ import { ArrowRight, Image as ImageIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useRealtimeProperties, Property } from '@/hooks/useRealtimeProperties';
 import { formatPriceWithSlash } from '@/lib/utils';
+import { ProtectedImage } from '@/components/ProtectedImage';
+import PropertyBadge from '@/components/PropertyBadge';
 
 interface DisplayListing {
   id: string;
@@ -11,6 +13,7 @@ interface DisplayListing {
   price: string;
   period: string;
   image: string;
+  badge?: string;
 }
 
 // Helper to extract timestamp from various Firestore date representations
@@ -86,11 +89,6 @@ const ListingCard: React.FC<{
 }> = ({ listing, isLast, onClick }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [imgSrc, setImgSrc] = useState(listing.image);
-
-  useEffect(() => {
-    setImgSrc(listing.image);
-  }, [listing.image]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -126,17 +124,20 @@ const ListingCard: React.FC<{
         className="flex flex-col md:flex-row gap-6 lg:gap-10 cursor-pointer group"
         onClick={onClick}
       >
-        {/* Image */}
-        <div className="md:w-2/5 overflow-hidden rounded-2xl aspect-[4/3] md:aspect-auto md:h-64 flex-shrink-0 bg-gray-100 relative">
-          <img
-            src={imgSrc}
-            alt={listing.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            onError={() => {
-              setImgSrc('https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80');
-            }}
-          />
-        </div>
+        {/* Protected Image with Watermark */}
+        <ProtectedImage
+          src={listing.image}
+          alt={listing.name}
+          className="md:w-2/5 rounded-2xl aspect-[4/3] md:aspect-auto md:h-64 flex-shrink-0 bg-gray-100 shadow-sm"
+          imgClassName="group-hover:scale-105"
+          watermarkSize="md"
+        >
+          {listing.badge && (
+            <div className="absolute top-3 left-3 z-20">
+              <PropertyBadge badge={listing.badge} size="sm" />
+            </div>
+          )}
+        </ProtectedImage>
         {/* Details */}
         <div className="flex-1 flex flex-col justify-center">
           <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 font-display group-hover:text-orange-600 transition-colors duration-300">
@@ -227,6 +228,7 @@ const LatestProperties: React.FC = () => {
         price: formatPrice(prop.price),
         period: getPeriod(prop.category, prop.price),
         image: mainImage,
+        badge: prop.badge,
       };
     });
   }, [properties]);

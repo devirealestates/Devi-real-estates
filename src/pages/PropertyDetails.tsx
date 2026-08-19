@@ -11,9 +11,12 @@ import PropertyMap from '@/components/PropertyMap';
 import PropertyContact from '@/components/PropertyContact';
 import SuggestedProperties from '@/components/SuggestedProperties';
 import ScheduleVisitModal from '@/components/ScheduleVisitModal';
+import BuildingSpecifications from '@/components/BuildingSpecifications';
+import LocationHighlights from '@/components/LocationHighlights';
+import PropertyBadge from '@/components/PropertyBadge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, MapPin, Calendar, Home, ImageIcon, MapIcon, Phone, CheckCircle, Heart, CalendarDays } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Home, ImageIcon, MapIcon, Phone, CheckCircle, Heart, CalendarDays, Building2, Compass } from 'lucide-react';
 import { useShortlist } from '@/hooks/useShortlist';
 import { formatPriceWithSlash } from '@/lib/utils';
 
@@ -21,8 +24,12 @@ interface Property {
   id: string;
   title: string;
   price: string;
+  priceMayChange?: boolean;
   location: string;
   fullAddress?: string;
+  mapEmbedLink?: string;
+  developer?: string;
+  badge?: string;
   type: string;
   category: string;
   images: string[];
@@ -31,8 +38,14 @@ interface Property {
   bathrooms?: number;
   area: string;
   areaAcres?: number;
+  plinthArea?: string;
+  saleableArea?: string;
+  plotSize?: string;
+  uds?: string;
   description: string;
   highlights?: string[];
+  locationHighlights?: string[];
+  buildingSpecifications?: Record<string, string[]>;
   contactName?: string;
   contactPhone?: string;
   contactEmail?: string;
@@ -219,13 +232,23 @@ const PropertyDetails = () => {
                 <MapPin className="w-4 h-4" />
                 <span className="text-sm">{property.location}</span>
               </div>
-              <p 
-                className="text-3xl font-semibold text-emerald-600"
-                style={{ fontFamily: "'DM Sans', sans-serif" }}
-              >
-                {property.price}
-              </p>
-              <div className="flex flex-wrap gap-2">
+              <div>
+                <p 
+                  className="text-3xl font-semibold text-emerald-600"
+                  style={{ fontFamily: "'DM Sans', sans-serif" }}
+                >
+                  {property.price}
+                </p>
+                {property.priceMayChange && (
+                  <span className="inline-block text-xs font-medium text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded mt-1">
+                    Prices may change / vary
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2 items-center">
+                {property.badge && (
+                  <PropertyBadge badge={property.badge} size="sm" />
+                )}
                 <span className="px-4 py-1.5 rounded-full text-sm font-medium border border-gray-200 text-gray-700">
                   {property.type}
                 </span>
@@ -272,13 +295,24 @@ const PropertyDetails = () => {
                       <ImageIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       Features
                     </TabsTrigger>
-                    <TabsTrigger 
-                      value="map" 
-                      className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2"
-                    >
-                      <MapIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      Map
-                    </TabsTrigger>
+                    {property.buildingSpecifications && Object.keys(property.buildingSpecifications).length > 0 && (
+                      <TabsTrigger 
+                        value="specs" 
+                        className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2"
+                      >
+                        <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        Specs
+                      </TabsTrigger>
+                    )}
+                    {property.mapEmbedLink && property.mapEmbedLink.trim() !== '' && (
+                      <TabsTrigger 
+                        value="map" 
+                        className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2"
+                      >
+                        <MapIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        Map
+                      </TabsTrigger>
+                    )}
                     <TabsTrigger 
                       value="contact" 
                       className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2"
@@ -289,11 +323,19 @@ const PropertyDetails = () => {
                   </TabsList>
                 </div>
                 
-                <TabsContent value="overview" className="p-4 sm:p-6 mt-2">
+                <TabsContent value="overview" className="p-4 sm:p-6 mt-2 space-y-6">
                   <PropertyOverview property={property} />
+                  {property.locationHighlights && property.locationHighlights.length > 0 && (
+                    <LocationHighlights highlights={property.locationHighlights} />
+                  )}
+                  {property.buildingSpecifications && Object.keys(property.buildingSpecifications).length > 0 && (
+                    <div className="border-t border-gray-100 pt-6">
+                      <BuildingSpecifications specifications={property.buildingSpecifications} />
+                    </div>
+                  )}
                 </TabsContent>
                 
-                <TabsContent value="amenities" className="p-4 sm:p-6 mt-2">
+                <TabsContent value="amenities" className="p-4 sm:p-6 mt-2 space-y-6">
                   {property.amenities && property.amenities.length > 0 ? (
                     <PropertyAmenities amenities={property.amenities} />
                   ) : (
@@ -303,14 +345,23 @@ const PropertyDetails = () => {
                     </div>
                   )}
                 </TabsContent>
+
+                {property.buildingSpecifications && Object.keys(property.buildingSpecifications).length > 0 && (
+                  <TabsContent value="specs" className="p-4 sm:p-6 mt-2">
+                    <BuildingSpecifications specifications={property.buildingSpecifications} />
+                  </TabsContent>
+                )}
                 
-                <TabsContent value="map" className="p-0 mt-2">
-                  <PropertyMap 
-                    location={property.location} 
-                    title={property.title} 
-                    fullAddress={property.fullAddress}
-                  />
-                </TabsContent>
+                {property.mapEmbedLink && property.mapEmbedLink.trim() !== '' && (
+                  <TabsContent value="map" className="p-0 mt-2">
+                    <PropertyMap 
+                      location={property.location} 
+                      title={property.title} 
+                      fullAddress={property.fullAddress}
+                      mapEmbedLink={property.mapEmbedLink}
+                    />
+                  </TabsContent>
+                )}
                 
                 <TabsContent value="contact" className="p-4 sm:p-6 mt-2">
                   <PropertyContact 
@@ -339,13 +390,23 @@ const PropertyDetails = () => {
                 <MapPin className="w-4 h-4 mr-2" />
                 <span className="text-sm">{property.location}</span>
               </div>
-              <p 
-                className="text-3xl font-semibold text-emerald-600 mb-6"
-                style={{ fontFamily: "'DM Sans', sans-serif" }}
-              >
-                {property.price}
-              </p>
-              <div className="flex flex-wrap gap-2 mb-6">
+              <div className="mb-6">
+                <p 
+                  className="text-3xl font-semibold text-emerald-600"
+                  style={{ fontFamily: "'DM Sans', sans-serif" }}
+                >
+                  {property.price}
+                </p>
+                {property.priceMayChange && (
+                  <span className="inline-block text-xs font-medium text-amber-600 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded mt-1.5">
+                    Prices may change / vary
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2 items-center mb-6">
+                {property.badge && (
+                  <PropertyBadge badge={property.badge} size="sm" />
+                )}
                 <span className="px-4 py-1.5 rounded-full text-sm font-medium border border-gray-200 text-gray-700">
                   {property.type}
                 </span>

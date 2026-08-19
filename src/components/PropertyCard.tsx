@@ -3,6 +3,8 @@ import { Heart, MapPin, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useShortlist } from '@/hooks/useShortlist';
 import EnhancedShareMenu from '@/components/EnhancedShareMenu';
+import { ProtectedImage } from '@/components/ProtectedImage';
+import PropertyBadge from '@/components/PropertyBadge';
 import { combineMediaItems, MediaItem } from '@/lib/mediaUtils';
 import { formatPriceWithSlash } from '@/lib/utils';
 
@@ -14,6 +16,7 @@ interface PropertyCardProps {
     location: string;
     fullAddress?: string;
     type: string;
+    badge?: string;
     images: string[];
     videos?: string[];
     bedrooms?: number;
@@ -38,28 +41,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
   const getMediaItems = (): MediaItem[] => {
     const images = property.images || [];
     const videos = property.videos || [];
-    const mediaItems = combineMediaItems(images, videos);
-    
-    if (mediaItems.length === 0) {
-      const defaultImage = 'https://images.unsplash.com/photo-1721322800607-8c38375eef04?q=80&w=500';
-      return [{ url: defaultImage, type: 'image' }];
-    }
-    
-    return mediaItems;
+    return combineMediaItems(images, videos);
   };
 
   const mediaItems = getMediaItems();
   const currentMedia = mediaItems[0];
-
-  const handleImageLoad = () => {
-    setImageLoading(false);
-    setImageError(false);
-  };
-
-  const handleImageError = () => {
-    setImageLoading(false);
-    setImageError(true);
-  };
 
   const handleCardClick = () => {
     navigate(`/property/${property.id}`);
@@ -84,25 +70,17 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
         className="cursor-pointer group transition-all duration-300"
         onClick={handleCardClick}
       >
-        {/* Card Image with Wishlist, Share overlay, and badges */}
-        <div className="relative aspect-[4/3] rounded-xl sm:rounded-2xl overflow-hidden mb-2.5 sm:mb-3 bg-gray-100 shadow-sm">
-          <img 
-            src={currentImageUrl}
-            alt={property.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            onLoad={handleImageLoad}
-            onError={handleImageError}
-            loading="lazy"
-          />
-
-          {imageLoading && (
-            <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-              <div className="w-8 h-8 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          )}
-
+        {/* Card Image with ProtectedImage, Watermark, Wishlist, Share overlay, and badges */}
+        <ProtectedImage
+          src={currentImageUrl}
+          alt={property.title}
+          aspectRatioClass="aspect-[4/3]"
+          className="rounded-xl sm:rounded-2xl mb-2.5 sm:mb-3 bg-gray-100 shadow-sm"
+          imgClassName="group-hover:scale-105"
+          watermarkSize="sm"
+        >
           {/* Top Right: Wish list & Share icon buttons on the card image */}
-          <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 flex items-center gap-1.5 sm:gap-2 z-10">
+          <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 flex items-center gap-1.5 sm:gap-2 z-20">
             <button 
               onClick={handleShortlistClick}
               disabled={shortlistLoading}
@@ -127,12 +105,18 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
             </button>
           </div>
 
-          {property.featured && (
-            <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium shadow">
-              Featured
-            </div>
-          )}
-        </div>
+          {/* Top Left: Badges */}
+          <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 flex flex-col items-start gap-1 z-20 max-w-[70%]">
+            {property.badge && (
+              <PropertyBadge badge={property.badge} size="xs" />
+            )}
+            {property.featured && !property.badge && (
+              <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium shadow">
+                Featured
+              </div>
+            )}
+          </div>
+        </ProtectedImage>
 
         {/* Details: Title & Price */}
         <div className="flex items-start justify-between gap-1 sm:gap-2 mb-0.5 sm:mb-1">

@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { ArrowRight, MapPin, Heart, Send } from 'lucide-react';
+import { ArrowRight, MapPin, Heart, Send, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useRealtimeProperties } from '@/hooks/useRealtimeProperties';
 import { formatPriceWithSlash } from '@/lib/utils';
 import EnhancedShareMenu from '@/components/EnhancedShareMenu';
+import { ProtectedImage } from '@/components/ProtectedImage';
+import PropertyBadge from '@/components/PropertyBadge';
 
 interface ListingItem {
   id: string | number;
@@ -12,44 +14,33 @@ interface ListingItem {
   location: string;
   area: string;
   image: string;
+  badge?: string;
 }
 
-const defaultListings: ListingItem[] = [
-  {
-    id: '1',
-    name: 'Serenity Haven',
-    price: '₹ 30,00,000/-',
-    location: 'Kakinada',
-    area: '2500 Sq.Ft',
-    image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-  },
-  {
-    id: '2',
-    name: 'Riverside Villa',
-    price: '₹ 45,00,000/-',
-    location: 'Rajahmundry',
-    area: '2500 Sq.Ft',
-    image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-  },
-  {
-    id: '3',
-    name: 'Serene Suburban',
-    price: '₹ 22,00,000/-',
-    location: 'Visakhapatnam',
-    area: '1800 Sq.Ft',
-    image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-  },
-];
+// Skeleton card for loading state
+const ListingSkeleton: React.FC = () => (
+  <div className="animate-pulse">
+    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl mb-2.5 sm:mb-4 aspect-[4/3] bg-gray-200" />
+    <div className="space-y-2">
+      <div className="flex items-start justify-between gap-2">
+        <div className="h-5 bg-gray-200 rounded w-1/2" />
+        <div className="h-5 bg-gray-200 rounded w-1/4" />
+      </div>
+      <div className="h-4 bg-gray-200 rounded w-3/4" />
+      <div className="h-4 bg-gray-200 rounded w-1/3" />
+    </div>
+  </div>
+);
 
-// Individual card component with its own intersection observer
+// Individual Listing Card Component
 const ListingCard: React.FC<{
   listing: ListingItem;
   onClick: () => void;
 }> = ({ listing, onClick }) => {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -83,19 +74,24 @@ const ListingCard: React.FC<{
         }`}
         onClick={onClick}
       >
-        {/* Image */}
-        <div className="relative overflow-hidden rounded-xl sm:rounded-2xl mb-2.5 sm:mb-4 aspect-[4/3] bg-gray-100 shadow-sm">
-          <img
-            src={listing.image}
-            alt={listing.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            onError={(e) => {
-              e.currentTarget.src = 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
-            }}
-          />
+        {/* Protected Image with Watermark */}
+        <ProtectedImage
+          src={listing.image}
+          alt={listing.name}
+          aspectRatioClass="aspect-[4/3]"
+          className="rounded-xl sm:rounded-2xl mb-2.5 sm:mb-4 bg-gray-100 shadow-sm"
+          imgClassName="group-hover:scale-105"
+          watermarkSize="sm"
+        >
+          {/* Top Left: Property Badge */}
+          {listing.badge && (
+            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-20">
+              <PropertyBadge badge={listing.badge} size="xs" />
+            </div>
+          )}
 
           {/* Top Right: Wish list & Share icon buttons on the card image */}
-          <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex items-center gap-1.5 sm:gap-2 z-10">
+          <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex items-center gap-1.5 sm:gap-2 z-20">
             <button 
               onClick={(e) => {
                 e.stopPropagation();
@@ -124,7 +120,7 @@ const ListingCard: React.FC<{
               <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white stroke-[2.2]" />
             </button>
           </div>
-        </div>
+        </ProtectedImage>
         {/* Info */}
         <div className="space-y-1">
           <div className="flex items-start justify-between gap-1 sm:gap-2">
@@ -162,7 +158,7 @@ const NewListings: React.FC = () => {
   const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
-  const { properties } = useRealtimeProperties();
+  const { properties, loading } = useRealtimeProperties();
 
   const displayListings = useMemo<ListingItem[]>(() => {
     if (properties && properties.length > 0) {
@@ -172,13 +168,14 @@ const NewListings: React.FC = () => {
         price: formatPriceWithSlash(prop.price),
         location: prop.location || 'Andhra Pradesh',
         area: prop.area ? `${prop.area} Sq.Ft` : 'Prime Space',
+        badge: prop.badge,
         image:
           prop.images && prop.images.length > 0 && prop.images[0]
             ? prop.images[0]
             : 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       }));
     }
-    return defaultListings;
+    return [];
   }, [properties]);
 
   useEffect(() => {
@@ -199,10 +196,8 @@ const NewListings: React.FC = () => {
   }, []);
 
   const handleCardClick = (listing: ListingItem) => {
-    if (listing.id && listing.id !== '1' && listing.id !== '2' && listing.id !== '3') {
+    if (listing.id) {
       navigate(`/property/${listing.id}`);
-    } else if (properties && properties.length > 0) {
-      navigate(`/property/${properties[0].id}`);
     } else {
       navigate('/buy');
     }
@@ -277,15 +272,29 @@ const NewListings: React.FC = () => {
         </div>
 
         {/* Cards Section */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6 lg:gap-8">
-          {displayListings.map((listing) => (
-            <ListingCard
-              key={listing.id}
-              listing={listing}
-              onClick={() => handleCardClick(listing)}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6 lg:gap-8">
+            <ListingSkeleton />
+            <ListingSkeleton />
+            <ListingSkeleton />
+          </div>
+        ) : displayListings.length > 0 ? (
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6 lg:gap-8">
+            {displayListings.map((listing) => (
+              <ListingCard
+                key={listing.id}
+                listing={listing}
+                onClick={() => handleCardClick(listing)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 px-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+            <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+            <p className="text-gray-700 font-medium text-lg">No new listings available</p>
+            <p className="text-gray-400 text-sm mt-1">Properties added from the admin dashboard will appear here.</p>
+          </div>
+        )}
       </div>
     </section>
   );

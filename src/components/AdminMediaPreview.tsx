@@ -86,13 +86,16 @@ const AdminMediaPreview: React.FC<AdminMediaPreviewProps> = ({
         
         <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {mediaItems.map((mediaItem, index) => (
-            <div key={`${mediaItem.type}-${index}-${mediaItem.url}`} className="relative group">
-              <div className="aspect-square rounded-lg overflow-hidden border-2 border-gray-200 hover:border-blue-300 transition-all duration-300 bg-gray-100">
+            <div key={`${mediaItem.type}-${index}-${mediaItem.url}`} className="relative group protected-media" onContextMenu={(e) => e.preventDefault()}>
+              <div className="aspect-square rounded-lg overflow-hidden border-2 border-gray-200 hover:border-emerald-300 transition-all duration-300 bg-gray-100 relative">
                 {mediaItem.type === 'image' ? (
                   <img
                     src={mediaItem.url}
                     alt={`Media ${index + 1}`}
-                    className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
+                    draggable={false}
+                    onContextMenu={(e) => e.preventDefault()}
+                    onDragStart={(e) => e.preventDefault()}
+                    className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105 pointer-events-none"
                     onError={(e) => {
                       console.error('Failed to load image:', mediaItem.url);
                       e.currentTarget.style.backgroundColor = '#f3f4f6';
@@ -109,7 +112,10 @@ const AdminMediaPreview: React.FC<AdminMediaPreviewProps> = ({
                       <img
                         src={getThumbnailForVideo(mediaItem.url)}
                         alt={`Video ${index + 1} thumbnail`}
-                        className="w-full h-full object-cover"
+                        draggable={false}
+                        onContextMenu={(e) => e.preventDefault()}
+                        onDragStart={(e) => e.preventDefault()}
+                        className="w-full h-full object-cover pointer-events-none"
                         onError={(e) => {
                           e.currentTarget.src = 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=300&fit=crop';
                         }}
@@ -120,6 +126,10 @@ const AdminMediaPreview: React.FC<AdminMediaPreviewProps> = ({
                         src={mediaItem.url}
                         className="w-full h-full object-cover"
                         muted
+                        controlsList="nodownload nofullscreen noremoteplayback"
+                        disablePictureInPicture
+                        onContextMenu={(e) => e.preventDefault()}
+                        onDragStart={(e) => e.preventDefault()}
                         preload="metadata"
                         onError={(e) => {
                           const placeholder = document.createElement('div');
@@ -132,8 +142,8 @@ const AdminMediaPreview: React.FC<AdminMediaPreviewProps> = ({
                     )}
                     
                     {/* Video play overlay */}
-                    <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                      <div className="bg-red-600 rounded-full p-1.5">
+                    <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center pointer-events-none">
+                      <div className="bg-red-600 rounded-full p-1.5 shadow-md">
                         <Play className="w-3 h-3 text-white fill-white" />
                       </div>
                     </div>

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Bed, Bath, Square, Compass, Home, Building, Calendar, CheckCircle, MapPin } from 'lucide-react';
+import { Bed, Bath, Square, Compass, Home, Building, Calendar, CheckCircle, MapPin, Layers, Building2 } from 'lucide-react';
 
 interface Property {
   id: string;
@@ -8,12 +8,17 @@ interface Property {
   price: string;
   location: string;
   fullAddress?: string;
+  developer?: string;
   type: string;
   category: string;
   bedrooms?: number;
   bathrooms?: number;
   area: string;
   areaAcres?: number;
+  plinthArea?: string;
+  saleableArea?: string;
+  plotSize?: string;
+  uds?: string;
   description: string;
   facing?: string;
   propertyAge?: number;
@@ -26,7 +31,8 @@ interface PropertyOverviewProps {
 
 const PropertyOverview: React.FC<PropertyOverviewProps> = ({ property }) => {
   const isLandProperty = property.category === 'Land' || property.type === 'Land' || 
-                        property.type === 'Agricultural' || property.type === 'Residential Plot';
+                        property.type === 'Agricultural' || property.type === 'Residential Plot' ||
+                        property.type === 'Plots';
 
   return (
     <div className="font-body">
@@ -56,17 +62,63 @@ const PropertyOverview: React.FC<PropertyOverviewProps> = ({ property }) => {
             </div>
           </div>
         )}
-        <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0">
-            <Square className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+        {property.plotSize && (
+          <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Square className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-base sm:text-lg font-semibold text-slate-900">{property.plotSize}</div>
+              <div className="text-xs text-slate-500">Plot Size</div>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-base sm:text-lg font-semibold text-slate-900">{property.area}</div>
-            {property.areaAcres && (
-              <div className="text-xs text-slate-500">({property.areaAcres} acres)</div>
-            )}
+        )}
+        {property.area && (!property.plotSize || property.area !== property.plotSize) && (
+          <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Square className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-base sm:text-lg font-semibold text-slate-900">{property.area}</div>
+              {property.areaAcres && (
+                <div className="text-xs text-slate-500">({property.areaAcres} acres)</div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
+        {property.plinthArea && (
+          <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Square className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-base sm:text-lg font-semibold text-slate-900">{property.plinthArea}</div>
+              <div className="text-xs text-slate-500">Plinth Area</div>
+            </div>
+          </div>
+        )}
+        {property.saleableArea && (
+          <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Square className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-base sm:text-lg font-semibold text-slate-900">{property.saleableArea}</div>
+              <div className="text-xs text-slate-500">Saleable Area</div>
+            </div>
+          </div>
+        )}
+        {property.uds && (
+          <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Layers className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-base sm:text-lg font-semibold text-slate-900">{property.uds} sq.yds</div>
+              <div className="text-xs text-slate-500">UDS (Undivided Share)</div>
+            </div>
+          </div>
+        )}
         {property.status && property.category !== 'Land' && (
           <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
             <div className="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -107,6 +159,17 @@ const PropertyOverview: React.FC<PropertyOverviewProps> = ({ property }) => {
       <div className="mb-4 sm:mb-6 bg-white rounded-xl border border-gray-200 p-4 sm:p-5">
         <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-3 sm:mb-4 font-premium">Property Details</h3>
         <div className="grid grid-cols-1 gap-3 sm:gap-4">
+          {property.developer && (
+            <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs text-slate-500 mb-0.5">Developer / Builder</div>
+                <div className="text-sm sm:text-base font-semibold text-slate-900">{property.developer}</div>
+              </div>
+            </div>
+          )}
           <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-50 rounded-xl border border-gray-200">
             <div className="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0">
               {property.category === 'Land' ? (

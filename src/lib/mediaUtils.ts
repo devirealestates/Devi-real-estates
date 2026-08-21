@@ -20,35 +20,67 @@ export const isVideoUrl = (url: string): boolean => {
 };
 
 export const getVideoThumbnail = (videoUrl: string): string => {
-  // YouTube thumbnail - handle both embed and watch URLs
-  if (videoUrl.includes('youtube.com/embed/')) {
-    const videoId = videoUrl.split('/embed/')[1]?.split('?')[0];
+  if (!videoUrl) return '';
+  const trimmed = videoUrl.trim();
+
+  // 1. YouTube thumbnails - handle embed, watch, youtu.be, shorts, and mobile URLs
+  if (trimmed.includes('youtube.com/embed/')) {
+    const videoId = trimmed.split('/embed/')[1]?.split('?')[0]?.split('/')[0];
     if (videoId) {
-      return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+      return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
     }
   }
   
-  if (videoUrl.includes('youtube.com/watch?v=')) {
-    const videoId = videoUrl.split('v=')[1]?.split('&')[0];
+  if (trimmed.includes('youtube.com/watch?v=') || trimmed.includes('m.youtube.com/watch?v=')) {
+    const videoId = trimmed.split('v=')[1]?.split('&')[0]?.split('#')[0];
     if (videoId) {
-      return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+      return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
     }
   }
   
-  if (videoUrl.includes('youtu.be/')) {
-    const videoId = videoUrl.split('youtu.be/')[1]?.split('?')[0];
+  if (trimmed.includes('youtu.be/')) {
+    const videoId = trimmed.split('youtu.be/')[1]?.split('?')[0]?.split('/')[0];
     if (videoId) {
-      return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+      return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    }
+  }
+
+  if (trimmed.includes('youtube.com/shorts/')) {
+    const videoId = trimmed.split('/shorts/')[1]?.split('?')[0]?.split('/')[0];
+    if (videoId) {
+      return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+    }
+  }
+
+  // 2. Cloudinary Video URLs: Convert to snapshot image (.jpg) with auto frame detection
+  if (trimmed.includes('cloudinary.com') || trimmed.includes('res.cloudinary.com')) {
+    let thumbUrl = trimmed.replace(/\.(mp4|webm|mov|avi|wmv|mkv|flv|m4v)(\?.*)?$/i, '.jpg$2');
+    if (!thumbUrl.endsWith('.jpg') && !thumbUrl.includes('.jpg?')) {
+      thumbUrl = `${thumbUrl}.jpg`;
+    }
+    if (thumbUrl.includes('/video/upload/') && !thumbUrl.includes('/video/upload/so_')) {
+      thumbUrl = thumbUrl.replace('/video/upload/', '/video/upload/so_auto,f_jpg,q_auto,w_800/');
+    }
+    return thumbUrl;
+  }
+
+  // 3. Vimeo thumbnails via vumbnail service
+  if (trimmed.includes('player.vimeo.com/video/')) {
+    const videoId = trimmed.split('/video/')[1]?.split('?')[0];
+    if (videoId) {
+      return `https://vumbnail.com/${videoId}.jpg`;
+    }
+  }
+
+  if (trimmed.includes('vimeo.com/')) {
+    const videoId = trimmed.split('vimeo.com/')[1]?.split('?')[0];
+    if (videoId && /^\d+$/.test(videoId)) {
+      return `https://vumbnail.com/${videoId}.jpg`;
     }
   }
   
-  // Vimeo thumbnail (using placeholder - requires API for actual thumbnail)
-  if (videoUrl.includes('player.vimeo.com/video/') || videoUrl.includes('vimeo.com/')) {
-    return 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=300&fit=crop';
-  }
-  
-  // Default video thumbnail for direct video files
-  return 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=300&fit=crop';
+  // 4. Direct video file fallback (with time offset for metadata preview)
+  return `${trimmed}#t=0.5`;
 };
 
 export const combineMediaItems = (images: string[] = [], videos: string[] = []): MediaItem[] => {

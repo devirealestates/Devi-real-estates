@@ -51,16 +51,24 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({ images, vid
       <div className="relative aspect-[16/10] rounded-lg overflow-hidden bg-gray-100 group cursor-pointer">
         {currentMedia?.type === 'video' ? (
           // Video Display
-          <div className="relative w-full h-full">
-            <img
-              src={currentMedia.thumbnail}
-              alt={`${title} - Video ${selectedMediaIndex + 1}`}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              onClick={() => openLightbox(selectedMediaIndex)}
-              onError={(e) => {
-                e.currentTarget.src = 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=300&fit=crop';
-              }}
-            />
+          <div className="relative w-full h-full bg-slate-900">
+            {currentMedia.thumbnail && !currentMedia.thumbnail.endsWith('.mp4') && !currentMedia.thumbnail.endsWith('.webm') && !currentMedia.thumbnail.endsWith('.mov') && !currentMedia.thumbnail.includes('#t=') ? (
+              <img
+                src={currentMedia.thumbnail}
+                alt={`${title} - Video ${selectedMediaIndex + 1}`}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                onClick={() => openLightbox(selectedMediaIndex)}
+              />
+            ) : (
+              <video
+                src={currentMedia.url ? `${currentMedia.url}#t=0.5` : undefined}
+                preload="metadata"
+                muted
+                playsInline
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none"
+                onClick={() => openLightbox(selectedMediaIndex)}
+              />
+            )}
             
             {/* Video Play Button Overlay */}
             <div 
@@ -132,7 +140,7 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({ images, vid
 
       {/* Compact Thumbnail Strip */}
       {mediaItems.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {mediaItems.slice(0, 6).map((media, index) => (
             <button
               key={index}
@@ -143,19 +151,37 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({ images, vid
                   : 'border-gray-200 hover:border-blue-300'
               }`}
             >
-              <div className="relative w-full h-full">
-                <img
-                  src={media.type === 'video' ? media.thumbnail : media.url}
-                  alt={`${title} - Thumbnail ${index + 1}`}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1721322800607-8c38375eef04?q=80&w=500';
-                  }}
-                />
-                {media.type === 'video' && (
-                  <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                    <Play className="w-3 h-3 text-white" />
-                  </div>
+              <div className="relative w-full h-full bg-slate-900">
+                {media.type === 'video' ? (
+                  <>
+                    {media.thumbnail && !media.thumbnail.endsWith('.mp4') && !media.thumbnail.endsWith('.webm') && !media.thumbnail.endsWith('.mov') && !media.thumbnail.includes('#t=') ? (
+                      <img
+                        src={media.thumbnail}
+                        alt={`${title} - Thumbnail ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <video
+                        src={media.url ? `${media.url}#t=0.5` : undefined}
+                        preload="metadata"
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover pointer-events-none"
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+                      <Play className="w-3 h-3 text-white" />
+                    </div>
+                  </>
+                ) : (
+                  <img
+                    src={media.url}
+                    alt={`${title} - Thumbnail ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://images.unsplash.com/photo-1721322800607-8c38375eef04?q=80&w=500';
+                    }}
+                  />
                 )}
               </div>
             </button>

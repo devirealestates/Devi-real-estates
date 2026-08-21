@@ -111,15 +111,30 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
       >
         {currentMedia?.type === 'video' ? (
           // Video Display
-          <div className="relative w-full h-full">
-            <ProtectedImage
-              src={currentMedia.thumbnail || 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=300&fit=crop'}
-              alt={`${title} - Video ${selectedMediaIndex + 1}`}
-              className="w-full h-full"
-              imgClassName="group-hover:scale-105"
-              watermarkSize="md"
-              onClick={() => openLightbox(selectedMediaIndex)}
-            />
+          <div className="relative w-full h-full bg-slate-900">
+            {currentMedia.thumbnail && !currentMedia.thumbnail.endsWith('.mp4') && !currentMedia.thumbnail.endsWith('.webm') && !currentMedia.thumbnail.endsWith('.mov') && !currentMedia.thumbnail.includes('#t=') ? (
+              <ProtectedImage
+                src={currentMedia.thumbnail}
+                alt={`${title} - Video ${selectedMediaIndex + 1}`}
+                className="w-full h-full"
+                imgClassName="group-hover:scale-105"
+                watermarkSize="md"
+                onClick={() => openLightbox(selectedMediaIndex)}
+              />
+            ) : (
+              <div 
+                className="relative w-full h-full cursor-pointer"
+                onClick={() => openLightbox(selectedMediaIndex)}
+              >
+                <video
+                  src={currentMedia.url ? `${currentMedia.url}#t=0.5` : undefined}
+                  preload="metadata"
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none"
+                />
+              </div>
+            )}
             
             {/* Video Play Button Overlay */}
             <div 
@@ -212,7 +227,7 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
 
       {/* Compact Thumbnail Strip */}
       {mediaItems.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {mediaItems.slice(0, 6).map((media, index) => (
             <button
               key={index}
@@ -223,17 +238,36 @@ const PropertyImageGallery: React.FC<PropertyImageGalleryProps> = ({
                   : 'border-gray-200 hover:border-emerald-300'
               }`}
             >
-              <div className="relative w-full h-full">
-                <ProtectedImage
-                  src={media.type === 'video' ? (media.thumbnail || '') : media.url}
-                  alt={`${title} - Thumbnail ${index + 1}`}
-                  className="w-full h-full"
-                  showWatermark={false}
-                />
-                {media.type === 'video' && (
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20">
-                    <Play className="w-3 h-3 text-white fill-white" />
-                  </div>
+              <div className="relative w-full h-full bg-slate-900">
+                {media.type === 'video' ? (
+                  <>
+                    {media.thumbnail && !media.thumbnail.endsWith('.mp4') && !media.thumbnail.endsWith('.webm') && !media.thumbnail.endsWith('.mov') && !media.thumbnail.includes('#t=') ? (
+                      <ProtectedImage
+                        src={media.thumbnail}
+                        alt={`${title} - Thumbnail ${index + 1}`}
+                        className="w-full h-full"
+                        showWatermark={false}
+                      />
+                    ) : (
+                      <video
+                        src={media.url ? `${media.url}#t=0.5` : undefined}
+                        preload="metadata"
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover pointer-events-none"
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20">
+                      <Play className="w-3.5 h-3.5 text-white fill-white" />
+                    </div>
+                  </>
+                ) : (
+                  <ProtectedImage
+                    src={media.url}
+                    alt={`${title} - Thumbnail ${index + 1}`}
+                    className="w-full h-full"
+                    showWatermark={false}
+                  />
                 )}
               </div>
             </button>

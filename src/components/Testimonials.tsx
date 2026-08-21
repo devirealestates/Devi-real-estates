@@ -13,35 +13,9 @@ export interface TestimonialItem {
   order?: number;
 }
 
-const defaultTestimonials: TestimonialItem[] = [
-  {
-    quote:
-      '"Devi Real Estates has been an invaluable partner in our search for the perfect commercial space. Their team is incredibly knowledgeable and dedicated, making the entire process seamless and stress-free."',
-    name: 'Ravi Kumar',
-    designation: 'CEO, Tech Innovations Inc.',
-    avatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80',
-  },
-  {
-    quote:
-      '"The professionalism and expertise of Devi Real Estates made finding our dream home an absolute joy. They understood exactly what we were looking for and delivered beyond our expectations."',
-    name: 'Priya Sharma',
-    designation: 'Business Owner',
-    avatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80',
-  },
-  {
-    quote:
-      '"I was impressed by how quickly and efficiently the team at Devi Real Estates found the perfect investment property for me. Their market knowledge is unmatched."',
-    name: 'Anil Reddy',
-    designation: 'Real Estate Investor',
-    avatar:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80',
-  },
-];
-
 const Testimonials: React.FC = () => {
-  const [testimonialsList, setTestimonialsList] = useState<TestimonialItem[]>(defaultTestimonials);
+  const [testimonialsList, setTestimonialsList] = useState<TestimonialItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [current, setCurrent] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -54,38 +28,37 @@ const Testimonials: React.FC = () => {
       const unsubscribe = onSnapshot(
         q,
         (snapshot) => {
-          if (!snapshot.empty) {
-            const items = snapshot.docs.map((doc) => {
-              const data = doc.data();
-              return {
-                id: doc.id,
-                quote: data.quote || data.message || '',
-                name: data.name || 'Anonymous',
-                designation: data.designation || data.title || 'Client',
-                avatar: data.avatar || data.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
-                order: data.order ?? 0,
-              };
-            });
-            setTestimonialsList(items);
-          } else {
-            setTestimonialsList(defaultTestimonials);
-          }
+          const items = snapshot.docs.map((doc) => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              quote: data.quote || data.message || '',
+              name: data.name || 'Anonymous',
+              designation: data.designation || data.title || 'Client',
+              avatar: data.avatar || data.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+              order: data.order ?? 0,
+            };
+          });
+          setTestimonialsList(items);
+          setLoading(false);
         },
         (error) => {
           console.error('Error fetching real-time testimonials:', error);
-          setTestimonialsList(defaultTestimonials);
+          setTestimonialsList([]);
+          setLoading(false);
         }
       );
 
       return () => unsubscribe();
     } catch (err) {
       console.error('Firestore listener setup error:', err);
+      setLoading(false);
     }
   }, []);
 
   // Reset index if it exceeds array length
   useEffect(() => {
-    if (current >= testimonialsList.length) {
+    if (current >= testimonialsList.length && testimonialsList.length > 0) {
       setCurrent(0);
     }
   }, [testimonialsList.length, current]);
@@ -109,7 +82,7 @@ const Testimonials: React.FC = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Auto-scroll every 3 seconds
+  // Auto-scroll every 4 seconds when multiple testimonials exist
   useEffect(() => {
     if (!isVisible || testimonialsList.length <= 1) return;
 
@@ -119,7 +92,7 @@ const Testimonials: React.FC = () => {
         setCurrent((prev) => (prev === testimonialsList.length - 1 ? 0 : prev + 1));
         setIsAnimating(false);
       }, 300);
-    }, 3000);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, [isVisible, testimonialsList.length]);
@@ -142,7 +115,12 @@ const Testimonials: React.FC = () => {
     }, 300);
   };
 
-  const testimonial = testimonialsList[current] || defaultTestimonials[0];
+  // If loading or no testimonials are in Firestore, do not render the section
+  if (loading || testimonialsList.length === 0) {
+    return null;
+  }
+
+  const testimonial = testimonialsList[current] || testimonialsList[0];
 
   return (
     <section 

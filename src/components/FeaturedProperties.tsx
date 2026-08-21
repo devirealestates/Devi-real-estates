@@ -279,7 +279,7 @@ const FeaturedProperties = () => {
           {/* Category Filter Buttons - Mobile Responsive */}
           <div className="mb-6 sm:mb-8">
             {/* Mobile: Horizontal Scroll */}
-            <div className="flex sm:hidden overflow-x-auto pb-2 px-2 -mx-2 space-x-2 snap-x snap-mandatory">
+            <div className="flex sm:hidden overflow-x-auto pb-2 px-2 -mx-2 space-x-2 snap-x snap-mandatory scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               {categories.map((category) => (
                 <Button
                   key={category}

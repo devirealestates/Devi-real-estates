@@ -20,14 +20,14 @@ interface ListingItem {
 // Skeleton card for loading state
 const ListingSkeleton: React.FC = () => (
   <div className="animate-pulse">
-    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl mb-2.5 sm:mb-4 aspect-[4/3] bg-gray-200" />
-    <div className="space-y-2">
-      <div className="flex items-start justify-between gap-2">
-        <div className="h-5 bg-gray-200 rounded w-1/2" />
-        <div className="h-5 bg-gray-200 rounded w-1/4" />
+    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl mb-2 sm:mb-3 aspect-square sm:aspect-[4/3] bg-gray-200" />
+    <div className="space-y-1.5">
+      <div className="h-4 sm:h-5 bg-gray-200 rounded w-4/5" />
+      <div className="h-4 sm:h-5 bg-gray-200 rounded w-1/2" />
+      <div className="hidden sm:flex justify-between gap-2 pt-0.5">
+        <div className="h-3.5 bg-gray-200 rounded w-1/2" />
+        <div className="h-3.5 bg-gray-200 rounded w-1/4" />
       </div>
-      <div className="h-4 bg-gray-200 rounded w-3/4" />
-      <div className="h-4 bg-gray-200 rounded w-1/3" />
     </div>
   </div>
 );
@@ -78,8 +78,8 @@ const ListingCard: React.FC<{
         <ProtectedImage
           src={listing.image}
           alt={listing.name}
-          aspectRatioClass="aspect-[4/3]"
-          className="rounded-xl sm:rounded-2xl mb-2.5 sm:mb-4 bg-gray-100 shadow-sm"
+          aspectRatioClass="aspect-square sm:aspect-[4/3]"
+          className="rounded-xl sm:rounded-2xl mb-2 sm:mb-3 bg-gray-100 shadow-sm"
           imgClassName="group-hover:scale-105"
           watermarkSize="sm"
         >
@@ -121,17 +121,19 @@ const ListingCard: React.FC<{
             </button>
           </div>
         </ProtectedImage>
-        {/* Info */}
-        <div className="space-y-1">
-          <div className="flex items-start justify-between gap-1 sm:gap-2">
-            <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 truncate group-hover:text-orange-600 transition-colors">
-              {listing.name}
-            </h3>
-            <span className="text-sm sm:text-base lg:text-lg font-semibold text-gray-900 whitespace-nowrap flex-shrink-0">
-              {listing.price}
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
+        {/* Info: On mobile, show only single-line title with ellipsis and green price on next line */}
+        <div className="space-y-0.5 sm:space-y-1">
+          <h3 
+            className="text-xs sm:text-base lg:text-lg font-semibold text-gray-900 truncate block group-hover:text-orange-600 transition-colors"
+            title={listing.name}
+          >
+            {listing.name}
+          </h3>
+          <p className="text-xs sm:text-base font-bold text-green-600 truncate">
+            {listing.price}
+          </p>
+          {/* Location & Area: Hidden on mobile screens, shown on desktop (sm+) */}
+          <div className="hidden sm:flex items-center justify-between text-xs sm:text-sm text-gray-500 pt-0.5">
             <p className="flex items-center gap-1 min-w-0">
               <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0 text-gray-400" />
               <span className="truncate">{listing.location}</span>
@@ -254,7 +256,7 @@ const NewListings: React.FC = () => {
             </span>
           </h2>
           <div className="max-w-lg">
-            <p 
+            <p
               className={`text-gray-500 text-lg leading-relaxed mb-6 text-reveal ${isHeaderVisible ? 'animate' : ''}`}
               style={{ animationDelay: '1s' }}
             >

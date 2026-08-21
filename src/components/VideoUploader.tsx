@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, X, Video, Link as LinkIcon, Play } from 'lucide-react';
 import { toast } from 'sonner';
+import { getVideoThumbnail } from '@/lib/mediaUtils';
 
 interface VideoUploaderProps {
   onVideosUpload: (videos: string[]) => void;
@@ -355,20 +356,8 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
     }
   }, [uploadedVideos, urlVideos]); // Depend on the actual arrays, not their length
 
-  const getVideoThumbnail = (videoUrl: string): string => {
-    // YouTube thumbnail
-    if (videoUrl.includes('youtube.com/embed/')) {
-      const videoId = videoUrl.split('/embed/')[1]?.split('?')[0];
-      return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-    }
-    
-    // Vimeo thumbnail (Note: This requires an API call for full implementation)
-    if (videoUrl.includes('player.vimeo.com/video/')) {
-      return 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=300&fit=crop'; // Placeholder
-    }
-    
-    // Default video thumbnail
-    return 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=300&fit=crop';
+  const getThumbnail = (videoUrl: string): string => {
+    return getVideoThumbnail(videoUrl);
   };
 
   return (

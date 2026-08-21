@@ -11,40 +11,88 @@ interface PropertyMapProps {
 }
 
 /**
- * Extracts a clean iframe embed URL from user input.
+ * Extracts a clean, working iframe embed URL from any user input.
  * Supports:
  * - Full HTML iframe snippets: <iframe src="https://www.google.com/maps/embed?pb=..." ...></iframe>
  * - Direct Google Maps Embed URLs: https://www.google.com/maps/embed?pb=...
  * - Maps output=embed URLs: https://maps.google.com/maps?q=...&output=embed
- * - Standard Google Maps URLs: https://www.google.com/maps/place/... or https://maps.app.goo.gl/...
+ * - Place URLs: https://www.google.com/maps/place/PlaceName/@lat,lng,zoom/...
+ * - Search URLs: https://www.google.com/maps/search/?api=1&query=...
+ * - Short links (maps.app.goo.gl, goo.gl/maps) -> converts to query embed using place/address
+ * - Coordinates: @16.989,82.247 or 16.989,82.247
+ * - Plain address / Landmark text
  */
-export const getCleanEmbedUrl = (rawInput?: string): string | null => {
-  if (!rawInput) return null;
-  const trimmed = rawInput.trim();
-  if (!trimmed) return null;
+export const getCleanEmbedUrl = (
+  rawInput?: string,
+  fallbackAddress?: string,
+  fallbackLocation?: string,
+  fallbackTitle?: string
+): string | null => {
+  if (!rawInput && !fallbackAddress && !fallbackLocation && !fallbackTitle) return null;
+  const trimmed = (rawInput || '').trim();
 
   // 1. Extract src if admin pasted full <iframe ...> embed code
   const iframeSrcMatch = trimmed.match(/src=["']([^"']+)["']/i);
   if (iframeSrcMatch && iframeSrcMatch[1]) {
-    return iframeSrcMatch[1];
-  }
-
-  // 2. Direct embed URL (contains /embed or output=embed)
-  if (trimmed.includes('/maps/embed') || trimmed.includes('output=embed')) {
-    return trimmed;
-  }
-
-  // 3. Regular Google Maps URL
-  if (trimmed.includes('google.com/maps') || trimmed.includes('maps.google.com')) {
-    if (trimmed.includes('?')) {
-      return `${trimmed}&output=embed`;
+    const src = iframeSrcMatch[1];
+    if (src.includes('google.com/maps/embed') || (src.includes('maps.google.com') && src.includes('output=embed'))) {
+      return src;
     }
-    return `${trimmed}?output=embed`;
+    return getCleanEmbedUrl(src, fallbackAddress, fallbackLocation, fallbackTitle);
   }
 
-  // 4. If it starts with http/https, return it as the embed source
-  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+  // 2. Direct official Google Maps Embed URL (from Google's "Embed a map" feature)
+  if (trimmed.includes('google.com/maps/embed') || (trimmed.includes('maps.google.com/maps') && trimmed.includes('output=embed'))) {
     return trimmed;
+  }
+
+  // 3. Extract place name or query from Google Maps place URLs
+  // Example: https://www.google.com/maps/place/Sasikanth+Nagar,+Kakinada,+Andhra+Pradesh+533003/@16.9891,82.2471,17z/...
+  const placeMatch = trimmed.match(/\/maps\/place\/([^/@?]+)/i);
+  if (placeMatch && placeMatch[1]) {
+    try {
+      const decodedPlace = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '));
+      return `https://maps.google.com/maps?q=${encodeURIComponent(decodedPlace)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+    } catch {
+      return `https://maps.google.com/maps?q=${encodeURIComponent(placeMatch[1])}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+    }
+  }
+
+  // 4. Extract search query from ?q= or ?query=
+  const queryMatch = trimmed.match(/[?&](?:q|query)=([^&]+)/i);
+  if (queryMatch && queryMatch[1]) {
+    try {
+      const decodedQuery = decodeURIComponent(queryMatch[1].replace(/\+/g, ' '));
+      return `https://maps.google.com/maps?q=${encodeURIComponent(decodedQuery)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+    } catch {
+      return `https://maps.google.com/maps?q=${encodeURIComponent(queryMatch[1])}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+    }
+  }
+
+  // 5. Extract coordinates from /@lat,lng or "lat, lng"
+  const coordMatch = trimmed.match(/@([0-9.-]+),([0-9.-]+)/i) || trimmed.match(/^([0-9.-]+),\s*([0-9.-]+)$/);
+  if (coordMatch && coordMatch[1] && coordMatch[2]) {
+    return `https://maps.google.com/maps?q=${coordMatch[1]},${coordMatch[2]}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+  }
+
+  // 6. Short links (maps.app.goo.gl or goo.gl/maps)
+  // Short links cannot be iframed by browsers due to Google CSP, so embed using the property's address/location/title
+  if (trimmed.includes('goo.gl') || trimmed.includes('maps.app.goo.gl')) {
+    const searchTarget = fallbackAddress || fallbackLocation || fallbackTitle;
+    if (searchTarget) {
+      return `https://maps.google.com/maps?q=${encodeURIComponent(searchTarget)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+    }
+  }
+
+  // 7. If it's plain text address / location entered in the field
+  if (trimmed && !trimmed.startsWith('http')) {
+    return `https://maps.google.com/maps?q=${encodeURIComponent(trimmed)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+  }
+
+  // 8. Fallback to location/address if provided
+  const searchTarget = fallbackAddress || fallbackLocation || fallbackTitle;
+  if (searchTarget) {
+    return `https://maps.google.com/maps?q=${encodeURIComponent(searchTarget)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
   }
 
   return null;
@@ -53,24 +101,39 @@ export const getCleanEmbedUrl = (rawInput?: string): string | null => {
 /**
  * Extracts a direct clickable URL to open in Google Maps in a new tab
  */
-export const getDirectMapUrl = (rawInput?: string, fallbackLocation?: string): string => {
+export const getDirectMapUrl = (
+  rawInput?: string, 
+  fallbackAddress?: string, 
+  fallbackLocation?: string, 
+  fallbackTitle?: string
+): string => {
   if (!rawInput) {
-    return fallbackLocation 
-      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fallbackLocation)}`
+    const target = fallbackAddress || fallbackLocation || fallbackTitle;
+    return target 
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(target)}`
       : 'https://www.google.com/maps';
   }
   const trimmed = rawInput.trim();
   const iframeSrcMatch = trimmed.match(/src=["']([^"']+)["']/i);
   const url = iframeSrcMatch ? iframeSrcMatch[1] : trimmed;
-  return url.startsWith('http') ? url : `https://${url}`;
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(url)}`;
 };
 
 const PropertyMap: React.FC<PropertyMapProps> = ({ location, title, fullAddress, mapEmbedLink }) => {
-  const embedUrl = useMemo(() => getCleanEmbedUrl(mapEmbedLink), [mapEmbedLink]);
-  const directMapsUrl = useMemo(() => getDirectMapUrl(mapEmbedLink, fullAddress || location), [mapEmbedLink, fullAddress, location]);
+  const embedUrl = useMemo(
+    () => getCleanEmbedUrl(mapEmbedLink, fullAddress, location, title),
+    [mapEmbedLink, fullAddress, location, title]
+  );
+  const directMapsUrl = useMemo(
+    () => getDirectMapUrl(mapEmbedLink, fullAddress, location, title),
+    [mapEmbedLink, fullAddress, location, title]
+  );
 
   // If no embed link is provided, do not show any map based on location field
-  if (!embedUrl) {
+  if (!mapEmbedLink || mapEmbedLink.trim() === '' || !embedUrl) {
     return null;
   }
 

@@ -11,6 +11,7 @@ import VideoUploader from './VideoUploader';
 import AdminMediaPreview from './AdminMediaPreview';
 import { defaultBuildingSpecifications, BuildingSpecificationsData } from './BuildingSpecifications';
 import PropertyBadge from './PropertyBadge';
+import { getCleanEmbedUrl } from './PropertyMap';
 import { toast } from 'sonner';
 import { triggerNewPropertyNotification, triggerPriceUpdateNotification } from '@/lib/notificationTriggers';
 
@@ -694,19 +695,44 @@ const AdminPropertyForm: React.FC<AdminPropertyFormProps> = ({
                 />
               </div>
 
-              <div>
-                <Label htmlFor="mapEmbedLink">Google Maps Embed Link (Optional)</Label>
+              <div className="md:col-span-2 bg-slate-50/80 p-3.5 sm:p-4 rounded-xl border border-slate-200">
+                <Label htmlFor="mapEmbedLink" className="text-xs sm:text-sm font-semibold text-slate-800">
+                  Google Maps Embed Link / Location Link (Optional)
+                </Label>
                 <Input
                   id="mapEmbedLink"
                   name="mapEmbedLink"
                   value={formData.mapEmbedLink}
                   onChange={handleInputChange}
-                  placeholder="Paste Google Maps embed code (<iframe...>) or embed link"
-                  className="transition-all duration-300 ease-in-out focus:scale-105 focus:shadow-md"
+                  placeholder="Paste Google Maps embed code (<iframe...>), place URL, or share link"
+                  className="bg-white mt-1.5 mb-1.5 transition-all duration-300 ease-in-out focus:scale-105 focus:shadow-md"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Tip: Google Maps → Share → Embed a map → Copy HTML (or link). Map will only appear on the website if this is filled.
+                <p className="text-xs text-gray-500">
+                  Supports Google Maps Embed HTML (<code className="bg-gray-100 px-1 py-0.5 rounded text-gray-700">&lt;iframe src="..."&gt;</code>), Maps Place URLs, Share links, or landmark coordinates.
                 </p>
+                {formData.mapEmbedLink && (
+                  <div className="mt-3">
+                    <p className="text-xs font-semibold text-slate-700 mb-1.5">Live Map Preview:</p>
+                    <div className="w-full h-48 rounded-lg overflow-hidden border border-gray-200 bg-white">
+                      {getCleanEmbedUrl(formData.mapEmbedLink, formData.fullAddress, formData.location, formData.title) ? (
+                        <iframe
+                          src={getCleanEmbedUrl(formData.mapEmbedLink, formData.fullAddress, formData.location, formData.title)!}
+                          width="100%"
+                          height="100%"
+                          style={{ border: 0 }}
+                          allowFullScreen={true}
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                          title="Admin Map Preview"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">
+                          Please enter a valid Google Maps embed link or place URL
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>

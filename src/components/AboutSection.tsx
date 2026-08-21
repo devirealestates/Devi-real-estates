@@ -109,7 +109,7 @@ const AboutSection: React.FC = () => {
               className={`text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-light italic leading-tight font-display about-reveal ${isMissionVisible ? 'animate' : ''}`}
               style={{ animationDelay: '0.2s' }}
             >
-              Our mission is simple, to provide unparalleled expertise, guidance, and support to our clients across their real estate journey.
+              Devi Real Estates is a professional real estate marketing and property services company based in Kakinada, Andhra Pradesh — connecting genuine buyers and tenants with the right properties.
             </h2>
           </div>
         </div>

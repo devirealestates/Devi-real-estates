@@ -280,17 +280,17 @@ const PropertyDetails = () => {
             <div className="bg-white rounded-2xl overflow-hidden">
               <Tabs defaultValue="overview" className="w-full">
                 <div className="bg-gray-50 px-3 py-3 sm:px-4 sm:py-4">
-                  <TabsList className="inline-flex gap-2 sm:gap-3 bg-transparent p-0 h-auto w-full justify-start overflow-x-auto">
+                  <TabsList className="inline-flex gap-2 sm:gap-3 bg-transparent p-0 h-auto w-full justify-start overflow-x-auto scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                     <TabsTrigger 
                       value="overview" 
-                      className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2"
+                      className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2 flex-shrink-0"
                     >
                       <Home className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       Info
                     </TabsTrigger>
                     <TabsTrigger 
                       value="amenities" 
-                      className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2"
+                      className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2 flex-shrink-0"
                     >
                       <ImageIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       Features
@@ -298,7 +298,7 @@ const PropertyDetails = () => {
                     {property.buildingSpecifications && Object.keys(property.buildingSpecifications).length > 0 && (
                       <TabsTrigger 
                         value="specs" 
-                        className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2"
+                        className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2 flex-shrink-0"
                       >
                         <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         Specs
@@ -307,7 +307,7 @@ const PropertyDetails = () => {
                     {property.mapEmbedLink && property.mapEmbedLink.trim() !== '' && (
                       <TabsTrigger 
                         value="map" 
-                        className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2"
+                        className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2 flex-shrink-0"
                       >
                         <MapIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         Map
@@ -315,7 +315,7 @@ const PropertyDetails = () => {
                     )}
                     <TabsTrigger 
                       value="contact" 
-                      className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2"
+                      className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full font-medium text-xs sm:text-sm data-[state=active]:bg-transparent data-[state=active]:text-slate-900 bg-transparent text-slate-600 hover:text-slate-900 transition-all whitespace-nowrap border border-slate-200 data-[state=active]:border-slate-900 data-[state=active]:border-2 flex-shrink-0"
                     >
                       <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       Contact

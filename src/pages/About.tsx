@@ -36,7 +36,7 @@ const About = () => {
     // Subscribe to real-time updates from the teamMembers collection
     console.log('About page: Setting up team members listener...');
     const q = query(collection(db, 'teamMembers'));
-    
+
     const unsubscribe = onSnapshot(q, (snapshot) => {
       console.log('About page: Received team members update, count:', snapshot.docs.length);
       const teamData = snapshot.docs.map(doc => {
@@ -51,14 +51,14 @@ const About = () => {
           order: data.order ?? 999999
         };
       }) as TeamMember[];
-      
+
       // Sort by order field (lower numbers first)
       const sortedTeamData = teamData.sort((a, b) => {
         const orderA = a.order ?? 999999;
         const orderB = b.order ?? 999999;
         return orderA - orderB;
       });
-      
+
       console.log('About page: Setting team members state, count:', sortedTeamData.length);
       setTeamMembers(sortedTeamData);
       setLoading(false);
@@ -89,13 +89,13 @@ const About = () => {
 
   useEffect(() => {
     const observers: (IntersectionObserver | null)[] = [];
-    
+
     sectionRefs.current.forEach((ref, index) => {
       if (!ref) {
         observers.push(null);
         return;
       }
-      
+
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
@@ -111,7 +111,7 @@ const About = () => {
         },
         { threshold: 0.2 }
       );
-      
+
       observer.observe(ref);
       observers.push(observer);
     });
@@ -122,49 +122,47 @@ const About = () => {
   }, [teamMembers, ceoMessage]);
 
   const stats = [
-    { value: '10+', label: 'Properties Listed' },
-    { value: '20+', label: 'Happy Clients' },
-    { value: '12+', label: 'Areas Covered' },
+    { value: '2+', label: 'Properties Listed' },
+    { value: '+', label: 'Happy Clients' },
+    { value: '+', label: 'Areas Covered' },
     { value: '100%', label: 'Genuine & Trusted Properties' },
   ];
 
   const values = [
     {
-      icon: <DollarSign className="w-6 h-6" />,
-      title: 'Affordable Price',
-      description: 'Offering competitive rates that make quality accessible to all.',
+      icon: <MessageSquare className="w-6 h-6" />,
+      title: 'Transparent Communication',
+      description: 'Open, direct, and honest communication connecting genuine buyers and tenants with the right properties.',
     },
     {
       icon: <Star className="w-6 h-6" />,
-      title: 'Innovative Excellence',
-      description: 'Inspiring change with creative solutions and a passion for excellence.',
+      title: 'Professional Marketing',
+      description: 'Targeted digital promotion, media reach, and expert marketing for owners, builders, and developers.',
     },
     {
       icon: <Award className="w-6 h-6" />,
-      title: 'Quality Crafts',
-      description: 'Exceptional craftsmanship and attention to detail in every creation.',
+      title: 'Reliable Information',
+      description: 'Accurate property details, verified media, and dependable discovery for buyers and tenants.',
     },
     {
       icon: <Scale className="w-6 h-6" />,
       title: 'Clear Legality',
-      description: 'Ensuring transparency and compliance in all legal matters.',
+      description: 'Ensuring transparency, compliance, and clarity across all property services and documentation.',
     },
     {
       icon: <Users className="w-6 h-6" />,
-      title: 'Experienced Agents',
-      description: 'Skilled professionals delivering expert guidance and support.',
+      title: 'Comprehensive Portfolio',
+      description: 'Residential, commercial, agricultural plots, apartments, villas, shops, farm lands, and rentals.',
     },
     {
-      icon: <MessageSquare className="w-6 h-6" />,
-      title: 'Honest Opinion',
-      description: 'Transparent and sincere perspectives you can trust.',
+      icon: <DollarSign className="w-6 h-6" />,
+      title: 'Kakinada & AP Reach',
+      description: 'Deep local market expertise and trusted real estate services across Kakinada and Andhra Pradesh.',
     },
   ];
 
   const agents = teamMembers.slice(0, 4);
   console.log('About page: agents array length:', agents.length, 'teamMembers length:', teamMembers.length, 'loading:', loading);
-
-
 
   return (
     <div className="min-h-screen bg-white">
@@ -190,22 +188,22 @@ const About = () => {
           animation: aboutReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
       `}</style>
-      
+
       <HeaderRedesign />
-      
+
       {/* Hero Section */}
       <section className="relative h-[50vh] min-h-[400px] flex items-center">
         <div className="absolute inset-0">
-          <img 
-            src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2070" 
-            alt="About Us" 
+          <img
+            src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2070"
+            alt="About Us"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-black/50"></div>
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <p className="text-gray-300 text-sm mb-4">Home / About</p>
-          <h1 
+          <h1
             className="text-4xl sm:text-5xl lg:text-6xl font-medium text-white"
             style={{ fontFamily: "'DM Sans', sans-serif" }}
           >
@@ -215,18 +213,18 @@ const About = () => {
       </section>
 
       {/* Welcome Section */}
-      <section 
+      <section
         ref={el => sectionRefs.current[0] = el}
         className="py-16 sm:py-20 lg:py-24 bg-white"
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 
+          <h2
             className={`text-3xl sm:text-4xl lg:text-5xl font-medium text-gray-900 mb-8 leading-tight about-reveal ${visibleSections[0] ? 'visible' : ''}`}
             style={{ fontFamily: "'DM Sans', sans-serif" }}
           >
-            Welcome to Devi Real Estates! As a design, build, and development firm, our goal is to shape communities that enrich, fortify the surrounding neighborhoods
+            Welcome to Devi Real Estates — your trusted real estate marketing and property services partner based in Kakinada, Andhra Pradesh.
           </h2>
-          <button 
+          <button
             onClick={() => navigate('/buy')}
             className={`inline-flex items-center gap-2 px-8 py-3 bg-orange-500 text-white rounded-full text-sm font-medium hover:bg-orange-600 transition-all duration-300 about-reveal ${visibleSections[0] ? 'visible' : ''}`}
             style={{ animationDelay: '0.2s' }}
@@ -251,49 +249,74 @@ const About = () => {
       </section>
 
       {/* Mission Section */}
-      <section 
+      <section
         ref={el => sectionRefs.current[1] = el}
-        className="relative py-20 lg:py-32 bg-gray-900 overflow-hidden"
+        className="relative py-20 lg:py-28 bg-gray-900 overflow-hidden"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <div className={`about-reveal ${visibleSections[1] ? 'visible' : ''}`}>
-              <h2 
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+            <div className={`lg:col-span-5 about-reveal ${visibleSections[1] ? 'visible' : ''}`}>
+              <div className="inline-block px-4 py-1.5 rounded-full bg-orange-500/20 text-orange-400 text-xs font-semibold uppercase tracking-wider mb-4 border border-orange-500/30">
+                Our Mission
+              </div>
+              <h2
                 className="text-3xl sm:text-4xl lg:text-5xl font-medium text-white mb-6 leading-tight"
                 style={{ fontFamily: "'DM Sans', sans-serif" }}
               >
-                Our Mission:<br />Building the Future
+                Connecting You with the Right Property
               </h2>
+              <p className="text-gray-300 text-base leading-relaxed">
+                Devi Real Estates is a professional real estate marketing and property services company based in Kakinada, Andhra Pradesh.
+              </p>
             </div>
-            <div 
-              className={`text-gray-400 text-sm leading-relaxed about-reveal ${visibleSections[1] ? 'visible' : ''}`}
+            <div
+              className={`lg:col-span-7 text-gray-300 text-sm sm:text-base leading-relaxed space-y-4 about-reveal ${visibleSections[1] ? 'visible' : ''}`}
               style={{ animationDelay: '0.2s' }}
             >
-              <p className="mb-4">
-                At Devi Real Estates, our mission is clear: to redefine the landscape of real estate by creating vibrant communities that inspire and endure. We're not just building structures; we're shaping the future with thoughtful designs that meet the needs of today while shaping the future of living.
-              </p>
+              <div className="p-6 sm:p-8 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 space-y-4">
+                <p className="text-gray-200 leading-relaxed">
+                  We help property owners, builders and developers market residential, commercial and agricultural properties, including plots, houses, apartments, villas, office spaces, shops, farm lands and rental properties.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/5">
+                    <h4 className="font-semibold text-orange-400 text-sm mb-1.5">For Owners & Developers</h4>
+                    <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                      Professional property marketing, digital promotion, and targeted buyer reach.
+                    </p>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/5">
+                    <h4 className="font-semibold text-orange-400 text-sm mb-1.5">For Buyers & Tenants</h4>
+                    <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                      Discover suitable properties based on your requirements with reliable information.
+                    </p>
+                  </div>
+                </div>
+                <p className="text-orange-300 font-medium text-sm sm:text-base pt-3 border-t border-white/10">
+                  Our focus is transparent communication, effective marketing and connecting genuine buyers and tenants with the right properties.
+                </p>
+              </div>
             </div>
           </div>
         </div>
-        <div 
+        <div
           className={`absolute bottom-0 right-0 w-full lg:w-1/2 h-64 lg:h-full about-reveal ${visibleSections[1] ? 'visible' : ''}`}
           style={{ animationDelay: '0.4s' }}
         >
-          <img 
-            src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800" 
-            alt="Mission" 
-            className="w-full h-full object-cover object-center lg:object-right opacity-30 lg:opacity-100"
+          <img
+            src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=800"
+            alt="Mission"
+            className="w-full h-full object-cover object-center lg:object-right opacity-15 lg:opacity-25 pointer-events-none"
           />
         </div>
       </section>
 
       {/* Values Section */}
-      <section 
+      <section
         ref={el => sectionRefs.current[2] = el}
         className="py-16 sm:py-20 lg:py-24 bg-white"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 
+          <h2
             className={`text-3xl sm:text-4xl lg:text-5xl font-medium text-gray-900 text-center mb-16 about-reveal ${visibleSections[2] ? 'visible' : ''}`}
             style={{ fontFamily: "'DM Sans', sans-serif" }}
           >
@@ -301,7 +324,7 @@ const About = () => {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
             {values.map((value, index) => (
-              <div 
+              <div
                 key={index}
                 className={`text-center about-reveal ${visibleSections[2] ? 'visible' : ''}`}
                 style={{ animationDelay: `${0.1 + index * 0.1}s` }}
@@ -315,7 +338,7 @@ const About = () => {
             ))}
           </div>
           <div className="text-center mt-12">
-            <button 
+            <button
               onClick={() => navigate('/contact')}
               className="inline-flex items-center gap-2 px-8 py-3 border-2 border-orange-500 text-orange-500 rounded-full text-sm font-medium hover:bg-orange-500 hover:text-white transition-all duration-300"
             >
@@ -326,29 +349,29 @@ const About = () => {
       </section>
 
       {/* CEO's Words Section */}
-      <section 
+      <section
         ref={el => sectionRefs.current[3] = el}
         className="py-16 sm:py-20 lg:py-24 bg-gray-50"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <div 
+            <div
               className={`about-reveal ${visibleSections[3] ? 'visible' : ''}`}
             >
-              <img 
-                src={ceoMessage?.image || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600'} 
-                alt="CEO" 
+              <img
+                src={ceoMessage?.image || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600'}
+                alt="CEO"
                 className="w-full max-w-md mx-auto lg:mx-0 rounded-2xl shadow-lg"
                 onError={(e) => {
                   e.currentTarget.src = 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=600';
                 }}
               />
             </div>
-            <div 
+            <div
               className={`about-reveal ${visibleSections[3] ? 'visible' : ''}`}
               style={{ animationDelay: '0.2s' }}
             >
-              <h2 
+              <h2
                 className="text-3xl sm:text-4xl font-medium text-gray-900 mb-6"
                 style={{ fontFamily: "'DM Sans', sans-serif" }}
               >
@@ -376,19 +399,19 @@ const About = () => {
       </section>
 
       {/* Our Agents Section */}
-      <section 
+      <section
         ref={el => sectionRefs.current[4] = el}
         className="py-16 sm:py-20 lg:py-24 bg-white"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-12">
-            <h2 
+            <h2
               className={`text-3xl sm:text-4xl font-medium text-gray-900 about-reveal ${visibleSections[4] ? 'visible' : ''}`}
               style={{ fontFamily: "'DM Sans', sans-serif" }}
             >
               Our Agents
             </h2>
-            <button 
+            <button
               onClick={() => navigate('/contact')}
               className={`inline-flex items-center gap-2 px-6 py-2 border border-gray-300 rounded-full text-sm text-gray-700 hover:border-orange-500 hover:text-orange-500 transition-colors about-reveal ${visibleSections[4] ? 'visible' : ''}`}
               style={{ animationDelay: '0.1s' }}
@@ -396,7 +419,7 @@ const About = () => {
               View All Agents <ArrowRight className="w-4 h-4" />
             </button>
           </div>
-          
+
           {loading ? (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
               {[1, 2, 3, 4].map((i) => (
@@ -410,14 +433,14 @@ const About = () => {
           ) : agents.length > 0 ? (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
               {agents.map((agent, index) => (
-                <div 
+                <div
                   key={agent.id}
                   className={`about-reveal ${visibleSections[4] ? 'visible' : ''}`}
                   style={{ animationDelay: `${0.2 + index * 0.1}s` }}
                 >
                   <div className="aspect-[3/4] rounded-xl overflow-hidden mb-4">
-                    <img 
-                      src={agent.image} 
+                    <img
+                      src={agent.image}
                       alt={agent.name}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                       onError={(e) => {
@@ -439,26 +462,26 @@ const About = () => {
       </section>
 
       {/* CTA Section */}
-      <section 
+      <section
         ref={el => sectionRefs.current[5] = el}
         className="relative py-20 lg:py-32 overflow-hidden"
       >
         <div className="absolute inset-0">
-          <img 
-            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070" 
-            alt="Property" 
+          <img
+            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070"
+            alt="Property"
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-black/60"></div>
         </div>
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 
+          <h2
             className={`text-3xl sm:text-4xl lg:text-5xl font-medium text-white mb-6 leading-tight about-reveal ${visibleSections[5] ? 'visible' : ''}`}
             style={{ fontFamily: "'DM Sans', sans-serif" }}
           >
             Are you looking to buy<br />or rent a property?
           </h2>
-          <button 
+          <button
             onClick={() => navigate('/contact')}
             className={`inline-flex items-center gap-2 px-8 py-3 border-2 border-white text-white rounded-full text-sm font-medium hover:bg-white hover:text-gray-900 transition-all duration-300 about-reveal ${visibleSections[5] ? 'visible' : ''}`}
             style={{ animationDelay: '0.2s' }}

@@ -44,18 +44,7 @@ const AdminMediaPreview: React.FC<AdminMediaPreviewProps> = ({
   };
 
   const getThumbnailForVideo = (videoUrl: string): string => {
-    // YouTube thumbnail
-    if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
-      return getVideoThumbnail(videoUrl);
-    }
-    
-    // Vimeo thumbnail
-    if (videoUrl.includes('vimeo.com')) {
-      return getVideoThumbnail(videoUrl);
-    }
-    
-    // For direct video files, we'll use a placeholder
-    return 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=300&fit=crop';
+    return getVideoThumbnail(videoUrl);
   };
 
   const getVideoTypeLabel = (videoUrl: string): string => {

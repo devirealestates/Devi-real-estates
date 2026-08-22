@@ -97,9 +97,10 @@ const ScheduleVisitModal: React.FC<ScheduleVisitModalProps> = ({
     setLoading(true);
 
     try {
+      const cleanPhone = formData.phone.trim().replace(/\D/g, '').slice(-10);
       await addDoc(collection(db, 'visitBookings'), {
         name: formData.name.trim(),
-        phone: formData.phone.trim().replace(/\D/g, '').slice(-10), // Store last 10 digits only
+        phone: cleanPhone, // Store last 10 digits only
         date: formData.date,
         time: formData.time,
         message: formData.message.trim() || '',
@@ -108,6 +109,9 @@ const ScheduleVisitModal: React.FC<ScheduleVisitModalProps> = ({
         status: 'pending',
         createdAt: serverTimestamp()
       });
+
+      // Save phone to localStorage for My Bookings page auto-fill
+      localStorage.setItem('devi_last_booking_phone', cleanPhone);
 
       setSuccess(true);
 

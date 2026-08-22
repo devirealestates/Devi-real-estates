@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, ShoppingCart, ChevronDown, User, Home, Info, Building2, Calculator, Heart, Phone, ArrowRight, LogOut, Download } from 'lucide-react';
+import { Menu, X, ShoppingCart, ChevronDown, User, Home, Info, Building2, Calculator, Heart, Phone, ArrowRight, LogOut, Download, Calendar } from 'lucide-react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useShortlist } from '@/hooks/useShortlist';
@@ -96,6 +96,7 @@ const HeaderRedesign: React.FC = () => {
     { name: 'Commercial', path: '/commercial' },
     { name: 'PG/Hostels', path: '/pg-hostels' },
     { name: 'Land', path: '/land' },
+    { name: 'My Bookings', path: '/my-bookings' },
     { name: 'My Shortlist', path: '/shortlist' },
     { name: 'EMI Calculator', path: '/emi-calculator' },
   ];
@@ -108,6 +109,7 @@ const HeaderRedesign: React.FC = () => {
     { name: 'Commercial', path: '/commercial', icon: Building2 },
     { name: 'PG/Hostels', path: '/pg-hostels', icon: Building2 },
     { name: 'Land', path: '/land', icon: Building2 },
+    { name: 'My Bookings', path: '/my-bookings', icon: Calendar },
     { name: 'EMI Calculator', path: '/emi-calculator', icon: Calculator },
     { name: 'Shortlist', path: '/shortlist', icon: Heart },
   ];
@@ -175,7 +177,19 @@ const HeaderRedesign: React.FC = () => {
           </nav>
 
           {/* Right Side */}
-          <div className="hidden lg:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-3 xl:gap-4">
+            {/* My Bookings - Desktop */}
+            <button
+              onClick={() => navigate('/my-bookings')}
+              className={`relative w-10 h-10 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 ${
+                location.pathname === '/my-bookings' ? 'text-orange-500' : ''
+              }`}
+              title="My Bookings"
+              aria-label="My Bookings"
+            >
+              <Calendar className={`w-5 h-5 ${location.pathname === '/my-bookings' ? 'text-orange-500' : textColor} ${hoverColor} transition-colors`} strokeWidth={1.75} />
+            </button>
+
             <button
               onClick={() => setIsShortlistOpen(true)}
               className="relative w-10 h-10 flex items-center justify-center transition-transform hover:scale-105 active:scale-95"

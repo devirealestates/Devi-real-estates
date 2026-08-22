@@ -97,7 +97,6 @@ const HeaderRedesign: React.FC = () => {
     { name: 'PG/Hostels', path: '/pg-hostels' },
     { name: 'Land', path: '/land' },
     { name: 'My Bookings', path: '/my-bookings' },
-    { name: 'My Shortlist', path: '/shortlist' },
     { name: 'EMI Calculator', path: '/emi-calculator' },
   ];
 
